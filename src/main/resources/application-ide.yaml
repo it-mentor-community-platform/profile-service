@@ -1,0 +1,15 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: profile-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/it_mentor_community_platform?currentSchema=profile_schema
+    username: root
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  kafka:
+    bootstrap-servers: localhost:9092
