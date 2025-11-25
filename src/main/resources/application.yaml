@@ -21,3 +21,8 @@ management:
         include:
           - health
           - prometheus
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: profile_schema
+    liquibase-schema: profile_schema
