@@ -16,7 +16,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "profiles", schema = "profile_schema")
+@Table(name = "profiles")
 public class Profile {
 
     @Id
