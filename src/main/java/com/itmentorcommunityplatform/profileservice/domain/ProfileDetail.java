@@ -11,7 +11,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "profiles_details")
+@Table(name = "profiles_details", schema = "profile_schema")
 public class ProfileDetail {
 
     @Column("detail_name")

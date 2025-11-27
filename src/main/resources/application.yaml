@@ -3,7 +3,7 @@ spring:
     name: profile-service
 
   datasource:
-    url: jdbc:postgresql://${POSTGRES_URL}/it_mentor_community_platform
+    url: jdbc:postgresql://${POSTGRES_URL}/it_mentor_community_platform?currentSchema=profile_schema
     username: ${POSTGRES_USERNAME}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -13,6 +13,8 @@ spring:
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: profile_schema
+    liquibase-schema: profile_schema
 
 management:
   metrics:
