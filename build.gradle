@@ -31,6 +31,7 @@ dependencies {
 	// data
 	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
 	runtimeOnly 'org.postgresql:postgresql'
+	implementation 'org.liquibase:liquibase-core'
 
 	// kafka
 	implementation 'org.springframework.kafka:spring-kafka'
