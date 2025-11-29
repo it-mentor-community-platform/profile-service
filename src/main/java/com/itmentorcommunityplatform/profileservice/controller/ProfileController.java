@@ -2,7 +2,6 @@ package com.itmentorcommunityplatform.profileservice.controller;
 
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileUpdateResponseDto;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
