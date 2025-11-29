@@ -1,0 +1,47 @@
+///200 Успешное обновление профилей пользователя
+###
+PATCH http://localhost:8080/api/profile
+Content-Type: application/json
+X-Telegram-User-Id: 10001
+
+{
+  "github_profile_url": "https://github.com/zhukovaasfssd",
+  "telegram_url": "https://t.me/zhokovsd"
+}
+###
+
+///200 -  Успешное обновление github пользователя
+###
+PATCH http://localhost:8080/api/profile
+Content-Type: application/json
+X-Telegram-User-Id: 10001
+
+{
+  "github_profile_url": "https://github.com/zhukovaasfssd"
+}
+###
+
+///400 - No parameters found to update
+###
+PATCH http://localhost:8080/api/profile
+Content-Type: application/json
+X-Telegram-User-Id: 10001
+
+{
+
+}
+###
+
+///400 -  profile url incorrect
+###
+PATCH http://localhost:8080/api/profile
+Content-Type: application/json
+X-Telegram-User-Id: 10001
+
+{
+  "github_profile_url": "htt://github.com/zhukovaasfssd",
+  "telegram_url": "https://t.me/zhokovsd"
+}
+###
+
+
