@@ -1,5 +1,7 @@
 package com.itmentorcommunityplatform.profileservice.controller;
 
+import com.itmentorcommunityplatform.profileservice.docs.GetCurrentProfileDocs;
+import com.itmentorcommunityplatform.profileservice.docs.UpdateCurrentProfileDocs;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
@@ -20,6 +22,7 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @GetMapping
+    @GetCurrentProfileDocs
     public ResponseEntity<ProfileDto> getCurrentProfile(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId
     ) {
@@ -28,6 +31,7 @@ public class ProfileController {
     }
 
     @PatchMapping
+    @UpdateCurrentProfileDocs
     public  ResponseEntity<ProfileDto> updateCurrentProfile(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId,
             @RequestBody ProfileUpdateRequestDto dto){
