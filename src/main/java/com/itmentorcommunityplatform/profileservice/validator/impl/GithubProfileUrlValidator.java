@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.validator.impl;
 
+import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
 import com.itmentorcommunityplatform.profileservice.validator.ProfileDetailValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -15,8 +16,8 @@ public class GithubProfileUrlValidator implements ProfileDetailValidator {
     private static final Pattern GITHUB_PATTERN = Pattern.compile("^https://github\\.com/[^\\s]+$");
 
     @Override
-    public String getProfileDetailTypeName() {
-        return GITHUB_PROFILE_URL.getDetailName();
+    public ProfileDetailType getSupportedProfileDetailType() {
+        return GITHUB_PROFILE_URL;
     }
 
     @Override

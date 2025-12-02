@@ -139,7 +139,7 @@ public class ProfileService {
 
             baseDetailValidator.validate(detailName, detailValue);
 
-            detailValidatorRegistry.getSpecificValidator(type.getDetailName())
+            detailValidatorRegistry.getSpecificValidator(type)
                     .ifPresent(v -> v.validate(detailValue));
         }
     }

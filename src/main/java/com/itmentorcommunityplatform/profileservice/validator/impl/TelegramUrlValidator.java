@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.validator.impl;
 
+import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
 import com.itmentorcommunityplatform.profileservice.validator.ProfileDetailValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -15,8 +16,8 @@ public class TelegramUrlValidator implements ProfileDetailValidator {
     private static final Pattern TELEGRAM_PATTERN = Pattern.compile("^https://t\\.me/[^\\s/]+$");
 
     @Override
-    public String getProfileDetailTypeName() {
-        return TELEGRAM_URL.getDetailName();
+    public ProfileDetailType getSupportedProfileDetailType() {
+        return TELEGRAM_URL;
     }
 
     @Override
