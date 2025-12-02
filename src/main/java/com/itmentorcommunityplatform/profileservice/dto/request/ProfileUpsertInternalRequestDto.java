@@ -2,6 +2,7 @@ package com.itmentorcommunityplatform.profileservice.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 import java.util.HashMap;
@@ -15,6 +16,17 @@ public record ProfileUpsertInternalRequestDto(
         @JsonProperty("details")
         Details details
 ) {
+    @Schema(
+            description = "Custom profile Details",
+            additionalProperties = Schema.AdditionalPropertiesValue.TRUE,
+            example = """
+        {
+          "github_profile_url": "https://github.com/johndoe",
+          "twitter_handle": "@johndoe",
+          "portfolio": "https://johndoe.dev"
+        }
+        """
+    )
     @Getter
     public static class Details {
         private final Map<String, String> map = new HashMap<>();

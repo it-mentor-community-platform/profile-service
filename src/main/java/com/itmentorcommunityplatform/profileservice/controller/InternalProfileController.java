@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.controller;
 
+import com.itmentorcommunityplatform.profileservice.docs.UpsertInternalProfileDocs;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class InternalProfileController {
     private final ProfileService profileService;
 
     @PatchMapping("/profile")
+    @UpsertInternalProfileDocs
     public ResponseEntity<Void> upsertProfile(
             @RequestBody ProfileUpsertInternalRequestDto dto){
         boolean isCreated = profileService.upsertProfile(dto);

@@ -1,9 +1,22 @@
 package com.itmentorcommunityplatform.profileservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Map;
 
+@Schema(
+        description = "User Profile Details - an arbitrary set of allowed fields",
+        additionalProperties = Schema.AdditionalPropertiesValue.TRUE,
+        example = """
+        {
+          "github_profile_url": "https://github.com/johndoe",
+          "telegram_url": "https://t.me/johndoe",
+          "twitter_handle": "@johndoe",
+          "full_name": "John Doe"
+        }
+        """
+)
 public class ProfileDto {
 
     private final Map<String, String> details;
