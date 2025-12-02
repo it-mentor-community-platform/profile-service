@@ -1,16 +1,32 @@
 package com.itmentorcommunityplatform.profileservice.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@Data
-@Builder
+import java.util.Map;
+
+@Schema(
+        description = "User Profile Details - an arbitrary set of allowed fields",
+        additionalProperties = Schema.AdditionalPropertiesValue.TRUE,
+        example = """
+        {
+          "github_profile_url": "https://github.com/johndoe",
+          "telegram_url": "https://t.me/johndoe",
+          "twitter_handle": "@johndoe",
+          "full_name": "John Doe"
+        }
+        """
+)
 public class ProfileDto {
 
-    @JsonProperty("github_profile_url")
-    private String githubProfileUrl;
+    private final Map<String, String> details;
 
-    @JsonProperty("telegram_url")
-    private String telegramUrl;
+    public ProfileDto(Map<String, String> details) {
+        this.details = details;
+    }
+
+    @JsonAnyGetter
+    public Map<String, String> anyToJson() {
+        return details;
+    }
 }
