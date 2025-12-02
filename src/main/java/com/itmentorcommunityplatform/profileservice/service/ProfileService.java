@@ -2,10 +2,14 @@ package com.itmentorcommunityplatform.profileservice.service;
 
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
+import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
+import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
+import com.itmentorcommunityplatform.profileservice.validator.base.BaseProfileDetailValidator;
+import com.itmentorcommunityplatform.profileservice.validator.registry.ProfileDetailValidatorRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -13,9 +17,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -24,6 +31,8 @@ public class ProfileService {
 
     private final ProfileRepository profileRepository;
     private final ProfileMetrics profileMetrics;
+    private final BaseProfileDetailValidator baseDetailValidator;
+    private final ProfileDetailValidatorRegistry detailValidatorRegistry;
 
     private static final Pattern TELEGRAM_PATTERN = Pattern.compile("^https://t\\.me/[^\\s/]+$");
     private static final Pattern GITHUB_PATTERN = Pattern.compile("^https://github\\.com/[^\\s]+$");
@@ -123,5 +132,64 @@ public class ProfileService {
 
     private boolean validGithubUrl(String url) {
         return url != null && GITHUB_PATTERN.matcher(url).matches();
+    }
+
+    @Transactional
+    public boolean upsertProfile(ProfileUpsertInternalRequestDto dto) {
+
+        Map<String, String> newDetailsMap = dto.details().getMap();
+        validateDetails(newDetailsMap);
+
+        Optional<Profile> foundProfile = profileRepository.findByTelegramUserId(dto.telegramUserId());
+        boolean isNewProfile = foundProfile.isEmpty();
+
+        Set<ProfileDetail> existingDetails = foundProfile.map(Profile::getDetails).orElse(null);
+
+        Set<ProfileDetail> mergedDetails = mergeProfileDetails(existingDetails, newDetailsMap);
+
+        Profile profile = Profile.builder()
+                .id(foundProfile.map(Profile::getId).orElse(null))
+                .telegramUserId(dto.telegramUserId())
+                .details(mergedDetails)
+                .build();
+
+        profileRepository.save(profile);
+
+        return isNewProfile;
+    }
+
+    private static Set<ProfileDetail> mergeProfileDetails(
+            Set<ProfileDetail> existingDetails,
+            Map<String, String> newDetailsMap
+    ) {
+        Map<String, String> mergedMap = new HashMap<>();
+
+        if (existingDetails != null) {
+            existingDetails.forEach(d -> mergedMap.put(d.getDetailName(), d.getDetailValue()));
+        }
+
+        mergedMap.putAll(newDetailsMap);
+
+        return mergedMap.entrySet().stream()
+                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
+    }
+
+    private void validateDetails(Map<String, String> details) {
+        for (var entry : details.entrySet()) {
+            String detailName = entry.getKey();
+            String detailValue = entry.getValue();
+
+            ProfileDetailType type = ProfileDetailType.fromName(detailName)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Unknown detail name: " + detailName
+                    ));
+
+            baseDetailValidator.validate(detailName, detailValue);
+
+            detailValidatorRegistry.getSpecificValidator(type.getDetailName())
+                    .ifPresent(v -> v.validate(detailValue));
+        }
     }
 }
