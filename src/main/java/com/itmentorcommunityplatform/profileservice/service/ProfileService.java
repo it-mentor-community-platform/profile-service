@@ -17,10 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -151,7 +148,7 @@ public class ProfileService {
         Optional<Profile> foundProfile = profileRepository.findByTelegramUserId(telegramUserId);
         boolean isNewProfile = foundProfile.isEmpty();
 
-        Set<ProfileDetail> existingDetails = foundProfile.map(Profile::getDetails).orElse(null);
+        Set<ProfileDetail> existingDetails = foundProfile.map(Profile::getDetails).orElse(Collections.emptySet());
 
         Set<ProfileDetail> mergedDetails = mergeProfileDetails(existingDetails, newDetailsMap);
 
@@ -172,9 +169,8 @@ public class ProfileService {
     ) {
         Map<String, String> mergedMap = new HashMap<>();
 
-        if (existingDetails != null) {
-            existingDetails.forEach(d -> mergedMap.put(d.getDetailName(), d.getDetailValue()));
-        }
+        existingDetails.forEach(detail ->
+                mergedMap.put(detail.getDetailName(), detail.getDetailValue()));
 
         mergedMap.putAll(newDetailsMap);
 
