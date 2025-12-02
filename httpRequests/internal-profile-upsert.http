@@ -72,7 +72,7 @@ Content-Type: application/json
   }
 }
 
-### 7. Отсутсвуют детали (400)
+### 7. Список деталей пустой (400)
 PATCH http://localhost:8089/api/profile/internal/profile
 Content-Type: application/json
 
@@ -83,7 +83,15 @@ Content-Type: application/json
   }
 }
 
-### 8. Ошибки валидации: невалидное значение поля (400)
+### 8. Отсутсвуют детали (400)
+PATCH http://localhost:8089/api/profile/internal/profile
+Content-Type: application/json
+
+{
+  "telegram_user_id": 100
+}
+
+### 9. Ошибки валидации: невалидное значение поля (400)
 PATCH http://localhost:8089/api/profile/internal/profile
 Content-Type: application/json
 

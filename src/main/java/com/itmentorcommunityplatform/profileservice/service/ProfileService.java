@@ -137,10 +137,18 @@ public class ProfileService {
     @Transactional
     public boolean upsertProfile(ProfileUpsertInternalRequestDto dto) {
 
+        Long telegramUserId = dto.telegramUserId();
+        if (telegramUserId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'telegram_user_id' must be provided");
+        }
+
+        if (dto.details() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'details' must be provided");
+        }
         Map<String, String> newDetailsMap = dto.details().getMap();
         validateDetails(newDetailsMap);
 
-        Optional<Profile> foundProfile = profileRepository.findByTelegramUserId(dto.telegramUserId());
+        Optional<Profile> foundProfile = profileRepository.findByTelegramUserId(telegramUserId);
         boolean isNewProfile = foundProfile.isEmpty();
 
         Set<ProfileDetail> existingDetails = foundProfile.map(Profile::getDetails).orElse(null);
@@ -149,7 +157,7 @@ public class ProfileService {
 
         Profile profile = Profile.builder()
                 .id(foundProfile.map(Profile::getId).orElse(null))
-                .telegramUserId(dto.telegramUserId())
+                .telegramUserId(telegramUserId)
                 .details(mergedDetails)
                 .build();
 
@@ -176,6 +184,9 @@ public class ProfileService {
     }
 
     private void validateDetails(Map<String, String> details) {
+        if (details == null || details.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Profile details should not be empty");
+        }
         for (var entry : details.entrySet()) {
             String detailName = entry.getKey();
             String detailValue = entry.getValue();
