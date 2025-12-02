@@ -3,8 +3,8 @@
 # INSERT INTO profiles(telegram_user_id) VALUES(1);
 # INSERT INTO profiles_details(profile_id, detail_name, detail_value)
 # VALUES
-# (1, 'github_profile', 'https://github.com/testuser'),
-# (1, 'telegram_username', '@testuser');
+# (1, 'github_profile_url', 'https://github.com/testuser'),
+# (1, 'telegram_url', 'https://t.me/testuser');
 
 GET http://localhost:8088/api/profile
 X-Telegram-User-Id: 1

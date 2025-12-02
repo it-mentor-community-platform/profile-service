@@ -1,16 +1,19 @@
 package com.itmentorcommunityplatform.profileservice.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 
-@Data
-@Builder
+import java.util.Map;
+
 public class ProfileDto {
 
-    @JsonProperty("github_profile_url")
-    private String githubProfileUrl;
+    private final Map<String, String> details;
 
-    @JsonProperty("telegram_url")
-    private String telegramUrl;
+    public ProfileDto(Map<String, String> details) {
+        this.details = details;
+    }
+
+    @JsonAnyGetter
+    public Map<String, String> anyToJson() {
+        return details;
+    }
 }
