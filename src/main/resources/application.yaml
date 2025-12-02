@@ -10,6 +10,9 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: profile-service-group
+      auto-offset-reset: earliest
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml

@@ -6,6 +6,7 @@ import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailTyp
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
+import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
 import com.itmentorcommunityplatform.profileservice.validator.base.BaseProfileDetailValidator;
@@ -19,6 +20,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -29,6 +33,29 @@ public class ProfileService {
     private final ProfileMetrics profileMetrics;
     private final BaseProfileDetailValidator baseDetailValidator;
     private final ProfileDetailValidatorRegistry detailValidatorRegistry;
+
+    @Transactional
+    public void createProfile(UserCreatedEvent event) {
+        if (event == null || event.getTelegramUserId() == null) {
+            log.warn("Received empty event or null telegramUserId. Skipping.");
+            return;
+        }
+        Long telegramUserId = event.getTelegramUserId();
+        log.info("Attempting to create profile for telegramUserId: {}", telegramUserId);
+
+        if (profileRepository.findByTelegramUserId(telegramUserId).isPresent()) {
+            log.info("Profile for telegramUserId: {} already exists. Skipping creation.", telegramUserId);
+            return;
+        }
+        Profile newProfile = Profile.builder()
+                .id(null)
+                .telegramUserId(telegramUserId)
+                .details(new HashSet<>())
+                .build();
+
+        profileRepository.save(newProfile);
+        log.info("Successfully created profile with telegramUserId: {}", telegramUserId);
+    }
 
     public ProfileDto getCurrentUserProfile(Long telegramUserId) {
         return profileMetrics.getGetProfileTimer().record(() -> {
