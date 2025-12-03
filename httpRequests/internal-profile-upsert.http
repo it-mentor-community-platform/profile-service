@@ -1,6 +1,6 @@
 ### 1. Успешное создание профиля пользователя (201 Created)
 # profile с telegram_user_id = 1201 не должен существовать в БД
-PATCH http://localhost:8089/api/profile/internal/profile
+POST http://localhost:8089/api/profile/internal/profile
 Content-Type: application/json
 
 {
@@ -13,7 +13,7 @@ Content-Type: application/json
 
 ### 2. Успешное обновление профиля существующего пользователя (200 OK)
 # В БД должен существовать profile с telegram_user_id = 1201
-PATCH http://localhost:8089 /api/profile/internal/profile
+POST http://localhost:8089 /api/profile/internal/profile
 Content-Type: application/json
 
 {
@@ -27,7 +27,7 @@ Content-Type: application/json
 ### 3. Успешное обновление одного параметра профиля без затирания другого (200 OK)
 # В БД должен существовать profile с telegram_user_id = 1201
 # Проверить в БД что другой параметр не изменился
-PATCH http://localhost:8089 /api/profile/internal/profile
+POST http://localhost:8089 /api/profile/internal/profile
 Content-Type: application/json
 
 {
@@ -38,7 +38,7 @@ Content-Type: application/json
 }
 
 ### 4. Ошибки валидации: невалидные поля (400)
-PATCH http://localhost:8089/api/profile/internal/profile
+POST http://localhost:8089/api/profile/internal/profile
 Content-Type: application/json
 
 {
@@ -50,7 +50,7 @@ Content-Type: application/json
 }
 
 ### 5. Отсутсвует telegram_user_id (400)
-PATCH http://localhost:8089/api/profile/internal/profile
+POST http://localhost:8089/api/profile/internal/profile
 Content-Type: application/json
 
 {
@@ -61,7 +61,7 @@ Content-Type: application/json
 }
 
 ### 6. Невалидный telegram_user_id (400)
-PATCH http://localhost:8089/api/profile/internal/profile
+POST http://localhost:8089/api/profile/internal/profile
 Content-Type: application/json
 
 {
@@ -73,7 +73,7 @@ Content-Type: application/json
 }
 
 ### 7. Список деталей пустой (400)
-PATCH http://localhost:8089/api/profile/internal/profile
+POST http://localhost:8089/api/profile/internal/profile
 Content-Type: application/json
 
 {
@@ -84,7 +84,7 @@ Content-Type: application/json
 }
 
 ### 8. Отсутсвуют детали (400)
-PATCH http://localhost:8089/api/profile/internal/profile
+POST http://localhost:8089/api/profile/internal/profile
 Content-Type: application/json
 
 {
@@ -92,7 +92,7 @@ Content-Type: application/json
 }
 
 ### 9. Ошибки валидации: невалидное значение поля (400)
-PATCH http://localhost:8089/api/profile/internal/profile
+POST http://localhost:8089/api/profile/internal/profile
 Content-Type: application/json
 
 {
