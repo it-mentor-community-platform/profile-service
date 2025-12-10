@@ -1,6 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.docs;
 
-import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailDto;
+import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
         @ApiResponse(
                 responseCode = "200",
                 description = "Profile retrieved successfully",
-                content = @Content(schema = @Schema(implementation = ProfileDetailDto.class))
+                content = @Content(schema = @Schema(implementation = ProfileDetailsResponseDto.class))
         ),
         @ApiResponse(
                 responseCode = "400",

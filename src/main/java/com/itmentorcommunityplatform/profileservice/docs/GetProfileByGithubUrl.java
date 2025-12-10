@@ -1,6 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.docs;
 
-import com.itmentorcommunityplatform.profileservice.dto.ProfileDto;
+import com.itmentorcommunityplatform.profileservice.dto.ProfileResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
                 description = "Profile received successfully",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = ProfileDto.class))
+                        schema = @Schema(implementation = ProfileResponseDto.class))
         ),
         @ApiResponse(
                 responseCode = "404",

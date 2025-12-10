@@ -6,11 +6,11 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class ProfileDto {
+public class ProfileResponseDto {
 
     @JsonProperty("telegram_user_id")
     private final Long telegramUserId;
 
-    private final ProfileDetailDto details;
+    private final ProfileDetailsResponseDto details;
 
 }

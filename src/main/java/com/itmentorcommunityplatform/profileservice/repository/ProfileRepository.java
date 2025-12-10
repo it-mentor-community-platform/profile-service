@@ -13,9 +13,9 @@ public interface ProfileRepository extends CrudRepository<Profile, Long> {
 
     Optional<Profile> findByTelegramUserId(Long telegramUserId);
 
-    @Query(value = """
+    @Query("""
             SELECT p.* FROM profiles p 
             JOIN profiles_details pd ON p.id = pd.profile_id
             WHERE pd.detail_name = 'github_profile_url' AND pd.detail_value = :gitHubUrl""")
-    Optional<Profile> findProfileByGitHubUrl( @Param("gitHubUrl") String gitHubUrl);
+    Optional<Profile> findProfileByGitHubUrl(@Param("gitHubUrl") String gitHubUrl);
 }

@@ -2,8 +2,7 @@ package com.itmentorcommunityplatform.profileservice.controller;
 
 import com.itmentorcommunityplatform.profileservice.docs.GetProfileByGithubUrl;
 import com.itmentorcommunityplatform.profileservice.docs.UpsertInternalProfileDocs;
-import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailDto;
-import com.itmentorcommunityplatform.profileservice.dto.ProfileDto;
+import com.itmentorcommunityplatform.profileservice.dto.ProfileResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
 import lombok.RequiredArgsConstructor;
@@ -30,10 +29,10 @@ public class InternalProfileController {
 
     @GetMapping("/profile/by-github-profile-url")
     @GetProfileByGithubUrl
-    public ResponseEntity<ProfileDto> getProfileByGitHubUrl(
+    public ResponseEntity<ProfileResponseDto> getProfileByGitHubUrl(
             @RequestParam("url") String gitHubUrl) {
 
-        ProfileDto profile = profileService.getProfileByGitHubUrl(gitHubUrl);
+        ProfileResponseDto profile = profileService.getProfileByGitHubUrl(gitHubUrl);
         return ResponseEntity.ok(profile);
 
 

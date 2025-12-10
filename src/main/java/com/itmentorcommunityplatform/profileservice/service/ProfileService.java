@@ -3,14 +3,15 @@ package com.itmentorcommunityplatform.profileservice.service;
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
-import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailDto;
-import com.itmentorcommunityplatform.profileservice.dto.ProfileDto;
+import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.ProfileResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
 import com.itmentorcommunityplatform.profileservice.validator.base.BaseProfileDetailValidator;
+import com.itmentorcommunityplatform.profileservice.validator.impl.GithubProfileUrlValidator;
 import com.itmentorcommunityplatform.profileservice.validator.registry.ProfileDetailValidatorRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class ProfileService {
     private final ProfileMetrics profileMetrics;
     private final BaseProfileDetailValidator baseDetailValidator;
     private final ProfileDetailValidatorRegistry detailValidatorRegistry;
+    private final GithubProfileUrlValidator githubProfileUrlValidator;
 
     @Transactional
     public void createProfile(UserCreatedEvent event) {
@@ -58,7 +60,7 @@ public class ProfileService {
         log.info("Successfully created profile with telegramUserId: {}", telegramUserId);
     }
 
-    public ProfileDetailDto getCurrentUserProfile(Long telegramUserId) {
+    public ProfileDetailsResponseDto getCurrentUserProfile(Long telegramUserId) {
         return profileMetrics.getGetProfileTimer().record(() -> {
             log.info("Fetching profile for telegramUserId: {}", telegramUserId);
             try {
@@ -74,7 +76,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileDetailDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto) {
+    public ProfileDetailsResponseDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto) {
         return profileMetrics.getGetProfileTimer().record(() -> {
             try {
                 Map<String, String> newDetailsMap = dto.getDetails();
@@ -96,11 +98,11 @@ public class ProfileService {
         });
     }
 
-    private ProfileDetailDto mapToProfileDetailDto(Set<ProfileDetail> details) {
+    private ProfileDetailsResponseDto mapToProfileDetailDto(Set<ProfileDetail> details) {
         Map<String, String> map = details.stream()
                 .collect(Collectors.toMap(ProfileDetail::getDetailName, ProfileDetail::getDetailValue));
 
-        return new ProfileDetailDto(map);
+        return new ProfileDetailsResponseDto(map);
     }
 
 
@@ -174,11 +176,9 @@ public class ProfileService {
     }
 
 
-    public ProfileDto getProfileByGitHubUrl(String gitHubUrl) {
+    public ProfileResponseDto getProfileByGitHubUrl(String gitHubUrl) {
 
-        if (gitHubUrl == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "GitHub URL should not be empty");
-        }
+        githubProfileUrlValidator.validate(gitHubUrl);
 
         log.info("Searching profile by GitHub URL: {}", gitHubUrl);
 
@@ -189,10 +189,9 @@ public class ProfileService {
                 ));
 
 
-        return new ProfileDto(profile.getTelegramUserId(),
+        return new ProfileResponseDto(profile.getTelegramUserId(),
                 mapToProfileDetailDto(profile.getDetails()));
     }
-
 
 
 }

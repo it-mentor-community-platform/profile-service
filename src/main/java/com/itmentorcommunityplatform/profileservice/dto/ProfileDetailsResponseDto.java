@@ -17,11 +17,11 @@ import java.util.Map;
         }
         """
 )
-public class ProfileDetailDto {
+public class ProfileDetailsResponseDto {
 
     private final Map<String, String> details;
 
-    public ProfileDetailDto(Map<String, String> details) {
+    public ProfileDetailsResponseDto(Map<String, String> details) {
         this.details = details;
     }
 
