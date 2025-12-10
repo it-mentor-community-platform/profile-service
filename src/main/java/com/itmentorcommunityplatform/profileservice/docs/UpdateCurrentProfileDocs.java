@@ -2,7 +2,7 @@ package com.itmentorcommunityplatform.profileservice.docs;
 
 
 
-import com.itmentorcommunityplatform.profileservice.dto.ProfileDto;
+import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -54,7 +54,7 @@ import java.lang.annotation.Target;
         @ApiResponse(
                 responseCode = "200",
                 description = "Profile updated successfully",
-                content = @Content(schema = @Schema(implementation = ProfileDto.class))
+                content = @Content(schema = @Schema(implementation = ProfileDetailsResponseDto.class))
         ),
         @ApiResponse(
                 responseCode = "400",
