@@ -4,7 +4,13 @@ GET http://localhost:8080/api/profile/internal/profile/by-github-profile-url
 
 
 
-### 2. Профиль не найдень (404 Not found)
+### 2. Поиск профилу по существующей ссылке на телеграмм (404 Not found)
+GET http://localhost:8080/api/profile/internal/profile/by-github-profile-url
+    ?url=https://t.me/anelfer
+
+
+
+### 3. Профиль не найдень (404 Not found)
 GET http://localhost:8080/api/profile/internal/profile/by-github-profile-url
     ?url=https://github.com/unknown-github-profile
 
