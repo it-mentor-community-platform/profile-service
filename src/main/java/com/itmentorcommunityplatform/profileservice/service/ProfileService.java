@@ -3,6 +3,7 @@ package com.itmentorcommunityplatform.profileservice.service;
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
+import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
@@ -57,14 +58,14 @@ public class ProfileService {
         log.info("Successfully created profile with telegramUserId: {}", telegramUserId);
     }
 
-    public ProfileDto getCurrentUserProfile(Long telegramUserId) {
+    public ProfileDetailDto getCurrentUserProfile(Long telegramUserId) {
         return profileMetrics.getGetProfileTimer().record(() -> {
             log.info("Fetching profile for telegramUserId: {}", telegramUserId);
             try {
                 Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
                 profileMetrics.getGetProfileSuccessCounter().increment();
-                return mapToDto(profile.getDetails());
+                return mapToProfileDetailDto(profile.getDetails());
             } catch (Exception e) {
                 profileMetrics.getGetProfileErrorCounter().increment();
                 throw e;
@@ -73,7 +74,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto) {
+    public ProfileDetailDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto) {
         return profileMetrics.getGetProfileTimer().record(() -> {
             try {
                 Map<String, String> newDetailsMap = dto.getDetails();
@@ -87,7 +88,7 @@ public class ProfileService {
 
                 profileRepository.save(profile);
                 profileMetrics.getGetProfileSuccessCounter().increment();
-                return mapToDto(profile.getDetails());
+                return mapToProfileDetailDto(profile.getDetails());
             } catch (Exception e) {
                 profileMetrics.getGetProfileErrorCounter().increment();
                 throw e;
@@ -95,12 +96,13 @@ public class ProfileService {
         });
     }
 
-    private ProfileDto mapToDto(Set<ProfileDetail> details) {
+    private ProfileDetailDto mapToProfileDetailDto(Set<ProfileDetail> details) {
         Map<String, String> map = details.stream()
                 .collect(Collectors.toMap(ProfileDetail::getDetailName, ProfileDetail::getDetailValue));
 
-        return new ProfileDto(map);
+        return new ProfileDetailDto(map);
     }
+
 
     @Transactional
     public boolean upsertProfile(ProfileUpsertInternalRequestDto dto) {
@@ -170,4 +172,27 @@ public class ProfileService {
                     .ifPresent(v -> v.validate(detailValue));
         }
     }
+
+
+    public ProfileDto getProfileByGitHubUrl(String gitHubUrl) {
+
+        if (gitHubUrl == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "GitHub URL should not be empty");
+        }
+
+        log.info("Searching profile by GitHub URL: {}", gitHubUrl);
+
+        Profile profile = profileRepository.findProfileByGitHubUrl(gitHubUrl)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Profile with URL: %s not found".formatted(gitHubUrl)
+                ));
+
+
+        return new ProfileDto(profile.getTelegramUserId(),
+                mapToProfileDetailDto(profile.getDetails()));
+    }
+
+
+
 }

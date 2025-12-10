@@ -1,15 +1,14 @@
 package com.itmentorcommunityplatform.profileservice.controller;
 
 import com.itmentorcommunityplatform.profileservice.docs.UpsertInternalProfileDocs;
+import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailDto;
+import com.itmentorcommunityplatform.profileservice.dto.ProfileDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/profile/internal")
@@ -21,10 +20,20 @@ public class InternalProfileController {
     @PostMapping("/profile")
     @UpsertInternalProfileDocs
     public ResponseEntity<Void> upsertProfile(
-            @RequestBody ProfileUpsertInternalRequestDto dto){
+            @RequestBody ProfileUpsertInternalRequestDto dto) {
         boolean isCreated = profileService.upsertProfile(dto);
         return isCreated
                 ? ResponseEntity.status(HttpStatus.CREATED).build()
                 : ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/profile/by-github-profile-url")
+    public ResponseEntity<ProfileDto> getProfileByGitHubUrl(
+            @RequestParam("url") String gitHubUrl) {
+
+        ProfileDto profile = profileService.getProfileByGitHubUrl(gitHubUrl);
+        return ResponseEntity.ok(profile);
+
+
     }
 }

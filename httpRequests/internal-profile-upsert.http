@@ -3,6 +3,7 @@
 POST http://localhost:8089/api/profile/internal/profile
 Content-Type: application/json
 
+
 {
   "telegram_user_id": 1201,
   "details": {

@@ -2,7 +2,7 @@ package com.itmentorcommunityplatform.profileservice.controller;
 
 import com.itmentorcommunityplatform.profileservice.docs.GetCurrentProfileDocs;
 import com.itmentorcommunityplatform.profileservice.docs.UpdateCurrentProfileDocs;
-import com.itmentorcommunityplatform.profileservice.dto.ProfileDto;
+import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
 import lombok.RequiredArgsConstructor;
@@ -23,16 +23,16 @@ public class ProfileController {
 
     @GetMapping
     @GetCurrentProfileDocs
-    public ResponseEntity<ProfileDto> getCurrentProfile(
+    public ResponseEntity<ProfileDetailDto> getCurrentProfile(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId
     ) {
-        ProfileDto profileDto = profileService.getCurrentUserProfile(telegramUserId);
-        return ResponseEntity.ok(profileDto);
+        ProfileDetailDto profileDetailDto = profileService.getCurrentUserProfile(telegramUserId);
+        return ResponseEntity.ok(profileDetailDto);
     }
 
     @PatchMapping
     @UpdateCurrentProfileDocs
-    public  ResponseEntity<ProfileDto> updateCurrentProfile(
+    public  ResponseEntity<ProfileDetailDto> updateCurrentProfile(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId,
             @RequestBody ProfileUpdateRequestDto dto){
         var response = profileService.updateCurrentProfile(telegramUserId, dto);
