@@ -14,7 +14,11 @@ public class AuthUserCreatedConsumer {
 
     private final ProfileService profileService;
 
-    @KafkaListener(topics = "auth.user.created", groupId = "profile-service-group")
+    @KafkaListener(
+            topics = "auth.user.created",
+            groupId = "profile-service-group",
+            containerFactory = "userCreatedListenerContainerFactory"
+    )
     public void consumeUserCreatedEvent(UserCreatedEvent event) {
         log.info("Kafka Consumer: Received user created event: {}", event);
         try {
