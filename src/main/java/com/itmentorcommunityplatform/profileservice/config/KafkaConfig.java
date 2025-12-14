@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.config;
 
+import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -12,9 +13,14 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.support.converter.RecordMessageConverter;
+import org.springframework.kafka.support.converter.StringJsonMessageConverter;
+import org.springframework.kafka.support.mapping.DefaultJackson2JavaTypeMapper;
+import org.springframework.kafka.support.mapping.Jackson2JavaTypeMapper;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
@@ -25,24 +31,38 @@ public class KafkaConfig {
     private final KafkaProperties kafkaProperties;
 
     @Bean
-    public ConsumerFactory<String, UserCreatedEvent> consumerFactory() {
+    public RecordMessageConverter multiTypeConverter() {
+        StringJsonMessageConverter converter = new StringJsonMessageConverter();
+        DefaultJackson2JavaTypeMapper typeMapper = new DefaultJackson2JavaTypeMapper();
+        typeMapper.setTypePrecedence(Jackson2JavaTypeMapper.TypePrecedence.TYPE_ID);
+        typeMapper.addTrustedPackages("*");
+        Map<String, Class<?>> mappings = new HashMap<>();
+        mappings.put("com.itmentorcommunityplatform.authservice.kafka.UserCreatedEvent", UserCreatedEvent.class);
+        mappings.put("com.itmentorcommunityplatform.projectservice.kafka.ProjectCreatedEvent", ProjectCreatedEvent.class);
+        typeMapper.setIdClassMapping(mappings);
+        converter.setTypeMapper(typeMapper);
+        return converter;
+    }
+
+    @Bean
+    public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> props = kafkaProperties.buildConsumerProperties(null);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class.getName());
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-        props.put(JsonDeserializer.USE_TYPE_INFO_HEADERS, false);
-        props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, UserCreatedEvent.class.getName());
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, UserCreatedEvent> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, UserCreatedEvent> factory =
+    public ConcurrentKafkaListenerContainerFactory<String, Object> multiTypeKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.getContainerProperties().setMissingTopicsFatal(true);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
+        factory.setRecordMessageConverter(multiTypeConverter());
         return factory;
     }
+
 }
