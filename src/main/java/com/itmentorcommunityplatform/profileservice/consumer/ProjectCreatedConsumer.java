@@ -9,13 +9,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProjectCreatedConsumer {
 
-
-    @KafkaListener(
-            topics = "projects.project.created",
-            groupId = "profile-service-cg",
-            containerFactory = "projectCreatedListenerContainerFactory"
-    )
-    public void test(ProjectCreatedEvent projectCreatedEvent) {
+    @KafkaListener(topics = "projects.project.created", groupId = "profile-service-cg")
+    public void consumeProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
         log.info("Added new project: {}", projectCreatedEvent);
     }
 }
