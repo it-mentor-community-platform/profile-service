@@ -20,27 +20,15 @@ Profile Service
 - Spring Kafka
 - Liquibase
 
-### Сборка и запуск Docker-образа
-Перейдите в корень проекта, на один уровень с `Dockerfile`, и используйте следующие команды:
-1. Сборка образа
-    ```bash
-    docker build -t profile-service:local .
-    ```
-2. Запуск контейнера
-    ```bash
-    docker run \
-      -e POSTGRES_URL=your_postgres_server_url \
-      -e POSTGRES_USERNAME=root \
-      -e POSTGRES_PASSWORD=password \
-      -p 8080:8080 \ 
-      profile-service:local
-    ```
-   **!** `your_postgres_server_url` - замените на адрес вашего postgres сервера. Например `192.168.1.50:5432`
-   или `postgres:5432` или `localhost:5432`, в зависимости от способа запуска БД и её настроек. <br>
-   В случае подключения к локально запущенной базе postgres может помочь использование адреса 
-   `host.docker.internal:5432` и ключа запуска `--add-host=host.docker.internal:host-gateway` для `docker run`.
-   Но так же должен быть настроен postgres для работы с запросами с других ip, помимо `localhost`.(по-умолчанию
-   настроен на `localhost`)
+### Локальный запуск и тестирование   
+- Через консоль
+```bash
+    ./gradlew bootRun --args='--spring.profiles.active=ide'
+```
+
+- В IntelliJ IDEA
+  * Run -> Edit Configurations....
+  * В поле Active profiles введите имя профиля: `ide`
 
 ### Ссылки на репозиторий документации
 - [Системная аналитика Profile Service](https://github.com/it-mentor-community-platform/meta/blob/main/system-analytics/services/profile-service/index.md)
