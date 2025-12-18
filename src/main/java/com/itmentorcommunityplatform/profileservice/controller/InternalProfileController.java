@@ -34,7 +34,5 @@ public class InternalProfileController {
 
         ProfileResponseDto profile = profileService.getProfileByGitHubUrl(gitHubUrl);
         return ResponseEntity.ok(profile);
-
-
     }
 }
