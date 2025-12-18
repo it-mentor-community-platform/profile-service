@@ -2,14 +2,18 @@ package com.itmentorcommunityplatform.profileservice.service;
 
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
+import com.itmentorcommunityplatform.profileservice.domain.Project;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
+import com.itmentorcommunityplatform.profileservice.mapper.ProjectMapper;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
+import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import com.itmentorcommunityplatform.profileservice.validator.base.BaseProfileDetailValidator;
 import com.itmentorcommunityplatform.profileservice.validator.impl.GithubProfileUrlValidator;
 import com.itmentorcommunityplatform.profileservice.validator.registry.ProfileDetailValidatorRegistry;
@@ -32,7 +36,9 @@ import java.util.Set;
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
+    private final ProjectRepository projectRepository;
     private final ProfileMetrics profileMetrics;
+    private final ProjectMapper projectMapper;
     private final BaseProfileDetailValidator baseDetailValidator;
     private final ProfileDetailValidatorRegistry detailValidatorRegistry;
     private final GithubProfileUrlValidator githubProfileUrlValidator;
@@ -193,5 +199,11 @@ public class ProfileService {
                 mapToProfileDetailDto(profile.getDetails()));
     }
 
+
+    @Transactional
+    public void createdProject(ProjectCreatedEvent projectCreated){
+        Project project=projectMapper.toEvent(projectCreated);
+        projectRepository.save(project);
+    }
 
 }
