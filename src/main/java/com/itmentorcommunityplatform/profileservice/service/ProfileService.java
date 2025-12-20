@@ -36,9 +36,7 @@ import java.util.Set;
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
-    private final ProjectRepository projectRepository;
     private final ProfileMetrics profileMetrics;
-    private final ProjectMapper projectMapper;
     private final BaseProfileDetailValidator baseDetailValidator;
     private final ProfileDetailValidatorRegistry detailValidatorRegistry;
     private final GithubProfileUrlValidator githubProfileUrlValidator;
@@ -200,10 +198,6 @@ public class ProfileService {
     }
 
 
-    @Transactional
-    public void createdProject(ProjectCreatedEvent projectCreated){
-        Project project=projectMapper.toEvent(projectCreated);
-        projectRepository.save(project);
-    }
+
 
 }

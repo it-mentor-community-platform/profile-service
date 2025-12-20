@@ -5,6 +5,7 @@ import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEven
 
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
 import com.itmentorcommunityplatform.profileservice.service.AchievementService;
+import com.itmentorcommunityplatform.profileservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class ProjectCreatedConsumer {
 
 
-    private final ProfileService profileService;
+    private final ProjectService projectService;
     private final AchievementService achievementService;
 
     @KafkaListener(topics = "projects.project.created", groupId = "profile-service-cg")
@@ -34,7 +35,7 @@ public class ProjectCreatedConsumer {
                 event.getProgrammingLanguage(), event.getRoadmapProject(),
                 event.getAddedTimestamp(), event.getProjectSourceType());
 
-             profileService.createdProject(event);
+        projectService.createdProject(event);
         try {
             achievementService.awardAchievement(event, AchievementType.TEST_ACHIEVEMENTS);
             log.info("Kafka Consumer: Successfully processed event for user {}", event.getAuthorTelegramUserId());
