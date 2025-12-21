@@ -1,5 +1,3 @@
-DROP table project;
-
 CREATE TABLE project
 (
     id                      BIGSERIAL PRIMARY KEY,

@@ -172,7 +172,6 @@ public class ProfileService {
         }
     }
 
-
     public ProfileResponseDto getProfileByGitHubUrl(String gitHubUrl) {
 
         githubProfileUrlValidator.validate(gitHubUrl);
@@ -185,10 +184,7 @@ public class ProfileService {
                         "Profile with URL: %s not found".formatted(gitHubUrl)
                 ));
 
-
         return new ProfileResponseDto(profile.getTelegramUserId(),
                 mapToProfileDetailDto(profile.getDetails()));
     }
-
-
 }

@@ -68,7 +68,6 @@ public class AchievementService {
                 .publiclyVisible(true)
                 .build();
 
-
         achievementRepository.save(achievement);
         log.info("User (profileId: {}({})), earned achievement: {}",
                 profile.getId(), event.getAuthorTelegramUserId(), achievementType);

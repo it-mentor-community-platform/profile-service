@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProjectCreatedConsumer {
 
-
     private final ProjectService projectService;
     private final AchievementService achievementService;
 
