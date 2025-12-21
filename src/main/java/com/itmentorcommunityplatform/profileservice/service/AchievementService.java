@@ -2,12 +2,15 @@ package com.itmentorcommunityplatform.profileservice.service;
 
 import com.itmentorcommunityplatform.profileservice.domain.Achievement;
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
+import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementCriteriaChecker;
+import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementStrategyRegistry;
 import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.repository.AchievementRepository;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,9 +23,21 @@ public class AchievementService {
 
     private final AchievementRepository achievementRepository;
     private final ProfileRepository profileRepository;
+    private final AchievementStrategyRegistry registry;
+    private final ApplicationContext context;
+
+    public void recheckAndAwardAchievements(ProjectCreatedEvent event) {
+        for (AchievementType type : AchievementType.values()) {
+            AchievementCriteriaChecker checker = registry.get(type);
+            if (checker != null && checker.checkCriteria()) {
+                AchievementService proxy = context.getBean(AchievementService.class);
+                proxy.awardAchievement(event, type);
+            }
+        }
+    }
 
     @Transactional
-    public void awardAchievement(ProjectCreatedEvent event, AchievementType achievementType) {
+    protected void awardAchievement(ProjectCreatedEvent event, AchievementType achievementType) {
         if (event == null || event.getAuthorTelegramUserId() == null) {
             log.warn("Received empty event or null author ID");
             return;
@@ -41,7 +56,7 @@ public class AchievementService {
 
         if (alreadyHasAchievement(profile.getId(), achievementType)) {
             log.info("Achievement issuance skipped: user (profileId: {}({})) already owns achievement of type: {}",
-                    profile.getId(),event.getAuthorTelegramUserId(), achievementType);
+                    profile.getId(), event.getAuthorTelegramUserId(), achievementType);
             return;
         }
 
@@ -53,7 +68,10 @@ public class AchievementService {
                 .publiclyVisible(true)
                 .build();
 
+
         achievementRepository.save(achievement);
+        log.info("User (profileId: {}({})), earned achievement: {}",
+                profile.getId(), event.getAuthorTelegramUserId(), achievementType);
     }
 
     private boolean alreadyHasAchievement(Long profileId, AchievementType type) {

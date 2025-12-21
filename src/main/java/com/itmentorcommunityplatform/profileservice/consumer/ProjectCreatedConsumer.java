@@ -1,6 +1,5 @@
 package com.itmentorcommunityplatform.profileservice.consumer;
 
-import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.service.AchievementService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,7 @@ public class ProjectCreatedConsumer {
     public void consumeProjectCreatedEvent(ProjectCreatedEvent event) {
         log.info("Added new project: {}", event);
         try {
-            achievementService.awardAchievement(event, AchievementType.TEST_ACHIEVEMENTS);
+            achievementService.recheckAndAwardAchievements(event);
             log.info("Kafka Consumer: Successfully processed event for user {}", event.getAuthorTelegramUserId());
         } catch (Exception e) {
             log.error("Kafka Consumer: Error processing event for user: {}. Error: {}",
