@@ -25,8 +25,7 @@ public class AchievementStrategyRegistry {
         }
     }
 
-    public AchievementCriteriaChecker get(AchievementType achievementType) {
+    public AchievementCriteriaChecker getStrategy(AchievementType achievementType) {
         return strategies.get(achievementType);
     }
-
 }

@@ -5,6 +5,7 @@ import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
@@ -186,5 +187,24 @@ public class ProfileService {
 
         return new ProfileResponseDto(profile.getTelegramUserId(),
                 mapToProfileDetailDto(profile.getDetails()));
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Profile> getProfileForEvent(ProjectCreatedEvent event) {
+        if (event == null || event.getAuthorTelegramUserId() == null) {
+            log.warn("Received empty event or null author ID");
+            return Optional.empty();
+        }
+
+        Long telegramUserId = event.getAuthorTelegramUserId();
+
+        Optional<Profile> maybeProfile = profileRepository.findByTelegramUserId(event.getAuthorTelegramUserId());
+
+        if (maybeProfile.isEmpty()) {
+            log.warn("Profile not found for telegramUserId {}", telegramUserId);
+            return Optional.empty();
+        }
+
+        return maybeProfile;
     }
 }
