@@ -19,11 +19,8 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
 
     @Transactional
-    public void createdProject(ProjectCreatedEvent projectCreated){
-
-
-
-        Project project=projectMapper.projectCreatedEvent(projectCreated);
+    public void createdProject(ProjectCreatedEvent projectCreated) {
+        Project project = projectMapper.projectCreatedEvent(projectCreated);
         projectRepository.save(project);
         log.info("The new project has been successfully created");
     }

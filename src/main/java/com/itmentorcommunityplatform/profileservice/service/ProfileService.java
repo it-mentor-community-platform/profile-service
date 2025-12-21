@@ -2,18 +2,15 @@ package com.itmentorcommunityplatform.profileservice.service;
 
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
-import com.itmentorcommunityplatform.profileservice.domain.Project;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
+import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
-import com.itmentorcommunityplatform.profileservice.mapper.ProjectMapper;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
-import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import com.itmentorcommunityplatform.profileservice.validator.base.BaseProfileDetailValidator;
 import com.itmentorcommunityplatform.profileservice.validator.impl.GithubProfileUrlValidator;
 import com.itmentorcommunityplatform.profileservice.validator.registry.ProfileDetailValidatorRegistry;
@@ -26,9 +23,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -179,7 +173,6 @@ public class ProfileService {
         }
     }
 
-
     public ProfileResponseDto getProfileByGitHubUrl(String gitHubUrl) {
 
         githubProfileUrlValidator.validate(gitHubUrl);
@@ -192,12 +185,26 @@ public class ProfileService {
                         "Profile with URL: %s not found".formatted(gitHubUrl)
                 ));
 
-
         return new ProfileResponseDto(profile.getTelegramUserId(),
                 mapToProfileDetailDto(profile.getDetails()));
     }
 
+    @Transactional(readOnly = true)
+    public Optional<Profile> getProfileForEvent(ProjectCreatedEvent event) {
+        if (event == null || event.getAuthorTelegramUserId() == null) {
+            log.warn("Received empty event or null author ID");
+            return Optional.empty();
+        }
 
+        Long telegramUserId = event.getAuthorTelegramUserId();
 
+        Optional<Profile> maybeProfile = profileRepository.findByTelegramUserId(event.getAuthorTelegramUserId());
 
+        if (maybeProfile.isEmpty()) {
+            log.warn("Profile not found for telegramUserId {}", telegramUserId);
+            return Optional.empty();
+        }
+
+        return maybeProfile;
+    }
 }
