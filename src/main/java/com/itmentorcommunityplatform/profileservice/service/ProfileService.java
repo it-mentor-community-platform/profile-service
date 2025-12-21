@@ -5,9 +5,9 @@ import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
 import com.itmentorcommunityplatform.profileservice.validator.base.BaseProfileDetailValidator;
@@ -22,9 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @Service
