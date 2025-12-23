@@ -198,7 +198,7 @@ public class ProfileService {
 
         Long telegramUserId = event.getAuthorTelegramUserId();
 
-        Optional<Profile> maybeProfile = profileRepository.findByTelegramUserId(event.getAuthorTelegramUserId());
+        Optional<Profile> maybeProfile = profileRepository.findByTelegramUserId(telegramUserId);
 
         if (maybeProfile.isEmpty()) {
             log.warn("Profile not found for telegramUserId {}", telegramUserId);
