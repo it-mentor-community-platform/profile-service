@@ -1,6 +1,7 @@
 package com.itmentorcommunityplatform.profileservice.domain;
 
 
+import com.itmentorcommunityplatform.profileservice.domain.type.RoadmapProjectType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,7 +30,7 @@ public class Project {
     String programmingLanguage;
 
     @Column("roadmap_project")
-    String roadmapProject;
+    RoadmapProjectType roadmapProject;
 
     @Column("added_timestamp")
     Long addedTimestamp;
