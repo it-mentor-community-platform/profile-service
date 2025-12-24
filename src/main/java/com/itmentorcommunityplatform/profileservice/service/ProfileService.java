@@ -1,8 +1,10 @@
 package com.itmentorcommunityplatform.profileservice.service;
 
+import com.itmentorcommunityplatform.profileservice.domain.Achievement;
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
+import com.itmentorcommunityplatform.profileservice.dto.ProfileAchievementsDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
@@ -10,6 +12,7 @@ import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
+import com.itmentorcommunityplatform.profileservice.repository.AchievementRepository;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
 import com.itmentorcommunityplatform.profileservice.validator.base.BaseProfileDetailValidator;
 import com.itmentorcommunityplatform.profileservice.validator.impl.GithubProfileUrlValidator;
@@ -30,6 +33,7 @@ import java.util.stream.Collectors;
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
+    private final AchievementRepository achievementRepository;
     private final ProfileMetrics profileMetrics;
     private final BaseProfileDetailValidator baseDetailValidator;
     private final ProfileDetailValidatorRegistry detailValidatorRegistry;
@@ -64,8 +68,11 @@ public class ProfileService {
             try {
                 Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
+
+                List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
+
                 profileMetrics.getGetProfileSuccessCounter().increment();
-                return mapToProfileDetailDto(profile.getDetails());
+                return mapToProfileDetailDto(profile.getDetails(), achievements);
             } catch (Exception e) {
                 profileMetrics.getGetProfileErrorCounter().increment();
                 throw e;
@@ -83,12 +90,14 @@ public class ProfileService {
                 Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
 
+                List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
+
                 Set<ProfileDetail> mergedDetails = mergeProfileDetails(profile.getDetails(), newDetailsMap);
                 profile.setDetails(mergedDetails);
 
                 profileRepository.save(profile);
                 profileMetrics.getGetProfileSuccessCounter().increment();
-                return mapToProfileDetailDto(profile.getDetails());
+                return mapToProfileDetailDto(profile.getDetails(), achievements);
             } catch (Exception e) {
                 profileMetrics.getGetProfileErrorCounter().increment();
                 throw e;
@@ -96,9 +105,17 @@ public class ProfileService {
         });
     }
 
-    private ProfileDetailsResponseDto mapToProfileDetailDto(Set<ProfileDetail> details) {
-        Map<String, String> map = details.stream()
-                .collect(Collectors.toMap(ProfileDetail::getDetailName, ProfileDetail::getDetailValue));
+    private ProfileDetailsResponseDto mapToProfileDetailDto(Set<ProfileDetail> details, List<Achievement> achievements) {
+        List<ProfileAchievementsDto> profileAchievements = achievements.stream()
+                .map(achievement -> new ProfileAchievementsDto(achievement.getAchievementType(),
+                        achievement.getEarnedTimestamp()))
+                .collect(Collectors.toList());
+
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+
+        details.forEach(detail -> map.put(detail.getDetailName(), detail.getDetailValue()));
+
+        map.put("achievements", profileAchievements);
 
         return new ProfileDetailsResponseDto(map);
     }
@@ -185,8 +202,10 @@ public class ProfileService {
                         "Profile with URL: %s not found".formatted(gitHubUrl)
                 ));
 
+        List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
+
         return new ProfileResponseDto(profile.getTelegramUserId(),
-                mapToProfileDetailDto(profile.getDetails()));
+                mapToProfileDetailDto(profile.getDetails(), achievements));
     }
 
     @Transactional(readOnly = true)
