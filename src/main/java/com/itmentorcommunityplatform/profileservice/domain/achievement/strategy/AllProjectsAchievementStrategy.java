@@ -8,8 +8,7 @@ import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEven
 import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,13 +22,14 @@ public class AllProjectsAchievementStrategy implements AchievementCriteriaChecke
     @Override
     public boolean checkCriteria(ProjectCreatedEvent projectCreatedEvent) {
 
-        Set<String> requiredRoadmapProjects = Arrays.stream(RoadmapProjectType.values())
+        Set<RoadmapProjectType> requiredRoadmapProjects = EnumSet.allOf(RoadmapProjectType.class)
+                .stream()
                 .filter(project -> project != RoadmapProjectType.OTHER)
-                .map(Enum::name)
                 .collect(Collectors.toSet());
 
-        Set<String> usersRoadmapProjects = projectRepository.findProjectsNamesByUserId(projectCreatedEvent.getAuthorTelegramUserId());
+        Set<RoadmapProjectType> usersRoadmapProjects = projectRepository
+                .findProjectsNamesByUserId(projectCreatedEvent.getAuthorTelegramUserId());
 
-        return requiredRoadmapProjects.equals(usersRoadmapProjects);
+        return usersRoadmapProjects.containsAll(requiredRoadmapProjects);
     }
 }

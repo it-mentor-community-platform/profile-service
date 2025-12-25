@@ -10,9 +10,8 @@ import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -20,31 +19,56 @@ import java.util.Optional;
 public class SprinterAchievementStrategy implements AchievementCriteriaChecker {
 
     private final ProjectRepository projectRepository;
+    private final List<RoadmapProjectType> nonRequiredProjectsTypeForSprinter = List.of(RoadmapProjectType.OTHER,
+                                                                                        RoadmapProjectType.TASK_TRACKER);
+
+    private static final long SIX_MONTHS_IN_MILLIS = 6L * 30 * 24 * 60 * 60 * 1000;
 
     @Override
     public boolean checkCriteria(ProjectCreatedEvent projectCreatedEvent) {
 
-        Optional<Project> hangmanProject = projectRepository.findFirstByAuthorTelegramUserIdAndRoadmapProject(
-                projectCreatedEvent.getAuthorTelegramUserId(),
-                RoadmapProjectType.HANGMAN
-        );
+        Long userId = projectCreatedEvent.getAuthorTelegramUserId();
 
-        Optional<Project> cloudProject = projectRepository.findFirstByAuthorTelegramUserIdAndRoadmapProject(
-                projectCreatedEvent.getAuthorTelegramUserId(),
-                RoadmapProjectType.CLOUD_FILE_STORAGE
-        );
+        Set<RoadmapProjectType> requiredProjectsTypeForSprinter = EnumSet.allOf(RoadmapProjectType.class)
+                .stream()
+                .filter(type -> !nonRequiredProjectsTypeForSprinter.contains(type))
+                .collect(Collectors.toSet());
 
-        if (hangmanProject.isEmpty() || cloudProject.isEmpty()){
+        List<Project> allUserProjects = projectRepository.findByAuthorTelegramUserId(userId);
+
+        List<Project> requiredUserProjects = new ArrayList<>();
+
+        for (Project project :allUserProjects) {
+
+            Optional<Project> projectWithSameType = requiredUserProjects.stream()
+                    .filter(p -> p.getRoadmapProject() == project.getRoadmapProject())
+                    .findFirst();
+
+            if (projectWithSameType.isEmpty() && requiredProjectsTypeForSprinter.contains(project.getRoadmapProject())) {
+                requiredUserProjects.add(project);
+            }
+        }
+
+
+        Set<RoadmapProjectType> userProjectTypes = requiredUserProjects.stream()
+                .map(Project::getRoadmapProject)
+                .collect(Collectors.toSet());
+
+        if (!userProjectTypes.containsAll(requiredProjectsTypeForSprinter)){
             return false;
         }
 
-        long hangmanTimestamp = hangmanProject.get().getAddedTimestamp();
-        long cloudTimestamp = cloudProject.get().getAddedTimestamp();
+        List<Project> sortedByTime = requiredUserProjects.stream()
+                .sorted(Comparator.comparingLong(Project::getAddedTimestamp))
+                .toList();
 
-        long diffMillis = Math.abs(cloudTimestamp - hangmanTimestamp);
 
-        long sixMonthsInMillis = 6L * 30 * 24 * 60 * 60 * 1000;
+        Long firstProjectTimestamp = sortedByTime.getFirst().getAddedTimestamp();
 
-        return diffMillis < sixMonthsInMillis;
+        Long sixthProjectTimestamp = sortedByTime.get(5).getAddedTimestamp();
+
+        long diffMillis = sixthProjectTimestamp - firstProjectTimestamp;
+
+        return diffMillis < SIX_MONTHS_IN_MILLIS;
     }
 }
