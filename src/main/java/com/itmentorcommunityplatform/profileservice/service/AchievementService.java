@@ -27,7 +27,7 @@ public class AchievementService {
                 transactionTemplate.executeWithoutResult(status -> {
                     for (AchievementType type : AchievementType.values()) {
                         AchievementCriteriaChecker checker = registry.getStrategy(type);
-                        if (checker != null && checker.checkCriteria()) {
+                        if (checker != null && checker.checkCriteria(event)) {
                             awardAchievement(event, type, profile);
                         }
                     }

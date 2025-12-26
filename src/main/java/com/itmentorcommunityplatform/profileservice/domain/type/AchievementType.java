@@ -1,6 +1,9 @@
 package com.itmentorcommunityplatform.profileservice.domain.type;
 
 public enum AchievementType {
-    TEST_ACHIEVEMENTS,
-    BETA_TESTER
+    FIRST_PROJECT,
+    ALL_PROJECTS,
+    BILINGUAL,
+    POLYGLOT,
+    SPRINTER
 }
