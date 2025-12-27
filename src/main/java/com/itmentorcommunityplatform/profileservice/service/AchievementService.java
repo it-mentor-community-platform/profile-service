@@ -6,6 +6,7 @@ import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementCriteriaChecker;
 import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementStrategyRegistry;
 import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
+import com.itmentorcommunityplatform.profileservice.dto.AchievementsDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileAchievementsDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.repository.AchievementRepository;
@@ -45,17 +46,17 @@ public class AchievementService {
                 }));
     }
 
-    public List<ProfileAchievementsDto> getProfileAchievements(Long telegramUserId){
+    public List<AchievementsDto> getProfileAchievements(Long telegramUserId){
 
-        ProfileAchievementsDto profileAchievementsDto;
-        List<ProfileAchievementsDto> profileAchievementsDtoList=new ArrayList<>();
+        AchievementsDto achievementsDto;
+        List<AchievementsDto> profileAchievementsDtoList=new ArrayList<>();
         Optional<Profile> profile= profileRepository.findByTelegramUserId(telegramUserId);
         List<Achievement> achievement=achievementRepository.findAchievemetsByProfileId(profile.get().getId()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "Achievements not found"));
 
         for (Achievement achiev:achievement){
            String description= achievementConfig.getAchievements().get(achiev.getAchievementType().toString());
-           profileAchievementsDto=new ProfileAchievementsDto(achiev.getAchievementType(), achiev.getEarnedTimestamp(), description, achiev.isPubliclyVisible());
-           profileAchievementsDtoList.add(profileAchievementsDto);
+            achievementsDto=new AchievementsDto(achiev.getAchievementType(), achiev.getEarnedTimestamp(), description, achiev.isPubliclyVisible());
+           profileAchievementsDtoList.add(achievementsDto);
         }
 
         return profileAchievementsDtoList;

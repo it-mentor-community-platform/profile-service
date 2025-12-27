@@ -1,6 +1,7 @@
 package com.itmentorcommunityplatform.profileservice.controller;
 
 
+import com.itmentorcommunityplatform.profileservice.dto.AchievementsDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileAchievementsDto;
 import com.itmentorcommunityplatform.profileservice.service.AchievementService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class AchievementController {
     private final AchievementService achievementService;
 
     @GetMapping
-    public ResponseEntity<List<ProfileAchievementsDto>> getProfileAchievements(
+    public ResponseEntity<List<AchievementsDto>> getProfileAchievements(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId){
 
         var allProfileAchievements=achievementService.getProfileAchievements(telegramUserId);

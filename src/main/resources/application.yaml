@@ -30,8 +30,8 @@ management:
 
 app:
   achievements:
-    PROJECT_ONE: Сдан первый проект!
-    PROJECT_ALL: Сданы все проекты!
+    FIRST_PROJECT: Сдан первый проект!
+    ALL_PROJECTS: Сданы все проекты!
     BILINGUAL: Сданы проекты на двух языках!
     POLYGLOT: Сданы проекты на 4+ языках!
     SPRINTER: Сданы с 1 по 6 проект за 6 месяцев!

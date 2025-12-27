@@ -16,7 +16,7 @@ X-Telegram-Username: telegram_dev_user
 ### Успешный сценарий. Получение ачивок пользователя
 GET http://localhost:8083/api/achievements
 Accept: application/json
-X-Telegram-User-Id: 123456789
+X-Telegram-User-Id: 987654321
 
 ### Неуспешный сценарий. Отсутствует обязательный загаловок X-Telegram-User-Id:
 GET http://localhost:8083/api/achievements
