@@ -1,5 +1,9 @@
 package com.itmentorcommunityplatform.profileservice.domain.achievement;
 
+import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
+
 public interface AchievementCriteriaChecker {
-    boolean checkCriteria();
+
+
+    boolean checkCriteria(ProjectCreatedEvent projectCreatedEvent);
 }

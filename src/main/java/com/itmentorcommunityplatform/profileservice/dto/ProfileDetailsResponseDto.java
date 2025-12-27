@@ -19,14 +19,14 @@ import java.util.Map;
 )
 public class ProfileDetailsResponseDto {
 
-    private final Map<String, String> details;
+    private final Map<String, Object> details;
 
-    public ProfileDetailsResponseDto(Map<String, String> details) {
+    public ProfileDetailsResponseDto(Map<String, Object> details) {
         this.details = details;
     }
 
     @JsonAnyGetter
-    public Map<String, String> anyToJson() {
+    public Map<String, Object> anyToJson() {
         return details;
     }
 }
