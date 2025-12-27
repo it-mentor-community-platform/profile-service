@@ -1,13 +1,39 @@
+### Успешный сценарий. Добавление проекта в бд
 POST http://localhost:8084//api/projects/project
 Content-Type: application/json
-X-Telegram-User-Id: 1212121212
+X-Telegram-User-Id: 23232323
 X-Telegram-Username: telegram_dev_user
 
 {
-  "author_telegram_user_id": 1212121212,
-  "github_repository_url": "https://github.com/zhukovsd/clou",
+  "author_telegram_user_id": 23232323,
+  "github_repository_url": "https://github.com/zhukovsd/close",
   "programming_language": "Java",
   "roadmap_project": "SIMULATION",
-  "telegram_user_id": 12144444,
-  "added_timestamp:": 123313
+  "telegram_user_id": 34343434,
+  "added_timestamp:": 12333413
 }
+
+### Успешный сценарий. Получение ачивок пользователя
+GET http://localhost:8083/api/achievements
+Accept: application/json
+X-Telegram-User-Id: 123456789
+
+### Неуспешный сценарий. Отсутствует обязательный загаловок X-Telegram-User-Id:
+GET http://localhost:8083/api/achievements
+Accept: application/json
+
+### Неуспешный сценарий. Неправильный формат заголовка X-Telegram-User-Id
+GET http://localhost:8083/api/achievements
+Accept: application/json
+X-Telegram-User-Id: not-user
+
+### Неуспешный сценарий. Пользователя не найден
+GET http://localhost:8083/api/achievements
+Accept: application/json
+X-Telegram-User-Id: 1234567892131
+
+### Успешный сценарий. Пользователь без ачивок
+GET http://localhost:8083/api/achievements
+Accept: application/json
+X-Telegram-User-Id: 0785467
+
