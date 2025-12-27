@@ -20,6 +20,7 @@ import com.itmentorcommunityplatform.profileservice.validator.registry.ProfileDe
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -225,5 +226,18 @@ public class ProfileService {
         }
 
         return maybeProfile;
+    }
+
+    public ProfileDetailsResponseDto getUserProfile(Long profileId) {
+
+        Profile profile = profileRepository.findById(profileId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Profile with id: %s not found".formatted(profileId)
+                ));
+
+        List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profileId);
+
+        return mapToProfileDetailDto(profile.getDetails(), achievements);
     }
 }

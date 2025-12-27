@@ -1,0 +1,43 @@
+### 1. Успешное получение профиля (Существующий пользователь)
+# Предварительно выполнить:
+# INSERT INTO profiles(telegram_user_id) VALUES(12345);
+# INSERT INTO profiles_details(profile_id, detail_name, detail_value)
+# VALUES
+# (1, 'github_profile_url', 'https://github.com/testuser'),
+# (1, 'telegram_url', 'https://t.me/testuser');
+# (Опиционально) Для получения списка ачивок:
+# INSERT INTO achievements (profile_id, achievement_type, earned_timestamp, publicly_visible)
+# VALUES (1, 'SPRINTER', 1766606135188, true)
+GET http://localhost:8083/api/profile
+X-Telegram-User-Id: 12345
+X-User-Roles: STUDENT
+
+### 2. Ошибка: Профиль не найден (404)
+# Пользователь с таким ID (99999) не должен существовать в БД
+GET http://localhost:8083/api/profile
+X-Telegram-User-Id: 99999
+X-User-Roles: STUDENT
+
+### 3. Ошибка: Отсутствует заголовок X-Telegram-User-Id (401/400)
+# Проверка обработки отсутствия обязательного заголовка (GlobalExceptionHandler)
+GET http://localhost:8083/api/profile
+X-User-Roles: STUDENT
+
+### 4. Успешное получение публичного профиля другого пользователя (Существующий пользователь)
+# Предварительно выполнить:
+# INSERT INTO profiles(telegram_user_id) VALUES(12345);
+# INSERT INTO profiles_details(profile_id, detail_name, detail_value)
+# VALUES
+# (1, 'github_profile_url', 'https://github.com/testuser'),
+# (1, 'telegram_url', 'https://t.me/testuser');
+# (Опционально) Для получения списка ачивок:
+# INSERT INTO achievements (profile_id, achievement_type, earned_timestamp, publicly_visible)
+# VALUES (1, 'SPRINTER', 1766606135188, true)
+GET http://localhost:8083/api/profile/1
+X-User-Roles: STUDENT
+
+### 5. Ошибка: Профиль не найден (404)
+# Профиль с таким ID (99999) не должен существовать в БД
+GET http://localhost:8083/api/profile/99999
+X-User-Roles: STUDENT
+
