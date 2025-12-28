@@ -28,7 +28,7 @@ management:
           - health
           - prometheus
 
-app:
+profile-service:
   achievements:
     FIRST_PROJECT: Сдан первый проект!
     ALL_PROJECTS: Сданы все проекты!

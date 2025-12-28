@@ -1,18 +1,3 @@
-### Успешный сценарий. Добавление проекта в бд
-POST http://localhost:8084//api/projects/project
-Content-Type: application/json
-X-Telegram-User-Id: 23232323
-X-Telegram-Username: telegram_dev_user
-
-{
-  "author_telegram_user_id": 23232323,
-  "github_repository_url": "https://github.com/zhukovsd/close",
-  "programming_language": "Java",
-  "roadmap_project": "SIMULATION",
-  "telegram_user_id": 34343434,
-  "added_timestamp:": 12333413
-}
-
 ### Успешный сценарий. Получение ачивок пользователя
 GET http://localhost:8083/api/achievements
 Accept: application/json
@@ -36,4 +21,3 @@ X-Telegram-User-Id: 1234567892131
 GET http://localhost:8083/api/achievements
 Accept: application/json
 X-Telegram-User-Id: 0785467
-

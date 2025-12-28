@@ -6,13 +6,13 @@ import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementCriteriaChecker;
 import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementStrategyRegistry;
 import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
-import com.itmentorcommunityplatform.profileservice.dto.AchievementsDto;
-import com.itmentorcommunityplatform.profileservice.dto.ProfileAchievementsDto;
+import com.itmentorcommunityplatform.profileservice.dto.AchievementDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.repository.AchievementRepository;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -20,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -46,20 +47,34 @@ public class AchievementService {
                 }));
     }
 
-    public List<AchievementsDto> getProfileAchievements(Long telegramUserId){
+    public List<AchievementDto> getProfileAchievements(Long telegramUserId) {
 
-        AchievementsDto achievementsDto;
-        List<AchievementsDto> profileAchievementsDtoList=new ArrayList<>();
-        Optional<Profile> profile= profileRepository.findByTelegramUserId(telegramUserId);
-        List<Achievement> achievement=achievementRepository.findAchievemetsByProfileId(profile.get().getId()).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, "Achievements not found"));
+        List<AchievementDto> listAchievementsProfile = new ArrayList<>();
 
-        for (Achievement achiev:achievement){
-           String description= achievementConfig.getAchievements().get(achiev.getAchievementType().toString());
-            achievementsDto=new AchievementsDto(achiev.getAchievementType(), achiev.getEarnedTimestamp(), description, achiev.isPubliclyVisible());
-           profileAchievementsDtoList.add(achievementsDto);
+        Profile profile = profileRepository.findByTelegramUserId(telegramUserId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
+
+        List<Achievement> achievements = achievementRepository.findAchievemetsByProfileId(profile.getId());
+
+        for (Map.Entry<AchievementType, String> entry : achievementConfig.getAchievements().entrySet()) {
+            AchievementType type = entry.getKey();
+            String achievementName = entry.getValue();
+            boolean isfound = false;
+
+            for (Achievement achievement : achievements) {
+                if (achievement.getAchievementType() == type) {
+                    listAchievementsProfile.add(new AchievementDto(type, achievement.getEarnedTimestamp(), achievementName, achievement.isPubliclyVisible()));
+                    isfound = true;
+                    break;
+                }
+            }
+
+            if (!isfound) {
+                listAchievementsProfile.add(new AchievementDto(type, 0L, achievementName, true));
+            }
+
         }
 
-        return profileAchievementsDtoList;
+        return listAchievementsProfile;
     }
 
     private void awardAchievement(ProjectCreatedEvent event, AchievementType achievementType, Profile profile) {

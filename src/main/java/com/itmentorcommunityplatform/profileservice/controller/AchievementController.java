@@ -1,8 +1,8 @@
 package com.itmentorcommunityplatform.profileservice.controller;
 
 
-import com.itmentorcommunityplatform.profileservice.dto.AchievementsDto;
-import com.itmentorcommunityplatform.profileservice.dto.ProfileAchievementsDto;
+import com.itmentorcommunityplatform.profileservice.docs.GetProfileAchievements;
+import com.itmentorcommunityplatform.profileservice.dto.AchievementDto;
 import com.itmentorcommunityplatform.profileservice.service.AchievementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,8 @@ public class AchievementController {
     private final AchievementService achievementService;
 
     @GetMapping
-    public ResponseEntity<List<AchievementsDto>> getProfileAchievements(
+    @GetProfileAchievements
+    public ResponseEntity<List<AchievementDto>> getProfileAchievements(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId){
 
         var allProfileAchievements=achievementService.getProfileAchievements(telegramUserId);

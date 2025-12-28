@@ -10,6 +10,8 @@ import java.util.Optional;
 public interface AchievementRepository extends CrudRepository<Achievement, Long> {
 
     boolean existsByProfileIdAndAchievementType(Long profileId, AchievementType achievementType);
-    Optional<List<Achievement>> findAchievemetsByProfileId(Long id);
+
+    List<Achievement> findAchievemetsByProfileId(Long id);
+
     List<Achievement> findAllByProfileIdAndPubliclyVisibleTrue(Long profileId);
 }
