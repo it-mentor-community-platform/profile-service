@@ -5,7 +5,6 @@ import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface AchievementRepository extends CrudRepository<Achievement, Long> {
 
