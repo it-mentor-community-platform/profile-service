@@ -1,4 +1,9 @@
 package com.itmentorcommunityplatform.profileservice.dto.request;
 
-public record AchievementsVisibleRequestDto(boolean publicly_visible) {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record AchievementsVisibleRequestDto(
+        @JsonProperty(value = "publicly_visible", required = true)
+        boolean publiclyVisible
+) {
 }

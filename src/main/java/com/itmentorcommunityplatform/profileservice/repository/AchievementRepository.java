@@ -11,4 +11,6 @@ public interface AchievementRepository extends CrudRepository<Achievement, Long>
     boolean existsByProfileIdAndAchievementType(Long profileId, AchievementType achievementType);
 
     List<Achievement> findAllByProfileIdAndPubliclyVisibleTrue(Long profileId);
+
+    Achievement findByProfileIdAndAchievementType(Long profileId, AchievementType achievementType);
 }

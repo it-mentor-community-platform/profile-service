@@ -1,0 +1,53 @@
+### 1. Успешное обновление достижения профиля по telegram id (200 OK)
+PATCH http://localhost:8083/api/achievement/type/SPRINTER
+Content-Type: application/json
+X-Telegram-User-Id: 143304648
+
+{
+  "publicly_visible": false
+}
+
+### 2. Ошибки валидации: невалидные поле (400)
+PATCH http://localhost:8083/api/achievement/type/SPRINTER
+Content-Type: application/json
+X-Telegram-User-Id: 143304648
+
+{
+  "visible": true
+}
+
+### 3. Ошибки валидации: несуществующие достижение (400)
+PATCH http://localhost:8083/api/achievement/type/BETA_TESTER123123
+Content-Type: application/json
+X-Telegram-User-Id: 143304648
+
+{
+  "publicly_visible": true
+}
+
+### 4. У юзера нет ачивки, которую он пытается редактировать (403)
+PATCH http://localhost:8083/api/achievement/type/POLYGLOT
+Content-Type: application/json
+X-Telegram-User-Id: 143304648
+
+{
+  "publicly_visible": true
+}
+
+### 5. Профиль текущего пользователя не существуете (404)
+PATCH http://localhost:8083/api/achievement/type/SPRINTER
+Content-Type: application/json
+X-Telegram-User-Id: 1
+
+{
+  "publicly_visible": true
+}
+
+### 6. Неизвестная ошибка (500)
+PATCH http://localhost:8083/api/achievement/type/SPRINTER
+Content-Type: application/json
+X-Telegram-User-Id: asd
+
+{
+  "publicly_visible": true
+}
