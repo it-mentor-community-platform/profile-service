@@ -70,6 +70,7 @@ public class AchievementService {
             profileAchievements.putIfAbsent(type, achievementDto);
         });
 
+
         return new ArrayList<>(profileAchievements.values());
     }
 
