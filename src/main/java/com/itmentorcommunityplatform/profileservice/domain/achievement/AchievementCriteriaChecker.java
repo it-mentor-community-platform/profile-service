@@ -4,6 +4,6 @@ import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEven
 
 public interface AchievementCriteriaChecker {
 
-
     boolean checkCriteria(ProjectCreatedEvent projectCreatedEvent);
+
 }
