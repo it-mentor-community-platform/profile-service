@@ -4,10 +4,10 @@ import com.itmentorcommunityplatform.profileservice.domain.achievement.Achieveme
 import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementStrategy;
 import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
 import com.itmentorcommunityplatform.profileservice.domain.type.RoadmapProjectType;
-import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,7 +20,7 @@ public class AllProjectsAchievementStrategy implements AchievementCriteriaChecke
     private final ProjectRepository projectRepository;
 
     @Override
-    public boolean checkCriteria(ProjectCreatedEvent projectCreatedEvent) {
+    public boolean checkCriteria(Long userId) {
 
         Set<RoadmapProjectType> requiredRoadmapProjects = EnumSet.allOf(RoadmapProjectType.class)
                 .stream()
@@ -28,7 +28,7 @@ public class AllProjectsAchievementStrategy implements AchievementCriteriaChecke
                 .collect(Collectors.toSet());
 
         Set<RoadmapProjectType> usersRoadmapProjects = projectRepository
-                .findProjectsNamesByUserId(projectCreatedEvent.getAuthorTelegramUserId());
+                .findProjectsNamesByUserId(userId);
 
         return usersRoadmapProjects.containsAll(requiredRoadmapProjects);
     }

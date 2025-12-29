@@ -32,8 +32,6 @@ class FirstProjectAchievementStrategyTest {
     @DisplayName("Возвращает true, если это первый проект юзера")
     void shouldReturnTrueWhenUserHasExactlyOneProject() {
         Long userId = 228L;
-        ProjectCreatedEvent event = new ProjectCreatedEvent();
-        event.setAuthorTelegramUserId(userId);
 
         List<Project> singleProject = List.of(
                 new Project(1L, userId, null, "Java", RoadmapProjectType.SIMULATION, null)
@@ -42,7 +40,7 @@ class FirstProjectAchievementStrategyTest {
         when(projectRepository.findByAuthorTelegramUserId(userId))
                 .thenReturn(singleProject);
 
-        boolean result = achievementStrategy.checkCriteria(event);
+        boolean result = achievementStrategy.checkCriteria(userId);
 
         assertTrue(result);
     }
@@ -51,8 +49,6 @@ class FirstProjectAchievementStrategyTest {
     @DisplayName("Возвращает false, если у юзера проектов больше, чем 1")
     void shouldReturnFalseWhenUserHasMoreThanOneProject() {
         Long userId = 228L;
-        ProjectCreatedEvent event = new ProjectCreatedEvent();
-        event.setAuthorTelegramUserId(userId);
 
         List<Project> singleProject = List.of(
                 new Project(1L, userId, null, "Java", RoadmapProjectType.SIMULATION, null),
@@ -62,7 +58,7 @@ class FirstProjectAchievementStrategyTest {
         when(projectRepository.findByAuthorTelegramUserId(userId))
                 .thenReturn(singleProject);
 
-        boolean result = achievementStrategy.checkCriteria(event);
+        boolean result = achievementStrategy.checkCriteria(userId);
 
         assertFalse(result);
     }
@@ -80,7 +76,7 @@ class FirstProjectAchievementStrategyTest {
         when(projectRepository.findByAuthorTelegramUserId(userId))
                 .thenReturn(Collections.emptyList());
 
-        boolean result = achievementStrategy.checkCriteria(event);
+        boolean result = achievementStrategy.checkCriteria(userId);
 
         assertFalse(result);
     }

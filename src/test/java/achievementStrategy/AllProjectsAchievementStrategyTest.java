@@ -2,7 +2,6 @@ package achievementStrategy;
 
 import com.itmentorcommunityplatform.profileservice.domain.achievement.strategy.AllProjectsAchievementStrategy;
 import com.itmentorcommunityplatform.profileservice.domain.type.RoadmapProjectType;
-import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,8 +32,6 @@ public class AllProjectsAchievementStrategyTest {
     void checkCriteriaShouldReturnTrueWhenUserHasAllRequiredProjects() {
 
         Long userId = 228L;
-        ProjectCreatedEvent event = new ProjectCreatedEvent();
-        event.setAuthorTelegramUserId(userId);
 
         Set<RoadmapProjectType> userRoadmapProjects =  EnumSet.allOf(RoadmapProjectType.class)
                 .stream()
@@ -44,7 +42,7 @@ public class AllProjectsAchievementStrategyTest {
                 .thenReturn(userRoadmapProjects);
 
 
-        boolean result = achievementStrategy.checkCriteria(event);
+        boolean result = achievementStrategy.checkCriteria(userId);
 
 
         assertTrue(result);
@@ -55,15 +53,13 @@ public class AllProjectsAchievementStrategyTest {
     void checkCriteriaShouldReturnTrueWhenUserHasAllRequiredProjectsAndOther() {
 
         Long userId = 228L;
-        ProjectCreatedEvent event = new ProjectCreatedEvent();
-        event.setAuthorTelegramUserId(userId);
 
         Set<RoadmapProjectType> userRoadmapProjects =  EnumSet.allOf(RoadmapProjectType.class);
 
         when(projectRepository.findProjectsNamesByUserId(userId))
                 .thenReturn(userRoadmapProjects);
 
-        boolean result = achievementStrategy.checkCriteria(event);
+        boolean result = achievementStrategy.checkCriteria(userId);
 
 
         assertTrue(result);
@@ -73,8 +69,6 @@ public class AllProjectsAchievementStrategyTest {
     @DisplayName("Возвращает false, если юзер не выполнил 7 проектов")
     void checkCriteriaShouldReturnFalseWhenUserMissingOneRequiredProjects(){
         Long userId = 228L;
-        ProjectCreatedEvent event = new ProjectCreatedEvent();
-        event.setAuthorTelegramUserId(userId);
 
         Set<RoadmapProjectType> userRoadmapProjects =  EnumSet.allOf(RoadmapProjectType.class)
                 .stream().filter(project -> project != RoadmapProjectType.OTHER && project != RoadmapProjectType.TASK_TRACKER)
@@ -83,7 +77,7 @@ public class AllProjectsAchievementStrategyTest {
         when(projectRepository.findProjectsNamesByUserId(userId))
                 .thenReturn(userRoadmapProjects);
 
-        boolean result = achievementStrategy.checkCriteria(event);
+        boolean result = achievementStrategy.checkCriteria(userId);
 
         assertFalse(result);
     }

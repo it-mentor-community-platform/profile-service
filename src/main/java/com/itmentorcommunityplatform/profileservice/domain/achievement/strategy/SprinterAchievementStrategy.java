@@ -5,7 +5,6 @@ import com.itmentorcommunityplatform.profileservice.domain.achievement.Achieveme
 import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementStrategy;
 import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
 import com.itmentorcommunityplatform.profileservice.domain.type.RoadmapProjectType;
-import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -25,9 +24,7 @@ public class SprinterAchievementStrategy implements AchievementCriteriaChecker {
     private static final long SIX_MONTHS_IN_MILLIS = 6L * 30 * 24 * 60 * 60 * 1000;
 
     @Override
-    public boolean checkCriteria(ProjectCreatedEvent projectCreatedEvent) {
-
-        Long userId = projectCreatedEvent.getAuthorTelegramUserId();
+    public boolean checkCriteria(Long userId) {
 
         Set<RoadmapProjectType> requiredProjectsTypeForSprinter = EnumSet.allOf(RoadmapProjectType.class)
                 .stream()
