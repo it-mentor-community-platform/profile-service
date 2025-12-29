@@ -1,7 +1,6 @@
 package achievementStrategy;
 
 import com.itmentorcommunityplatform.profileservice.domain.achievement.strategy.PolyglotAchievementStrategy;
-import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,15 +28,13 @@ public class PolyglotAchievementStrategyTest {
     @DisplayName("Возвращает true, если у юзера проекты на 4 различных языках")
     void shouldReturnTrueWhenUserHasFourDifferentLanguages() {
         Long userId = 228L;
-        ProjectCreatedEvent event = new ProjectCreatedEvent();
-        event.setAuthorTelegramUserId(userId);
 
         Set<String> fourLanguages = Set.of("Java", "Python", "JavaScript", "Go");
 
         when(projectRepository.findUsersProjectsLanguagesByUserId(userId))
                 .thenReturn(fourLanguages);
 
-        boolean result = achievementStrategy.checkCriteria(event);
+        boolean result = achievementStrategy.checkCriteria(userId);
 
         assertTrue(result);
     }
@@ -47,15 +44,13 @@ public class PolyglotAchievementStrategyTest {
     void shouldReturnTrueWhenUserHasMoreThanFourLanguages() {
 
         Long userId = 228L;
-        ProjectCreatedEvent event = new ProjectCreatedEvent();
-        event.setAuthorTelegramUserId(userId);
 
         Set<String> fiveLanguages = Set.of("Java", "Python", "JavaScript", "Go", "Rust");
 
         when(projectRepository.findUsersProjectsLanguagesByUserId(userId))
                 .thenReturn(fiveLanguages);
 
-        boolean result = achievementStrategy.checkCriteria(event);
+        boolean result = achievementStrategy.checkCriteria(userId);
 
         assertTrue(result);
     }
@@ -65,15 +60,13 @@ public class PolyglotAchievementStrategyTest {
     void shouldReturnFalseWhenUserHasLessThanFourLanguages() {
 
         Long userId = 228L;
-        ProjectCreatedEvent event = new ProjectCreatedEvent();
-        event.setAuthorTelegramUserId(userId);
 
         Set<String> threeLanguages = Set.of("Java", "Python", "JavaScript");
 
         when(projectRepository.findUsersProjectsLanguagesByUserId(userId))
                 .thenReturn(threeLanguages);
 
-        boolean result = achievementStrategy.checkCriteria(event);
+        boolean result = achievementStrategy.checkCriteria(userId);
 
         assertFalse(result);
     }

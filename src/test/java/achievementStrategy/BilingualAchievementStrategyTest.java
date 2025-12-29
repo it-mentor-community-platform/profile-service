@@ -1,7 +1,6 @@
 package achievementStrategy;
 
 import com.itmentorcommunityplatform.profileservice.domain.achievement.strategy.BilingualAchievementStrategy;
-import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,15 +29,13 @@ public class BilingualAchievementStrategyTest {
     void checkCriteriaShouldReturnTrueWhenUserHasProjectsOnTwoLanguages() {
 
         Long userId = 228L;
-        ProjectCreatedEvent event = new ProjectCreatedEvent();
-        event.setAuthorTelegramUserId(userId);
 
         Set<String> twoLanguages = Set.of("Java", "Python");
 
         when(projectRepository.findUsersProjectsLanguagesByUserId(userId))
                 .thenReturn(twoLanguages);
 
-        boolean result = achievementStrategy.checkCriteria(event);
+        boolean result = achievementStrategy.checkCriteria(userId);
 
         assertTrue(result);
     }
@@ -48,15 +45,13 @@ public class BilingualAchievementStrategyTest {
     void checkCriteriaShouldReturnTrueWhenUserHasProjectsOnOnlyOneLanguage() {
 
         Long userId = 228L;
-        ProjectCreatedEvent event = new ProjectCreatedEvent();
-        event.setAuthorTelegramUserId(userId);
 
         Set<String> twoLanguages = Set.of("Java");
 
         when(projectRepository.findUsersProjectsLanguagesByUserId(userId))
                 .thenReturn(twoLanguages);
 
-        boolean result = achievementStrategy.checkCriteria(event);
+        boolean result = achievementStrategy.checkCriteria(userId);
 
         assertFalse(result);
     }
@@ -66,15 +61,13 @@ public class BilingualAchievementStrategyTest {
     void checkCriteriaShouldReturnFalseWhenUserHasProjectsOnThreeOrMoreLanguages() {
 
         Long userId = 228L;
-        ProjectCreatedEvent event = new ProjectCreatedEvent();
-        event.setAuthorTelegramUserId(userId);
 
         Set<String> threeLanguages = Set.of("Java", "Python", "JavaScript");
 
         when(projectRepository.findUsersProjectsLanguagesByUserId(userId))
                 .thenReturn(threeLanguages);
 
-        boolean result = achievementStrategy.checkCriteria(event);
+        boolean result = achievementStrategy.checkCriteria(userId);
 
         assertFalse(result);
 

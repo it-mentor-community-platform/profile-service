@@ -4,7 +4,6 @@ import com.itmentorcommunityplatform.profileservice.domain.Project;
 import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementCriteriaChecker;
 import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementStrategy;
 import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
-import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,9 +18,9 @@ public class FirstProjectAchievementStrategy implements AchievementCriteriaCheck
     private final ProjectRepository projectRepository;
 
     @Override
-    public boolean checkCriteria(ProjectCreatedEvent projectCreatedEvent) {
+    public boolean checkCriteria(Long userId) {
 
-        List<Project> projectsByUser = projectRepository.findByAuthorTelegramUserId(projectCreatedEvent.getAuthorTelegramUserId());
+        List<Project> projectsByUser = projectRepository.findByAuthorTelegramUserId(userId);
 
         return projectsByUser.size() == 1;
     }
