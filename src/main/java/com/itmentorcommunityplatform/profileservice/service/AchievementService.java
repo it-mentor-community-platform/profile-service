@@ -20,6 +20,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -47,32 +49,28 @@ public class AchievementService {
 
     public List<AchievementDto> getProfileAchievements(Long telegramUserId) {
 
-        List<AchievementDto> listAchievementsProfile = new ArrayList<>();
+        Map<AchievementType, String> achievementsDescriptions = achievementConfig.getAchievements();
 
-        Profile profile = profileRepository.findByTelegramUserId(telegramUserId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
+        Long profileId = profileRepository.findByTelegramUserId(telegramUserId)
+                .map(Profile::getId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
 
-        List<Achievement> achievements = achievementRepository.findAchievemetsByProfileId(profile.getId());
+        Map<AchievementType, AchievementDto> profileAchievements = achievementRepository.findAchievemetsByProfileId(profileId)
+                .stream()
+                .map(achievement -> new AchievementDto(
+                        achievement.getAchievementType(),
+                        achievement.getEarnedTimestamp(),
+                        achievementsDescriptions.get(achievement.getAchievementType()),
+                        achievement.isPubliclyVisible()
+                ))
+                .collect(Collectors.toMap(AchievementDto::getType, Function.identity()));
 
-        for (Map.Entry<AchievementType, String> entry : achievementConfig.getAchievements().entrySet()) {
-            AchievementType type = entry.getKey();
-            String achievementName = entry.getValue();
-            boolean isfound = false;
+        achievementsDescriptions.forEach((type, name) -> {
+            AchievementDto achievementDto = new AchievementDto(type, 0L, name, true);
+            profileAchievements.putIfAbsent(type, achievementDto);
+        });
 
-            for (Achievement achievement : achievements) {
-                if (achievement.getAchievementType() == type) {
-                    listAchievementsProfile.add(new AchievementDto(type, achievement.getEarnedTimestamp(), achievementName, achievement.isPubliclyVisible()));
-                    isfound = true;
-                    break;
-                }
-            }
-
-            if (!isfound) {
-                listAchievementsProfile.add(new AchievementDto(type, 0L, achievementName, true));
-            }
-
-        }
-
-        return listAchievementsProfile;
+        return new ArrayList<>(profileAchievements.values());
     }
 
     private void awardAchievement(ProjectCreatedEvent event, AchievementType achievementType, Profile profile) {
