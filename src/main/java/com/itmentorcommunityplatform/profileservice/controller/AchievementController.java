@@ -2,6 +2,7 @@ package com.itmentorcommunityplatform.profileservice.controller;
 
 
 import com.itmentorcommunityplatform.profileservice.docs.GetProfileAchievements;
+import com.itmentorcommunityplatform.profileservice.docs.SetAchievementVisibility;
 import com.itmentorcommunityplatform.profileservice.dto.AchievementDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.AchievementsVisibleRequestDto;
 import com.itmentorcommunityplatform.profileservice.service.AchievementService;
@@ -21,7 +22,6 @@ public class AchievementController {
 
     @GetMapping("/achievements")
     @GetProfileAchievements
-    @RequestMapping("/achievements")
     public ResponseEntity<List<AchievementDto>> getProfileAchievements(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId) {
 
@@ -30,6 +30,7 @@ public class AchievementController {
     }
 
     @PatchMapping("/achievement/type/{type}")
+    @SetAchievementVisibility
     public ResponseEntity<AchievementDto> setAchievementVisibility(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId,
             @RequestBody AchievementsVisibleRequestDto visible,
