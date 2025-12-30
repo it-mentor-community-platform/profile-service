@@ -1,6 +1,7 @@
 package com.itmentorcommunityplatform.profileservice.controller;
 
 import com.itmentorcommunityplatform.profileservice.docs.GetCurrentProfileDocs;
+import com.itmentorcommunityplatform.profileservice.docs.GetUserProfileByIdDocs;
 import com.itmentorcommunityplatform.profileservice.docs.UpdateCurrentProfileDocs;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileResponseDto;
@@ -36,6 +37,7 @@ public class ProfileController {
     }
 
     @GetMapping("/{id}")
+    @GetUserProfileByIdDocs
     public ResponseEntity<ProfileDetailsResponseDto> getUserProfile(@PathVariable("id") Long profileId) {
         ProfileDetailsResponseDto userProfile = profileService.getUserProfile(profileId);
 
