@@ -4,7 +4,7 @@ Content-Type: application/json
 X-Telegram-User-Id: 143304648
 
 {
-  "publicly_visible": false
+  "publicly_visible": true
 }
 
 ### 2. Ошибки валидации: невалидные поле (400)
@@ -38,15 +38,6 @@ X-Telegram-User-Id: 143304648
 PATCH http://localhost:8083/api/achievement/type/SPRINTER
 Content-Type: application/json
 X-Telegram-User-Id: 1
-
-{
-  "publicly_visible": true
-}
-
-### 6. Неизвестная ошибка (500)
-PATCH http://localhost:8083/api/achievement/type/SPRINTER
-Content-Type: application/json
-X-Telegram-User-Id: asd
 
 {
   "publicly_visible": true

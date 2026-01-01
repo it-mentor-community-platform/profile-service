@@ -78,39 +78,18 @@ public class AchievementService {
     @Transactional
     public AchievementDto setAchievementPublicity(Long telegramUserId,
                                                   AchievementsVisibleRequestDto visibility,
-                                                  String type) {
+                                                  AchievementType type) {
 
-        Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
-                .orElseThrow(() -> {
-                    log.warn("Profile not found for telegramUserId: {}", telegramUserId);
-                    return new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Profile with Telegram-User-Id %s does not exist".formatted(telegramUserId));
-                });
+        Profile profile = profileService.getProfileByTelegramIdOrThrow(telegramUserId);
 
         Long profileId = profile.getId();
-        AchievementType achievementType = parseAchievementType(type);
 
-        if (!isValidAchievementType(achievementType)) {
-            log.error("Unknown achievement type: {}", achievementType);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown achievement type: %s"
-                    .formatted(achievementType));
-        }
-
-        if (!alreadyHasAchievement(profileId, achievementType)) {
-            log.warn("User {} tried to edit achievement {} which they don't own", telegramUserId, type);
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "User %d does not own the achievement they are trying to edit".formatted(telegramUserId));
-        }
-
-        Achievement achievement = achievementRepository.findByProfileIdAndAchievementType(
-                profileId,
-                achievementType);
-
+        Achievement achievement = getAchievementOrThrow(profileId, type);
         achievement.setPubliclyVisible(visibility.publiclyVisible());
 
         Achievement savedAchievement = achievementRepository.save(achievement);
 
-        String description = achievementConfig.getAchievements().get(achievementType);
+        String description = achievementConfig.getAchievements().get(type);
 
         return new AchievementDto(
                 savedAchievement.getAchievementType(),
@@ -119,26 +98,6 @@ public class AchievementService {
                 savedAchievement.isPubliclyVisible()
         );
     }
-
-    private AchievementType parseAchievementType(String type) {
-        try {
-            return AchievementType.valueOf(type.toUpperCase().trim());
-        } catch (IllegalArgumentException | NullPointerException e) {
-            log.warn("Failed to parse achievement type: {}", type);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid achievement type: " + type);
-        }
-    }
-
-    private boolean isValidAchievementType(AchievementType achievementType) {
-        AchievementType[] values = AchievementType.values();
-        for (AchievementType type : values) {
-            if (type == achievementType) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
     private void awardAchievement(ProjectCreatedEvent event, AchievementType achievementType, Profile profile) {
         if (alreadyHasAchievement(profile.getId(), achievementType)) {
@@ -159,6 +118,16 @@ public class AchievementService {
         log.info("User (profileId: {}({})), earned achievement: {}",
                 profile.getId(), event.getAuthorTelegramUserId(), achievementType);
 
+    }
+
+    private Achievement getAchievementOrThrow(Long profileId, AchievementType type) {
+        return achievementRepository
+                .findByProfileIdAndAchievementType(profileId, type)
+                .orElseThrow(() -> {
+                    log.warn("User (profileId): {} tried to access achievement {} which they don't own", profileId, type);
+                    return new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "User (profileId) %d does not own the achievement %s".formatted(profileId, type));
+                });
     }
 
     private boolean alreadyHasAchievement(Long profileId, AchievementType achievementType) {

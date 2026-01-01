@@ -3,11 +3,11 @@ package com.itmentorcommunityplatform.profileservice.controller;
 
 import com.itmentorcommunityplatform.profileservice.docs.GetProfileAchievements;
 import com.itmentorcommunityplatform.profileservice.docs.SetAchievementVisibility;
+import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
 import com.itmentorcommunityplatform.profileservice.dto.AchievementDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.AchievementsVisibleRequestDto;
 import com.itmentorcommunityplatform.profileservice.service.AchievementService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,12 +34,11 @@ public class AchievementController {
     public ResponseEntity<AchievementDto> setAchievementVisibility(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId,
             @RequestBody AchievementsVisibleRequestDto visible,
-            @PathVariable String type
+            @PathVariable AchievementType type
     ) {
 
-        AchievementDto achievementDto = achievementService
-                .setAchievementPublicity(telegramUserId, visible, type);
+        var achievementDto = achievementService.setAchievementPublicity(telegramUserId, visible, type);
 
-        return ResponseEntity.status(HttpStatus.OK).body(achievementDto);
+        return ResponseEntity.ok(achievementDto);
     }
 }
