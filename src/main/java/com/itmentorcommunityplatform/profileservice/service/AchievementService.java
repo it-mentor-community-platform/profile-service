@@ -8,12 +8,14 @@ import com.itmentorcommunityplatform.profileservice.domain.achievement.Achieveme
 import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
 import com.itmentorcommunityplatform.profileservice.dto.AchievementDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
+import com.itmentorcommunityplatform.profileservice.dto.request.AchievementsVisibleRequestDto;
 import com.itmentorcommunityplatform.profileservice.repository.AchievementRepository;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,10 +31,10 @@ import java.util.stream.Collectors;
 public class AchievementService {
 
     private final AchievementRepository achievementRepository;
-    private final ProfileRepository profileRepository;
     private final AchievementStrategyRegistry registry;
     private final ProfileService profileService;
     private final TransactionTemplate transactionTemplate;
+    private final ProfileRepository profileRepository;
     private final AchievementConfig achievementConfig;
 
     public void recheckAndAwardAchievements(ProjectCreatedEvent event) {
@@ -70,8 +72,31 @@ public class AchievementService {
             profileAchievements.putIfAbsent(type, achievementDto);
         });
 
-
         return new ArrayList<>(profileAchievements.values());
+    }
+
+    @Transactional
+    public AchievementDto setAchievementPublicity(Long telegramUserId,
+                                                  AchievementsVisibleRequestDto visibility,
+                                                  AchievementType type) {
+
+        Profile profile = profileService.getProfileByTelegramIdOrThrow(telegramUserId);
+
+        Long profileId = profile.getId();
+
+        Achievement achievement = getAchievementOrThrow(profileId, type);
+        achievement.setPubliclyVisible(visibility.publiclyVisible());
+
+        Achievement savedAchievement = achievementRepository.save(achievement);
+
+        String description = achievementConfig.getAchievements().get(type);
+
+        return new AchievementDto(
+                savedAchievement.getAchievementType(),
+                savedAchievement.getEarnedTimestamp(),
+                description,
+                savedAchievement.isPubliclyVisible()
+        );
     }
 
     private void awardAchievement(ProjectCreatedEvent event, AchievementType achievementType, Profile profile) {
@@ -92,10 +117,19 @@ public class AchievementService {
         achievementRepository.save(achievement);
         log.info("User (profileId: {}({})), earned achievement: {}",
                 profile.getId(), event.getAuthorTelegramUserId(), achievementType);
-
     }
 
-    private boolean alreadyHasAchievement(Long profileId, AchievementType type) {
-        return achievementRepository.existsByProfileIdAndAchievementType(profileId, type);
+    private Achievement getAchievementOrThrow(Long profileId, AchievementType type) {
+        return achievementRepository
+                .findByProfileIdAndAchievementType(profileId, type)
+                .orElseThrow(() -> {
+                    log.warn("User (profileId): {} tried to access achievement {} which they don't own", profileId, type);
+                    return new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "User (profileId) %d does not own the achievement %s".formatted(profileId, type));
+                });
+    }
+
+    private boolean alreadyHasAchievement(Long profileId, AchievementType achievementType) {
+        return achievementRepository.existsByProfileIdAndAchievementType(profileId, achievementType);
     }
 }

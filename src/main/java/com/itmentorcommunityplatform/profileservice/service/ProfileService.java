@@ -257,6 +257,16 @@ public class ProfileService {
         return mapToProfileDetailDto(profile.getDetails(), achievements);
     }
 
+    @Transactional(readOnly = true)
+    public Profile getProfileByTelegramIdOrThrow(Long telegramUserId) {
+        return profileRepository.findByTelegramUserId(telegramUserId)
+                .orElseThrow(() -> {
+                    log.warn("Profile not found for telegramUserId: {}", telegramUserId);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "Profile with Telegram-User-Id %s does not exist".formatted(telegramUserId));
+                });
+    }
+
     private Map<String, String> getIdentityInfoIfPresent(UserCreatedEvent event) {
         Map<String, String> details = new HashMap<>();
 
