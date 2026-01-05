@@ -18,7 +18,7 @@ public class AuthUserCreatedConsumer {
     public void consumeUserCreatedEvent(UserCreatedEvent event) {
         log.info("Kafka Consumer: Received user created event: {}", event);
         try {
-            profileService.createProfile(event);
+            profileService.createOrUpdateProfile(event);
             log.info("Kafka Consumer: Successfully processed event for user {}", event.getTelegramUserId());
         } catch (Exception e) {
             log.error("Kafka Consumer: Error processing event for user {}", event.getTelegramUserId(), e);

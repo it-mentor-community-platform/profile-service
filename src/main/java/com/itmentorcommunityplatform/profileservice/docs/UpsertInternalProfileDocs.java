@@ -22,14 +22,16 @@ import java.lang.annotation.Target;
                 Create or update a user's profile details.
                 It is used by internal services.
                 Requires `telegram_user_id` and any set of details.
-
+                
                 ### Example request body
                 ```json
                 {
                   "telegram_user_id": 12345,
                   "details": {
                     "github_profile_url": "https://github.com/johndoe",
-                    "telegram_url": "https://t.me/johndoe"
+                    "telegram_url": "https://t.me/johndoe",
+                    "first_name": "Arc",
+                    "last_name": "Warden"
                   }
                 }
                 ```
@@ -46,7 +48,9 @@ import java.lang.annotation.Target;
                                           "telegram_user_id": 12345,
                                           "details": {
                                             "github_profile_url": "https://github.com/johndoe",
-                                            "telegram_url": "https://t.me/johndoe"
+                                            "telegram_url": "https://t.me/johndoe",
+                                            "first_name": "Arc",
+                                            "last_name": "Warden"
                                           }
                                         }
                                         """

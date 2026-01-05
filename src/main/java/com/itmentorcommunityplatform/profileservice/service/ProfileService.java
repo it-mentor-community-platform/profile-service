@@ -40,26 +40,43 @@ public class ProfileService {
     private final GithubProfileUrlValidator githubProfileUrlValidator;
 
     @Transactional
-    public void createProfile(UserCreatedEvent event) {
+    public void createOrUpdateProfile(UserCreatedEvent event) {
         if (event == null || event.getTelegramUserId() == null) {
             log.warn("Received empty event or null telegramUserId. Skipping.");
             return;
         }
+
         Long telegramUserId = event.getTelegramUserId();
         log.info("Attempting to create profile for telegramUserId: {}", telegramUserId);
 
-        if (profileRepository.findByTelegramUserId(telegramUserId).isPresent()) {
-            log.info("Profile for telegramUserId: {} already exists. Skipping creation.", telegramUserId);
-            return;
-        }
-        Profile newProfile = Profile.builder()
-                .id(null)
-                .telegramUserId(telegramUserId)
-                .details(new HashSet<>())
-                .build();
+        Map<String, String> maybeProfileInfo = getIdentityInfoIfPresent(event);
 
-        profileRepository.save(newProfile);
-        log.info("Successfully created profile with telegramUserId: {}", telegramUserId);
+        Optional<Profile> maybeProfile = profileRepository.findByTelegramUserId(telegramUserId);
+
+        if (maybeProfile.isPresent()) {
+            log.info("Profile for telegramUserId: {} exists. Updating details.", telegramUserId);
+            Profile existingProfile = maybeProfile.get();
+
+            Set<ProfileDetail> profileDetails = mergeProfileDetails(existingProfile.getDetails(), maybeProfileInfo);
+            existingProfile.setDetails(profileDetails);
+
+            profileRepository.save(existingProfile);
+        } else {
+            log.info("Creating new profile for telegramUserId: {}", telegramUserId);
+
+            Set<ProfileDetail> newProfileDetails = maybeProfileInfo.entrySet().stream()
+                    .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
+                    .collect(Collectors.toSet());
+
+            Profile newProfile = Profile.builder()
+                    .id(null)
+                    .telegramUserId(telegramUserId)
+                    .details(newProfileDetails)
+                    .build();
+
+            profileRepository.save(newProfile);
+            log.info("Successfully created profile with telegramUserId: {}", telegramUserId);
+        }
     }
 
     public ProfileDetailsResponseDto getCurrentUserProfile(Long telegramUserId) {
@@ -248,5 +265,17 @@ public class ProfileService {
                     return new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "Profile with Telegram-User-Id %s does not exist".formatted(telegramUserId));
                 });
+    }
+
+    private Map<String, String> getIdentityInfoIfPresent(UserCreatedEvent event) {
+        Map<String, String> details = new HashMap<>();
+
+        if (event.getFirstName() != null && !event.getFirstName().isBlank()) {
+            details.put(ProfileDetailType.FIRST_NAME.getDetailName(), event.getFirstName());
+        }
+        if (event.getLastName() != null && !event.getLastName().isBlank()) {
+            details.put(ProfileDetailType.LAST_NAME.getDetailName(), event.getLastName());
+        }
+        return details;
     }
 }

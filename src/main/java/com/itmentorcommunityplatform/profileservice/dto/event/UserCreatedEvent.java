@@ -14,4 +14,10 @@ public class UserCreatedEvent {
 
     @JsonProperty("telegram_user_id")
     private Long telegramUserId;
+
+    @JsonProperty("first_name")
+    private String firstName;
+
+    @JsonProperty("last_name")
+    private String lastName;
 }
