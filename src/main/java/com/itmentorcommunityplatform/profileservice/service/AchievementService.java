@@ -117,7 +117,6 @@ public class AchievementService {
         achievementRepository.save(achievement);
         log.info("User (profileId: {}({})), earned achievement: {}",
                 profile.getId(), event.getAuthorTelegramUserId(), achievementType);
-
     }
 
     private Achievement getAchievementOrThrow(Long profileId, AchievementType type) {
@@ -131,11 +130,6 @@ public class AchievementService {
     }
 
     private boolean alreadyHasAchievement(Long profileId, AchievementType achievementType) {
-        if (achievementRepository.existsByProfileIdAndAchievementType(profileId, achievementType)) {
-            log.info("User (profileId: {}) already owns achievement of type: {}",
-                    profileId, achievementType);
-            return true;
-        }
-        return false;
+        return achievementRepository.existsByProfileIdAndAchievementType(profileId, achievementType);
     }
 }
