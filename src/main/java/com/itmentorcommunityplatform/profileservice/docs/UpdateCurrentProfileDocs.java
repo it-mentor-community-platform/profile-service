@@ -1,7 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.docs;
 
 
-
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,12 +23,14 @@ import java.lang.annotation.Target;
         description = """
                 Update current user's profile.
                 Requires header `X-Telegram-User-Id`.
-
+                
                 ### Example request body
                 ```json
                 {
                   "github_profile_url": "https://github.com/johndoe",
-                  "telegram_url": "https://t.me/johndoe"
+                  "telegram_url": "https://t.me/johndoe",
+                  "first_name": "Arc",
+                  "last_name": "Warden"
                 }
                 ```
                 """,
@@ -43,7 +44,9 @@ import java.lang.annotation.Target;
                                 value = """
                                         {
                                           "github_profile_url": "https://github.com/johndoe",
-                                          "telegram_url": "https://t.me/johndoe"
+                                          "telegram_url": "https://t.me/johndoe",
+                                          "first_name": "Arc",
+                                          "last_name": "Warden"
                                         }
                                         """
                         )

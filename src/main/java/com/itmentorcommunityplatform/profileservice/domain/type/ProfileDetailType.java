@@ -24,7 +24,11 @@ public enum ProfileDetailType {
 
     GITHUB_PROFILE_URL("github_profile_url"),
 
-    TELEGRAM_URL("telegram_url");
+    TELEGRAM_URL("telegram_url"),
+
+    FIRST_NAME("first_name"),
+
+    LAST_NAME("last_name");
 
     private final String detailName;
 
