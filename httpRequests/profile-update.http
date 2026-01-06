@@ -25,7 +25,6 @@ X-Telegram-Username: trafer
 
 ###
 
-
 ///400 - No parameters found to update
 ###
 PATCH http://localhost:8083/api/profile
