@@ -28,9 +28,8 @@ import java.lang.annotation.Target;
                 ```json
                 {
                   "github_profile_url": "https://github.com/johndoe",
-                  "telegram_url": "https://t.me/johndoe",
-                  "first_name": "Arc",
-                  "last_name": "Warden"
+                  "first_name": "Dmitry",
+                  "last_name": "OxErr"
                 }
                 ```
                 """,
@@ -44,9 +43,8 @@ import java.lang.annotation.Target;
                                 value = """
                                         {
                                           "github_profile_url": "https://github.com/johndoe",
-                                          "telegram_url": "https://t.me/johndoe",
-                                          "first_name": "Arc",
-                                          "last_name": "Warden"
+                                          "first_name": "Dmitry",
+                                          "last_name": "OxErr"
                                         }
                                         """
                         )
@@ -56,15 +54,28 @@ import java.lang.annotation.Target;
 @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
-                description = "Profile updated successfully",
+                description = "Profile updated successfully. Returns full profile state.",
                 content = @Content(schema = @Schema(implementation = ProfileDetailsResponseDto.class))
         ),
         @ApiResponse(
                 responseCode = "400",
-                description = "Invalid request",
-                content = @Content(schema = @Schema(
-                        example = "{\"message\":\"Bad request\"}"
-                ))
+                description = "Validation error (invalid fields, incorrect GitHub URL format, or empty body)",
+                content = @Content(schema = @Schema(example = "{\"message\":\"Invalid request or validation failed\"}"))
+        ),
+        @ApiResponse(
+                responseCode = "403",
+                description = "Attempt to modify protected field 'telegram_url'",
+                content = @Content(schema = @Schema(example = "{\"message\":\"Modifying 'telegram_url' is not allowed\"}"))
+        ),
+        @ApiResponse(
+                responseCode = "404",
+                description = "Profile for the current user does not exist",
+                content = @Content(schema = @Schema(example = "{\"message\":\"Profile not found\"}"))
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Unknown internal server error",
+                content = @Content(schema = @Schema(example = "{\"message\":\"An unexpected error occurred\"}"))
         )
 })
 public @interface UpdateCurrentProfileDocs {

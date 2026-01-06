@@ -2,11 +2,12 @@
 ###
 PATCH http://localhost:8083/api/profile
 Content-Type: application/json
-X-Telegram-User-Id: 10001
+X-Telegram-User-Id: 39671982
 
 {
-  "github_profile_url": "https://github.com/zhukovaasfssd",
-  "telegram_url": "https://t.me/zhokovsd"
+  "github_profile_url": "https://github.com/JollykaiTEST1",
+  "first_name": "Dmitry",
+  "last_name": "OxErr"
 }
 ###
 
@@ -41,6 +42,28 @@ X-Telegram-User-Id: 10001
 {
   "github_profile_url": "htt://github.com/zhukovaasfssd",
   "telegram_url": "https://t.me/zhokovsd"
+}
+###
+
+///403 - попытка изменить "telegram_url"
+###
+PATCH http://localhost:8083/api/profile
+Content-Type: application/json
+X-Telegram-User-Id: 39671982
+
+{
+  "telegram_url": "https://t.me/zhukovaasfssd"
+}
+###
+
+///404 - профиль текущего пользователя не существует
+###
+PATCH http://localhost:8083/api/profile
+Content-Type: application/json
+X-Telegram-User-Id: 1
+
+{
+  "telegram_url": "https://t.me/zhukovaasfssd"
 }
 ###
 
