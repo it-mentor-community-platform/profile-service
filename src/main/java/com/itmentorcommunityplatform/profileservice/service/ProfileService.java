@@ -20,7 +20,6 @@ import com.itmentorcommunityplatform.profileservice.validator.registry.ProfileDe
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -39,6 +38,7 @@ public class ProfileService {
     private final BaseProfileDetailValidator baseDetailValidator;
     private final ProfileDetailValidatorRegistry detailValidatorRegistry;
     private final GithubProfileUrlValidator githubProfileUrlValidator;
+
 
     @Transactional
     public void createProfile(UserCreatedEvent event) {
@@ -82,11 +82,13 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileDetailsResponseDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto) {
+    public ProfileDetailsResponseDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto, String telegramUsername) {
         return profileMetrics.getGetProfileTimer().record(() -> {
             try {
                 Map<String, String> newDetailsMap = dto.getDetails();
                 validateDetails(newDetailsMap);
+
+                newDetailsMap.put("telegram_url", "https://t.me/"+telegramUsername);
 
                 Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));

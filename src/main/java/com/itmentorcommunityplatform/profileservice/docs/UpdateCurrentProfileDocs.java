@@ -28,8 +28,7 @@ import java.lang.annotation.Target;
                 ### Example request body
                 ```json
                 {
-                  "github_profile_url": "https://github.com/johndoe",
-                  "telegram_url": "https://t.me/johndoe"
+                  "github_profile_url": "https://github.com/johndoe"
                 }
                 ```
                 """,
@@ -42,8 +41,7 @@ import java.lang.annotation.Target;
                                 name = "Profile update example",
                                 value = """
                                         {
-                                          "github_profile_url": "https://github.com/johndoe",
-                                          "telegram_url": "https://t.me/johndoe"
+                                          "github_profile_url": "https://github.com/johndoe"
                                         }
                                         """
                         )
@@ -53,7 +51,7 @@ import java.lang.annotation.Target;
 @ApiResponses({
         @ApiResponse(
                 responseCode = "200",
-                description = "Profile updated successfully",
+                description = "successful update of the user's telegram name and github profile",
                 content = @Content(schema = @Schema(implementation = ProfileDetailsResponseDto.class))
         ),
         @ApiResponse(
@@ -61,6 +59,13 @@ import java.lang.annotation.Target;
                 description = "Invalid request",
                 content = @Content(schema = @Schema(
                         example = "{\"message\":\"Bad request\"}"
+                ))
+        ),
+        @ApiResponse(
+                responseCode = "403",
+                description = "invalid telegram_url field in the body",
+                content = @Content(schema = @Schema(
+                        example = "{\n" + "  \"message\": \"invalid telegram_url field in the body\"\n" + "}"
                 ))
         )
 })
