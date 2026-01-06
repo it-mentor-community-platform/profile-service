@@ -5,6 +5,7 @@ import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AchievementRepository extends CrudRepository<Achievement, Long> {
 
@@ -13,4 +14,6 @@ public interface AchievementRepository extends CrudRepository<Achievement, Long>
     List<Achievement> findAchievemetsByProfileId(Long id);
 
     List<Achievement> findAllByProfileIdAndPubliclyVisibleTrue(Long profileId);
+
+    Optional<Achievement> findByProfileIdAndAchievementType(Long profileId, AchievementType achievementType);
 }

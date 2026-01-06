@@ -28,7 +28,8 @@ import java.lang.annotation.Target;
                 ### Example request body
                 ```json
                 {
-                  "github_profile_url": "https://github.com/johndoe"
+                  "github_profile_url": "https://github.com/johndoe",
+                  "telegram_url": "https://t.me/johndoe"
                 }
                 ```
                 """,
@@ -41,7 +42,8 @@ import java.lang.annotation.Target;
                                 name = "Profile update example",
                                 value = """
                                         {
-                                          "github_profile_url": "https://github.com/johndoe"
+                                          "github_profile_url": "https://github.com/johndoe",
+                                          "telegram_url": "https://t.me/johndoe"
                                         }
                                         """
                         )
