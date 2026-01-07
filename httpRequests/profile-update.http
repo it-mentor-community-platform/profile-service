@@ -16,6 +16,7 @@ X-Telegram-User-Id: 39671982
 PATCH http://localhost:8083/api/profile
 Content-Type: application/json
 X-Telegram-User-Id: 10001
+X-Telegram-Username: zukov
 
 {
   "github_profile_url": "https://github.com/zhukovaasfssd"
@@ -50,6 +51,7 @@ X-Telegram-User-Id: 10001
 PATCH http://localhost:8083/api/profile
 Content-Type: application/json
 X-Telegram-User-Id: 39671982
+X-Telegram-Username: zukov
 
 {
   "telegram_url": "https://t.me/zhukovaasfssd"
