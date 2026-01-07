@@ -39,6 +39,7 @@ public class ProfileService {
     private final ProfileDetailValidatorRegistry detailValidatorRegistry;
     private final GithubProfileUrlValidator githubProfileUrlValidator;
 
+
     @Transactional
     public void createOrUpdateProfile(UserCreatedEvent event) {
         if (event == null || event.getTelegramUserId() == null) {
@@ -98,17 +99,15 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileDetailsResponseDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto) {
+    public ProfileDetailsResponseDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto, String telegramUsername) {
         return profileMetrics.getGetProfileTimer().record(() -> {
             try {
                 Map<String, String> newDetailsMap = dto.getDetails();
-
-                if (newDetailsMap.containsKey("telegram_url")) {
-                    log.error("Attempt to modify protected field 'telegram_url'");
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Modifying 'telegram_url' is not allowed");
-                }
-
                 validateDetails(newDetailsMap);
+
+                if (telegramUsername!=null && !telegramUsername.isBlank()) {
+                    newDetailsMap.put("telegram_url", "https://t.me/"+telegramUsername);
+                }
 
                 Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
