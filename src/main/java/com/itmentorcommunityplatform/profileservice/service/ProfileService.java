@@ -103,6 +103,12 @@ public class ProfileService {
         return profileMetrics.getGetProfileTimer().record(() -> {
             try {
                 Map<String, String> newDetailsMap = dto.getDetails();
+
+                if (newDetailsMap.containsKey("telegram_url")) {
+                    log.error("Attempt to modify protected field 'telegram_url'");
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Modifying 'telegram_url' is not allowed");
+                }
+
                 validateDetails(newDetailsMap);
 
                 newDetailsMap.put("telegram_url", "https://t.me/"+telegramUsername);

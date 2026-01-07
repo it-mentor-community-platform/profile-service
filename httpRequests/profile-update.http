@@ -1,28 +1,25 @@
-///403 - invalid telegram_url field in the body
+///200 Успешное обновление профилей пользователя
 ###
 PATCH http://localhost:8083/api/profile
 Content-Type: application/json
-X-Telegram-User-Id: 10001
-X-Telegram-Username: zhoko
+X-Telegram-User-Id: 39671982
 
 {
-  "github_profile_url": "https://github.com/zhukovaasfssd",
-  "telegram_url": "https://t.me/zhoko"
+  "github_profile_url": "https://github.com/JollykaiTEST1",
+  "first_name": "Dmitry",
+  "last_name": "OxErr"
 }
-
 ###
 
-///200 - successful update of the user's telegram name and github profile
+///200 -  Успешное обновление github пользователя
 ###
 PATCH http://localhost:8083/api/profile
 Content-Type: application/json
 X-Telegram-User-Id: 10001
-X-Telegram-Username: trafer
 
 {
   "github_profile_url": "https://github.com/zhukovaasfssd"
 }
-
 ###
 
 ///400 - No parameters found to update
@@ -30,7 +27,6 @@ X-Telegram-Username: trafer
 PATCH http://localhost:8083/api/profile
 Content-Type: application/json
 X-Telegram-User-Id: 10001
-X-Telegram-Username: trafere
 
 {
 
@@ -42,10 +38,32 @@ X-Telegram-Username: trafere
 PATCH http://localhost:8083/api/profile
 Content-Type: application/json
 X-Telegram-User-Id: 10001
-X-Telegram-Username: trafere
 
 {
-  "github_profile_url": "htt://github.com/zhukovaasfssd"
+  "github_profile_url": "htt://github.com/zhukovaasfssd",
+  "telegram_url": "https://t.me/zhokovsd"
+}
+###
+
+///403 - попытка изменить "telegram_url"
+###
+PATCH http://localhost:8083/api/profile
+Content-Type: application/json
+X-Telegram-User-Id: 39671982
+
+{
+  "telegram_url": "https://t.me/zhukovaasfssd"
+}
+###
+
+///404 - профиль текущего пользователя не существует
+###
+PATCH http://localhost:8083/api/profile
+Content-Type: application/json
+X-Telegram-User-Id: 1
+
+{
+  "telegram_url": "https://t.me/zhukovaasfssd"
 }
 ###
 

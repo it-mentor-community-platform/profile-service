@@ -13,7 +13,8 @@ import java.util.Map;
         example = """
         {
           "github_profile_url": "https://github.com/johndoe",
-          "telegram_url": "https://t.me/johndoe"
+          "first_name": "Dmitry",
+          "last_name": "OxErr"
         }
         """
 )
