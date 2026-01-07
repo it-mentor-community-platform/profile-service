@@ -2,24 +2,12 @@
 ###
 PATCH http://localhost:8083/api/profile
 Content-Type: application/json
-X-Telegram-User-Id: 39671982
+X-Telegram-User-Id: 10001
 
 {
   "github_profile_url": "https://github.com/JollykaiTEST1",
   "first_name": "Dmitry",
   "last_name": "OxErr"
-}
-###
-
-///200 -  Успешное обновление github пользователя
-###
-PATCH http://localhost:8083/api/profile
-Content-Type: application/json
-X-Telegram-User-Id: 10001
-X-Telegram-Username: zukov
-
-{
-  "github_profile_url": "https://github.com/zhukovaasfssd"
 }
 ###
 
@@ -41,8 +29,7 @@ Content-Type: application/json
 X-Telegram-User-Id: 10001
 
 {
-  "github_profile_url": "htt://github.com/zhukovaasfssd",
-  "telegram_url": "https://t.me/zhokovsd"
+  "github_profile_url": "htt://github.com/zhukovaasfssd"
 }
 ###
 
@@ -50,8 +37,7 @@ X-Telegram-User-Id: 10001
 ###
 PATCH http://localhost:8083/api/profile
 Content-Type: application/json
-X-Telegram-User-Id: 39671982
-X-Telegram-Username: zukov
+X-Telegram-User-Id: 10001
 
 {
   "telegram_url": "https://t.me/zhukovaasfssd"
@@ -65,7 +51,7 @@ Content-Type: application/json
 X-Telegram-User-Id: 1
 
 {
-  "telegram_url": "https://t.me/zhukovaasfssd"
+  "github_profile_url": "https://github.com/JollykaiTEST1"
 }
 ###
 

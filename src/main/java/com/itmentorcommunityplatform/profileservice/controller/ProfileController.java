@@ -13,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.swing.text.html.Option;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/profile")
 @RequiredArgsConstructor
@@ -33,13 +36,15 @@ public class ProfileController {
     @UpdateCurrentProfileDocs
     public ResponseEntity<ProfileDetailsResponseDto> updateCurrentProfile(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId,
-            @RequestHeader("X-Telegram-Username") String telegramUsername,
+            @RequestHeader("X-Telegram-Username") Optional<String> telegramUsername,
             @RequestBody ProfileUpdateRequestDto dto) {
 
 
-        if (dto.getDetails().containsKey("telegram_url")) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid telegram_url field in the body");
+        if (dto.getDetails()!=null && dto.getDetails().containsKey("telegram_url")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid telegram_url field in the body");
+        }
 
-        var response = profileService.updateCurrentProfile(telegramUserId, dto, telegramUsername);
+        var response = profileService.updateCurrentProfile(telegramUserId, dto, telegramUsername.orElse(null));
         return ResponseEntity.ok(response);
     }
 
