@@ -2,6 +2,7 @@ package com.itmentorcommunityplatform.profileservice.consumer;
 
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.service.AchievementService;
+import com.itmentorcommunityplatform.profileservice.service.ProfileDetailService;
 import com.itmentorcommunityplatform.profileservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ public class ProjectCreatedConsumer {
 
     private final ProjectService projectService;
     private final AchievementService achievementService;
+    private final ProfileDetailService profileDetailService;
 
     @KafkaListener(topics = "projects.project.created", groupId = "profile-service-cg")
     public void consumeProjectCreatedEvent(ProjectCreatedEvent event) {
@@ -30,6 +32,7 @@ public class ProjectCreatedConsumer {
                 event.getAddedTimestamp(), event.getProjectSourceType());
 
         try {
+            profileDetailService.upsertGithubProfileUrl(event.getAuthorTelegramUserId(), event.getGithubRepositoryUrl());
             projectService.createdProject(event);
             achievementService.recheckAndAwardAchievements(event);
             log.info("Kafka Consumer: Successfully processed event for user {}", event.getAuthorTelegramUserId());

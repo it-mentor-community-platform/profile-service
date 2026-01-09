@@ -38,6 +38,7 @@ public class ProfileService {
     private final BaseProfileDetailValidator baseDetailValidator;
     private final ProfileDetailValidatorRegistry detailValidatorRegistry;
     private final GithubProfileUrlValidator githubProfileUrlValidator;
+    private final ProfileDetailMerger profileDetailMerger;
 
 
     @Transactional
@@ -58,7 +59,7 @@ public class ProfileService {
             log.info("Profile for telegramUserId: {} exists. Updating details.", telegramUserId);
             Profile existingProfile = maybeProfile.get();
 
-            Set<ProfileDetail> profileDetails = mergeProfileDetails(existingProfile.getDetails(), maybeProfileInfo);
+            Set<ProfileDetail> profileDetails = profileDetailMerger.mergeProfileDetails(existingProfile.getDetails(), maybeProfileInfo);
             existingProfile.setDetails(profileDetails);
 
             profileRepository.save(existingProfile);
@@ -114,7 +115,7 @@ public class ProfileService {
 
                 List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
 
-                Set<ProfileDetail> mergedDetails = mergeProfileDetails(profile.getDetails(), newDetailsMap);
+                Set<ProfileDetail> mergedDetails = profileDetailMerger.mergeProfileDetails(profile.getDetails(), newDetailsMap);
                 profile.setDetails(mergedDetails);
 
                 profileRepository.save(profile);
@@ -162,7 +163,7 @@ public class ProfileService {
 
         Set<ProfileDetail> existingDetails = foundProfile.map(Profile::getDetails).orElse(Collections.emptySet());
 
-        Set<ProfileDetail> mergedDetails = mergeProfileDetails(existingDetails, newDetailsMap);
+        Set<ProfileDetail> mergedDetails = profileDetailMerger.mergeProfileDetails(existingDetails, newDetailsMap);
 
         Profile profile = Profile.builder()
                 .id(foundProfile.map(Profile::getId).orElse(null))
@@ -175,21 +176,6 @@ public class ProfileService {
         return isNewProfile;
     }
 
-    private static Set<ProfileDetail> mergeProfileDetails(
-            Set<ProfileDetail> existingDetails,
-            Map<String, String> newDetailsMap
-    ) {
-        Map<String, String> mergedMap = new HashMap<>();
-
-        existingDetails.forEach(detail ->
-                mergedMap.put(detail.getDetailName(), detail.getDetailValue()));
-
-        mergedMap.putAll(newDetailsMap);
-
-        return mergedMap.entrySet().stream()
-                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
-    }
 
     private void validateDetails(Map<String, String> details) {
         if (details == null || details.isEmpty()) {
