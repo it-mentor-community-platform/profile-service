@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Service
@@ -20,28 +19,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ProfileDetailService {
 
     private final ProfileRepository profileRepository;
-    private final ProfileDetailMerger profileDetailMerger;
 
     public void upsertGithubProfileUrl(Long telegramUserId, String githubUrl) {
-        Profile profile = profileRepository.findByTelegramUserId(telegramUserId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
+        Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
         Set<ProfileDetail> profileDetails = profile.getDetails();
-        Map<String, String> newDetailsMap = new HashMap<>();
 
-        AtomicBoolean githubAlreadyExists = new AtomicBoolean(true);
+        boolean githubAlreadyUpToDate = profileDetails.stream()
+                .map(ProfileDetail::getDetailName)
+                .anyMatch(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName()::equals);
 
-        profileDetails.forEach(profileDetail -> {
-            if (profileDetail.getDetailName().equals(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName())){
-                githubAlreadyExists.set(false);
-            }
-        });
-
-        if (!githubAlreadyExists.get()){
-            log.info("Github profile already exists");
+        if (githubAlreadyUpToDate) {
+            log.info("Github profile for profile with telegramId #{}, already exists", telegramUserId);
             return;
         }
 
-        newDetailsMap.put(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(), githubUrl);
-        profile.setDetails(profileDetailMerger.mergeProfileDetails(profile.getDetails(), newDetailsMap));
+        profileDetails.add(new ProfileDetail(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(), githubUrl));
+        profile.setDetails(profileDetails);
         profileRepository.save(profile);
         log.info("Github profile saved");
 
