@@ -34,7 +34,9 @@ public class ProfileDetailService {
             return;
         }
 
-        profileDetails.add(new ProfileDetail(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(), githubUrl));
+        profileDetails.add(new ProfileDetail(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(), githubUrl.replaceFirst("/+$", "")
+                .replaceFirst("/[^/]+$", "")));
+
         profile.setDetails(profileDetails);
         profileRepository.save(profile);
         log.info("Github profile saved");
