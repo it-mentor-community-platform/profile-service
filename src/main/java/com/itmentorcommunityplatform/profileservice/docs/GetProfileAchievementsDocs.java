@@ -19,7 +19,6 @@ import java.lang.annotation.Target;
 @Operation(
         summary = "Get all achievements profile",
         description = "Returns all achievements that a profile may have"
-
 )
 @ApiResponses({
         @ApiResponse(
@@ -74,6 +73,5 @@ import java.lang.annotation.Target;
         )
 }
 )
-
-public @interface GetProfileAchievements {
+public @interface GetProfileAchievementsDocs {
 }

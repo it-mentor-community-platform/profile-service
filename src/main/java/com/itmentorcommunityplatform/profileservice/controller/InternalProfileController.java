@@ -1,6 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.controller;
 
-import com.itmentorcommunityplatform.profileservice.docs.GetProfileByGithubUrl;
+import com.itmentorcommunityplatform.profileservice.docs.GetProfileByGithubUrlDocs;
 import com.itmentorcommunityplatform.profileservice.docs.UpsertInternalProfileDocs;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
@@ -28,7 +28,7 @@ public class InternalProfileController {
     }
 
     @GetMapping("/profile/by-github-profile-url")
-    @GetProfileByGithubUrl
+    @GetProfileByGithubUrlDocs
     public ResponseEntity<ProfileResponseDto> getProfileByGitHubUrl(
             @RequestParam("url") String gitHubUrl) {
 

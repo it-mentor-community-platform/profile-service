@@ -1,5 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.controller;
 
+import com.itmentorcommunityplatform.profileservice.docs.GetAllProfilesDocs;
 import com.itmentorcommunityplatform.profileservice.docs.GetCurrentProfileDocs;
 import com.itmentorcommunityplatform.profileservice.docs.GetUserProfileByIdDocs;
 import com.itmentorcommunityplatform.profileservice.docs.UpdateCurrentProfileDocs;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -58,9 +60,16 @@ public class ProfileController {
     }
 
     @GetMapping("/admin/profiles")
+    @GetAllProfilesDocs
     public ResponseEntity<AllProfilesPaginatedDto> getAllProfiles(@RequestParam("page_size") @Min(1) int pageSize,
-                                            @RequestParam("page_number") @Min(1) int pageNumber,
-                                            @RequestParam() Map<String, String> detailFilters) {
+                                                                  @RequestParam("page_number") @Min(1) int pageNumber,
+                                                                  @RequestParam(required = false) Map<String, String> detailFilters,
+                                                                  @RequestHeader(value = "X-User-Roles") List<String> roles) {
+
+
+        if (roles == null || roles.stream().noneMatch(r -> r.equalsIgnoreCase("ADMIN"))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied: missing ADMIN role in X-User-Roles header");
+        }
 
         detailFilters.remove("page_size");
         detailFilters.remove("page_number");

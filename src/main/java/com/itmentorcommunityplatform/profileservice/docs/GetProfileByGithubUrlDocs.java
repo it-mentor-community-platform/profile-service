@@ -34,5 +34,5 @@ import java.lang.annotation.Target;
                 ))
 }
 )
-public @interface GetProfileByGithubUrl {
+public @interface GetProfileByGithubUrlDocs {
 }
