@@ -3,17 +3,18 @@ package com.itmentorcommunityplatform.profileservice.controller;
 import com.itmentorcommunityplatform.profileservice.docs.GetCurrentProfileDocs;
 import com.itmentorcommunityplatform.profileservice.docs.GetUserProfileByIdDocs;
 import com.itmentorcommunityplatform.profileservice.docs.UpdateCurrentProfileDocs;
+import com.itmentorcommunityplatform.profileservice.dto.AllProfilesPaginatedDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.ProfileResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.swing.text.html.Option;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -40,7 +41,7 @@ public class ProfileController {
             @RequestBody ProfileUpdateRequestDto dto) {
 
 
-        if (dto.getDetails()!=null && dto.getDetails().containsKey("telegram_url")) {
+        if (dto.getDetails() != null && dto.getDetails().containsKey("telegram_url")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid telegram_url field in the body");
         }
 
@@ -54,5 +55,18 @@ public class ProfileController {
         ProfileDetailsResponseDto userProfile = profileService.getUserProfile(profileId);
 
         return ResponseEntity.ok(userProfile);
+    }
+
+    @GetMapping("/admin/profiles")
+    public ResponseEntity<AllProfilesPaginatedDto> getAllProfiles(@RequestParam("page_size") @Min(1) int pageSize,
+                                            @RequestParam("page_number") @Min(1) int pageNumber,
+                                            @RequestParam() Map<String, String> detailFilters) {
+
+        detailFilters.remove("page_size");
+        detailFilters.remove("page_number");
+
+        AllProfilesPaginatedDto allProfiles = profileService.getAllProfiles(pageSize, pageNumber, detailFilters);
+
+        return ResponseEntity.ok(allProfiles);
     }
 }

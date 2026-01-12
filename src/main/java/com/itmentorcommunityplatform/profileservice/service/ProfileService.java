@@ -4,6 +4,7 @@ import com.itmentorcommunityplatform.profileservice.domain.Achievement;
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
+import com.itmentorcommunityplatform.profileservice.dto.AllProfilesPaginatedDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileAchievementsDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.ProfileResponseDto;
@@ -105,8 +106,8 @@ public class ProfileService {
                 Map<String, String> newDetailsMap = dto.getDetails();
                 validateDetails(newDetailsMap);
 
-                if (telegramUsername!=null && !telegramUsername.isBlank()) {
-                    newDetailsMap.put("telegram_url", "https://t.me/"+telegramUsername);
+                if (telegramUsername != null && !telegramUsername.isBlank()) {
+                    newDetailsMap.put("telegram_url", "https://t.me/" + telegramUsername);
                 }
 
                 Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
@@ -282,5 +283,54 @@ public class ProfileService {
             details.put(ProfileDetailType.LAST_NAME.getDetailName(), event.getLastName());
         }
         return details;
+    }
+
+    public AllProfilesPaginatedDto getAllProfiles(Integer pageSize, Integer pageNumber, Map<String, String> detailFilters) {
+
+        List<Profile> allProfilesPaginated;
+        Long allProfilesCount;
+        int totalPageCount;
+
+        int offset = (pageNumber - 1) * pageSize;
+
+        if (detailFilters == null || detailFilters.isEmpty()) {
+            allProfilesPaginated = profileRepository.findAllProfilesPaginated(pageSize, offset);
+
+            allProfilesCount = profileRepository.countAllProfiles();
+
+        } else {
+
+            validateDetails(detailFilters);
+
+            List<String[]> detailFiltersList = detailFilters.entrySet()
+                    .stream().map(e -> new String[]{e.getKey().toLowerCase(), e.getValue().toLowerCase()})
+                    .toList();
+
+            allProfilesPaginated = profileRepository.findByDetailsFiltered(detailFiltersList,
+                    detailFiltersList.size(),
+                    pageSize,
+                    offset);
+
+            allProfilesCount = profileRepository.countFiltered(detailFiltersList, detailFiltersList.size());
+
+        }
+
+        totalPageCount = Math.max((int) Math.ceil((double) allProfilesCount / pageSize), 1);
+
+        if (pageNumber > totalPageCount) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page number is greater than total page count");
+        }
+
+        List<ProfileResponseDto> list = allProfilesPaginated.stream()
+                .map(profile -> new ProfileResponseDto(
+                        profile.getTelegramUserId(),
+                        mapToProfileDetailDto(
+                                profile.getDetails(),
+                                achievementRepository.findAchievemetsByProfileId(profile.getId()
+                                ))
+                ))
+                .toList();
+
+        return new AllProfilesPaginatedDto(allProfilesCount, totalPageCount, allProfilesPaginated.size(), pageNumber, list);
     }
 }
