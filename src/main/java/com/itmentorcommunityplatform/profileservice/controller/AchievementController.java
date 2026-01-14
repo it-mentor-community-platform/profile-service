@@ -1,11 +1,11 @@
 package com.itmentorcommunityplatform.profileservice.controller;
 
 
-import com.itmentorcommunityplatform.profileservice.docs.GetProfileAchievements;
-import com.itmentorcommunityplatform.profileservice.docs.SetAchievementVisibility;
+import com.itmentorcommunityplatform.profileservice.docs.GetProfileAchievementsDocs;
+import com.itmentorcommunityplatform.profileservice.docs.SetAchievementVisibilityDocs;
 import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
-import com.itmentorcommunityplatform.profileservice.dto.AchievementDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.AchievementsVisibleRequestDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.AchievementResponseDto;
 import com.itmentorcommunityplatform.profileservice.service.AchievementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +21,8 @@ public class AchievementController {
     private final AchievementService achievementService;
 
     @GetMapping("/achievements")
-    @GetProfileAchievements
-    public ResponseEntity<List<AchievementDto>> getProfileAchievements(
+    @GetProfileAchievementsDocs
+    public ResponseEntity<List<AchievementResponseDto>> getProfileAchievements(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId) {
 
         var allProfileAchievements = achievementService.getProfileAchievements(telegramUserId);
@@ -30,8 +30,8 @@ public class AchievementController {
     }
 
     @PatchMapping("/achievement/type/{type}")
-    @SetAchievementVisibility
-    public ResponseEntity<AchievementDto> setAchievementVisibility(
+    @SetAchievementVisibilityDocs
+    public ResponseEntity<AchievementResponseDto> setAchievementVisibility(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId,
             @RequestBody AchievementsVisibleRequestDto visible,
             @PathVariable AchievementType type

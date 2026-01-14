@@ -1,0 +1,26 @@
+### 1. Успешное получение списка профилей с пагинацией (200 OK)
+GET http://localhost:8083/api/profile/admin/profiles?page_number=1&page_size=10
+X-User-Roles: ADMIN
+
+### 2. Успешное получение списка профилей с 1 фильтром по колонке detail_name (200 OK)
+GET http://localhost:8083/api/profile/admin/profiles?page_number=1&page_size=10&first_name=Sergey
+X-User-Roles: ADMIN
+
+### 3. Успешное получение списка профилей с 2 фильтрами по колонке detail_name (200 OK)
+GET http://localhost:8083/api/profile/admin/profiles?page_number=1&page_size=10&first_name=Sergey&last_name=Zhukov
+X-User-Roles: ADMIN
+
+### 4. Невалидное значение параметра пагинации: индекс страницы начинается с 1 (400 Bad Request)
+GET http://localhost:8083/api/profile/admin/profiles?page_number=0&page_size=10
+X-User-Roles: ADMIN
+
+### 5. Невалидное значение параметра фильтрации: несуществующее поле профиля (400 Bad Request)
+GET http://localhost:8083/api/profile/admin/profiles?page_number=1&page_size=10&unknown_field=test
+X-User-Roles: ADMIN
+
+### 6. Невалидное значение параметра пагинации: запрашиваемый номер страницы больше, чем количество возможных (400 Bad Request)
+GET http://localhost:8083/api/profile/admin/profiles?page_number=99999&page_size=10
+X-User-Roles: ADMIN
+
+### 7. У пользователя отсутствует роль ADMIN (403 Forbidden)
+GET http://localhost:8083/api/profile/admin/profiles?page_number=10&page_size=1
