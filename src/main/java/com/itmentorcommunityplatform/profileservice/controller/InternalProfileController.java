@@ -2,8 +2,8 @@ package com.itmentorcommunityplatform.profileservice.controller;
 
 import com.itmentorcommunityplatform.profileservice.docs.GetProfileByGithubUrlDocs;
 import com.itmentorcommunityplatform.profileservice.docs.UpsertInternalProfileDocs;
-import com.itmentorcommunityplatform.profileservice.dto.ProfileResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ProfileResponseDto;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

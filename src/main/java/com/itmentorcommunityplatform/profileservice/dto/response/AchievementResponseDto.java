@@ -1,4 +1,4 @@
-package com.itmentorcommunityplatform.profileservice.dto;
+package com.itmentorcommunityplatform.profileservice.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
@@ -8,7 +8,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class AchievementDto
+public class AchievementResponseDto
 {
     AchievementType type;
 

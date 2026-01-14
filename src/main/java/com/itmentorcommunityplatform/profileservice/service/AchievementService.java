@@ -6,9 +6,9 @@ import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementCriteriaChecker;
 import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementStrategyRegistry;
 import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
-import com.itmentorcommunityplatform.profileservice.dto.AchievementDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.request.AchievementsVisibleRequestDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.AchievementResponseDto;
 import com.itmentorcommunityplatform.profileservice.repository.AchievementRepository;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +49,7 @@ public class AchievementService {
                 }));
     }
 
-    public List<AchievementDto> getProfileAchievements(Long telegramUserId) {
+    public List<AchievementResponseDto> getProfileAchievements(Long telegramUserId) {
 
         Map<AchievementType, String> achievementsDescriptions = achievementConfig.getAchievements();
 
@@ -57,28 +57,28 @@ public class AchievementService {
                 .map(Profile::getId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
 
-        Map<AchievementType, AchievementDto> profileAchievements = achievementRepository.findAchievemetsByProfileId(profileId)
+        Map<AchievementType, AchievementResponseDto> profileAchievements = achievementRepository.findAchievemetsByProfileId(profileId)
                 .stream()
-                .map(achievement -> new AchievementDto(
+                .map(achievement -> new AchievementResponseDto(
                         achievement.getAchievementType(),
                         achievement.getEarnedTimestamp(),
                         achievementsDescriptions.get(achievement.getAchievementType()),
                         achievement.isPubliclyVisible()
                 ))
-                .collect(Collectors.toMap(AchievementDto::getType, Function.identity()));
+                .collect(Collectors.toMap(AchievementResponseDto::getType, Function.identity()));
 
         achievementsDescriptions.forEach((type, name) -> {
-            AchievementDto achievementDto = new AchievementDto(type, 0L, name, true);
-            profileAchievements.putIfAbsent(type, achievementDto);
+            AchievementResponseDto achievementResponseDto = new AchievementResponseDto(type, 0L, name, true);
+            profileAchievements.putIfAbsent(type, achievementResponseDto);
         });
 
         return new ArrayList<>(profileAchievements.values());
     }
 
     @Transactional
-    public AchievementDto setAchievementPublicity(Long telegramUserId,
-                                                  AchievementsVisibleRequestDto visibility,
-                                                  AchievementType type) {
+    public AchievementResponseDto setAchievementPublicity(Long telegramUserId,
+                                                          AchievementsVisibleRequestDto visibility,
+                                                          AchievementType type) {
 
         Profile profile = profileService.getProfileByTelegramIdOrThrow(telegramUserId);
 
@@ -91,7 +91,7 @@ public class AchievementService {
 
         String description = achievementConfig.getAchievements().get(type);
 
-        return new AchievementDto(
+        return new AchievementResponseDto(
                 savedAchievement.getAchievementType(),
                 savedAchievement.getEarnedTimestamp(),
                 description,

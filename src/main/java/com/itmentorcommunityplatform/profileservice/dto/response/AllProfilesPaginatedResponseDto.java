@@ -1,7 +1,6 @@
-package com.itmentorcommunityplatform.profileservice.dto;
+package com.itmentorcommunityplatform.profileservice.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,7 +8,7 @@ import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
-public class AllProfilesPaginatedDto {
+public class AllProfilesPaginatedResponseDto {
 
     @JsonProperty("total_item_count")
     private final Long totalItemCount;

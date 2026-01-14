@@ -31,7 +31,7 @@ public interface ProfileRepository extends CrudRepository<Profile, Long> {
                 ORDER BY p.id
                 LIMIT :limit OFFSET :offset
             """)
-    List<Profile> findByDetailsFiltered(
+    List<Profile> findByDetails(
             @Param("pairs") List<String[]> pairs,
             @Param("filterCount") int filterCount,
             @Param("limit") int limit,
@@ -60,13 +60,9 @@ public interface ProfileRepository extends CrudRepository<Profile, Long> {
                 ORDER BY p.id
                 LIMIT :limit OFFSET :offset
             """)
-    List<Profile> findAllProfilesPaginated(
+    List<Profile> findAll(
             int limit,
             int offset
     );
 
-    @Query("""
-                SELECT count(*) FROM profiles
-            """)
-    Long countAllProfiles();
 }

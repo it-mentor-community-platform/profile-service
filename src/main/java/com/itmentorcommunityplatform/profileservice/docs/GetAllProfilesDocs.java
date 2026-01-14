@@ -1,6 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.docs;
 
-import com.itmentorcommunityplatform.profileservice.dto.AllProfilesPaginatedDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.AllProfilesPaginatedResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -59,7 +59,7 @@ import java.lang.annotation.Target;
                 description = "All profiles",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = AllProfilesPaginatedDto.class)
+                        schema = @Schema(implementation = AllProfilesPaginatedResponseDto.class)
 
                 )
         ),

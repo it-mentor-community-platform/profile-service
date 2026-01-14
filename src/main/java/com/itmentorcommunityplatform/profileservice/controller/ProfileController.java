@@ -4,9 +4,9 @@ import com.itmentorcommunityplatform.profileservice.docs.GetAllProfilesDocs;
 import com.itmentorcommunityplatform.profileservice.docs.GetCurrentProfileDocs;
 import com.itmentorcommunityplatform.profileservice.docs.GetUserProfileByIdDocs;
 import com.itmentorcommunityplatform.profileservice.docs.UpdateCurrentProfileDocs;
-import com.itmentorcommunityplatform.profileservice.dto.AllProfilesPaginatedDto;
-import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.AllProfilesPaginatedResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ProfileDetailsResponseDto;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -61,10 +61,10 @@ public class ProfileController {
 
     @GetMapping("/admin/profiles")
     @GetAllProfilesDocs
-    public ResponseEntity<AllProfilesPaginatedDto> getAllProfiles(@RequestParam("page_size") @Min(1) int pageSize,
-                                                                  @RequestParam("page_number") @Min(1) int pageNumber,
-                                                                  @RequestParam(required = false) Map<String, String> detailFilters,
-                                                                  @RequestHeader(value = "X-User-Roles") List<String> roles) {
+    public ResponseEntity<AllProfilesPaginatedResponseDto> getAllProfiles(@RequestParam("page_size") @Min(1) int pageSize,
+                                                                          @RequestParam("page_number") @Min(1) int pageNumber,
+                                                                          @RequestParam(required = false) Map<String, String> detailFilters,
+                                                                          @RequestHeader(value = "X-User-Roles", required = false) List<String> roles) {
 
 
         if (roles == null || roles.stream().noneMatch(r -> r.equalsIgnoreCase("ADMIN"))) {
@@ -74,7 +74,7 @@ public class ProfileController {
         detailFilters.remove("page_size");
         detailFilters.remove("page_number");
 
-        AllProfilesPaginatedDto allProfiles = profileService.getAllProfiles(pageSize, pageNumber, detailFilters);
+        AllProfilesPaginatedResponseDto allProfiles = profileService.getAllProfiles(pageSize, pageNumber, detailFilters);
 
         return ResponseEntity.ok(allProfiles);
     }

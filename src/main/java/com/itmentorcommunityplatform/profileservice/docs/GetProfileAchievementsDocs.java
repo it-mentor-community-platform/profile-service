@@ -1,6 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.docs;
 
-import com.itmentorcommunityplatform.profileservice.dto.AchievementDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.AchievementResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,7 +27,7 @@ import java.lang.annotation.Target;
                 content = @Content(
                         mediaType = "application/json",
                         array = @ArraySchema(
-                                schema = @Schema(implementation = AchievementDto.class)
+                                schema = @Schema(implementation = AchievementResponseDto.class)
                         )
                 )
         ),
@@ -67,7 +67,7 @@ import java.lang.annotation.Target;
                 content = @Content(
                         mediaType = "application/json",
                         array = @ArraySchema(
-                                schema = @Schema(implementation = AchievementDto.class)
+                                schema = @Schema(implementation = AchievementResponseDto.class)
                         )
                 )
         )

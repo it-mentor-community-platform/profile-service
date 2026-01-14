@@ -1,4 +1,4 @@
-package com.itmentorcommunityplatform.profileservice.dto;
+package com.itmentorcommunityplatform.profileservice.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.docs;
 
-import com.itmentorcommunityplatform.profileservice.dto.AchievementDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.AchievementResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
                 description = "Achievement visibility successfully updated",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = AchievementDto.class),
+                        schema = @Schema(implementation = AchievementResponseDto.class),
                         examples = @ExampleObject(
                                 value = """
                                         {

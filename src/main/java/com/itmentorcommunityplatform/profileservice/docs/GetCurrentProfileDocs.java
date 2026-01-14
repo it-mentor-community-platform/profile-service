@@ -1,6 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.docs;
 
-import com.itmentorcommunityplatform.profileservice.dto.ProfileDetailsResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ProfileDetailsResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
