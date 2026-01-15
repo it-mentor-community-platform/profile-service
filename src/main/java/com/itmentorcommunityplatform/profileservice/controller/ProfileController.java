@@ -1,22 +1,17 @@
 package com.itmentorcommunityplatform.profileservice.controller;
 
-import com.itmentorcommunityplatform.profileservice.docs.GetAllProfilesDocs;
 import com.itmentorcommunityplatform.profileservice.docs.GetCurrentProfileDocs;
 import com.itmentorcommunityplatform.profileservice.docs.GetUserProfileByIdDocs;
 import com.itmentorcommunityplatform.profileservice.docs.UpdateCurrentProfileDocs;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.AllProfilesPaginatedResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileResponseDto;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -57,25 +52,5 @@ public class ProfileController {
         ProfileResponseDto userProfile = profileService.getUserProfile(profileId);
 
         return ResponseEntity.ok(userProfile);
-    }
-
-    @GetMapping("/admin/profiles")
-    @GetAllProfilesDocs
-    public ResponseEntity<AllProfilesPaginatedResponseDto> getAllProfiles(@RequestParam("page_size") @Min(1) int pageSize,
-                                                                          @RequestParam("page_number") @Min(1) int pageNumber,
-                                                                          @RequestParam(required = false) Map<String, String> detailFilters,
-                                                                          @RequestHeader(value = "X-User-Roles", required = false) List<String> roles) {
-
-
-        if (roles == null || roles.stream().noneMatch(r -> r.equalsIgnoreCase("ADMIN"))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied: missing ADMIN role in X-User-Roles header");
-        }
-
-        detailFilters.remove("page_size");
-        detailFilters.remove("page_number");
-
-        AllProfilesPaginatedResponseDto allProfiles = profileService.getAllProfiles(pageSize, pageNumber, detailFilters);
-
-        return ResponseEntity.ok(allProfiles);
     }
 }
