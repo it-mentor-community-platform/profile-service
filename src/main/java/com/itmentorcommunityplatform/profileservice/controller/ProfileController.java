@@ -6,7 +6,7 @@ import com.itmentorcommunityplatform.profileservice.docs.GetUserProfileByIdDocs;
 import com.itmentorcommunityplatform.profileservice.docs.UpdateCurrentProfileDocs;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.AllProfilesPaginatedResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileDetailsResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ProfileResponseDto;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -28,16 +28,16 @@ public class ProfileController {
 
     @GetMapping
     @GetCurrentProfileDocs
-    public ResponseEntity<ProfileDetailsResponseDto> getCurrentProfile(
+    public ResponseEntity<ProfileResponseDto> getCurrentProfile(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId
     ) {
-        ProfileDetailsResponseDto profileDetailsResponseDto = profileService.getCurrentUserProfile(telegramUserId);
-        return ResponseEntity.ok(profileDetailsResponseDto);
+        ProfileResponseDto profileResponseDto = profileService.getCurrentUserProfile(telegramUserId);
+        return ResponseEntity.ok(profileResponseDto);
     }
 
     @PatchMapping
     @UpdateCurrentProfileDocs
-    public ResponseEntity<ProfileDetailsResponseDto> updateCurrentProfile(
+    public ResponseEntity<ProfileResponseDto> updateCurrentProfile(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId,
             @RequestHeader("X-Telegram-Username") Optional<String> telegramUsername,
             @RequestBody ProfileUpdateRequestDto dto) {
@@ -53,8 +53,8 @@ public class ProfileController {
 
     @GetMapping("/{id}")
     @GetUserProfileByIdDocs
-    public ResponseEntity<ProfileDetailsResponseDto> getUserProfile(@PathVariable("id") Long profileId) {
-        ProfileDetailsResponseDto userProfile = profileService.getUserProfile(profileId);
+    public ResponseEntity<ProfileResponseDto> getUserProfile(@PathVariable("id") Long profileId) {
+        ProfileResponseDto userProfile = profileService.getUserProfile(profileId);
 
         return ResponseEntity.ok(userProfile);
     }

@@ -9,9 +9,8 @@ import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.AllProfilesPaginatedResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileAchievementsResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileDetailsResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileResponseDto;
+import com.itmentorcommunityplatform.profileservice.mapper.ProfileMapper;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
 import com.itmentorcommunityplatform.profileservice.repository.AchievementRepository;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
@@ -39,6 +38,7 @@ public class ProfileService {
     private final BaseProfileDetailValidator baseDetailValidator;
     private final ProfileDetailValidatorRegistry detailValidatorRegistry;
     private final GithubProfileUrlValidator githubProfileUrlValidator;
+    private final ProfileMapper profileMapper;
 
 
     @Transactional
@@ -81,7 +81,7 @@ public class ProfileService {
         }
     }
 
-    public ProfileDetailsResponseDto getCurrentUserProfile(Long telegramUserId) {
+    public ProfileResponseDto getCurrentUserProfile(Long telegramUserId) {
         return profileMetrics.getGetProfileTimer().record(() -> {
             log.info("Fetching profile for telegramUserId: {}", telegramUserId);
             try {
@@ -91,7 +91,9 @@ public class ProfileService {
                 List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
 
                 profileMetrics.getGetProfileSuccessCounter().increment();
-                return mapToProfileDetailDto(profile.getDetails(), achievements);
+
+                return profileMapper.mapToProfileDto(profile.getDetails(), achievements);
+
             } catch (Exception e) {
                 profileMetrics.getGetProfileErrorCounter().increment();
                 throw e;
@@ -100,7 +102,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileDetailsResponseDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto, String telegramUsername) {
+    public ProfileResponseDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto, String telegramUsername) {
         return profileMetrics.getGetProfileTimer().record(() -> {
             try {
                 Map<String, String> newDetailsMap = dto.getDetails();
@@ -120,29 +122,15 @@ public class ProfileService {
 
                 profileRepository.save(profile);
                 profileMetrics.getGetProfileSuccessCounter().increment();
-                return mapToProfileDetailDto(profile.getDetails(), achievements);
+
+                return profileMapper.mapToProfileDto(profile.getDetails(), achievements);
+
             } catch (Exception e) {
                 profileMetrics.getGetProfileErrorCounter().increment();
                 throw e;
             }
         });
     }
-
-    private ProfileDetailsResponseDto mapToProfileDetailDto(Set<ProfileDetail> details, List<Achievement> achievements) {
-        List<ProfileAchievementsResponseDto> profileAchievements = achievements.stream()
-                .map(achievement -> new ProfileAchievementsResponseDto(achievement.getAchievementType(),
-                        achievement.getEarnedTimestamp()))
-                .collect(Collectors.toList());
-
-        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-
-        details.forEach(detail -> map.put(detail.getDetailName(), detail.getDetailValue()));
-
-        map.put("achievements", profileAchievements);
-
-        return new ProfileDetailsResponseDto(map);
-    }
-
 
     @Transactional
     public boolean upsertProfile(ProfileUpsertInternalRequestDto dto) {
@@ -176,43 +164,6 @@ public class ProfileService {
         return isNewProfile;
     }
 
-    private static Set<ProfileDetail> mergeProfileDetails(
-            Set<ProfileDetail> existingDetails,
-            Map<String, String> newDetailsMap
-    ) {
-        Map<String, String> mergedMap = new HashMap<>();
-
-        existingDetails.forEach(detail ->
-                mergedMap.put(detail.getDetailName(), detail.getDetailValue()));
-
-        mergedMap.putAll(newDetailsMap);
-
-        return mergedMap.entrySet().stream()
-                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
-    }
-
-    private void validateDetails(Map<String, String> details) {
-        if (details == null || details.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Profile details should not be empty");
-        }
-        for (var entry : details.entrySet()) {
-            String detailName = entry.getKey();
-            String detailValue = entry.getValue();
-
-            ProfileDetailType type = ProfileDetailType.fromName(detailName)
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST,
-                            "Unknown detail name: " + detailName
-                    ));
-
-            baseDetailValidator.validate(detailName, detailValue);
-
-            detailValidatorRegistry.getSpecificValidator(type)
-                    .ifPresent(v -> v.validate(detailValue));
-        }
-    }
-
     public ProfileResponseDto getProfileByGitHubUrl(String gitHubUrl) {
 
         githubProfileUrlValidator.validate(gitHubUrl);
@@ -227,8 +178,7 @@ public class ProfileService {
 
         List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
 
-        return new ProfileResponseDto(profile.getTelegramUserId(),
-                mapToProfileDetailDto(profile.getDetails(), achievements));
+        return profileMapper.mapToProfileDto(profile.getTelegramUserId(), profile.getDetails(), achievements);
     }
 
     @Transactional(readOnly = true)
@@ -250,7 +200,7 @@ public class ProfileService {
         return maybeProfile;
     }
 
-    public ProfileDetailsResponseDto getUserProfile(Long profileId) {
+    public ProfileResponseDto getUserProfile(Long profileId) {
 
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -260,7 +210,7 @@ public class ProfileService {
 
         List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profileId);
 
-        return mapToProfileDetailDto(profile.getDetails(), achievements);
+        return profileMapper.mapToProfileDto(profile.getDetails(), achievements);
     }
 
     @Transactional(readOnly = true)
@@ -271,18 +221,6 @@ public class ProfileService {
                     return new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "Profile with Telegram-User-Id %s does not exist".formatted(telegramUserId));
                 });
-    }
-
-    private Map<String, String> getIdentityInfoIfPresent(UserCreatedEvent event) {
-        Map<String, String> details = new HashMap<>();
-
-        if (event.getFirstName() != null && !event.getFirstName().isBlank()) {
-            details.put(ProfileDetailType.FIRST_NAME.getDetailName(), event.getFirstName());
-        }
-        if (event.getLastName() != null && !event.getLastName().isBlank()) {
-            details.put(ProfileDetailType.LAST_NAME.getDetailName(), event.getLastName());
-        }
-        return details;
     }
 
     public AllProfilesPaginatedResponseDto getAllProfiles(Integer pageSize, Integer pageNumber, Map<String, String> detailFilters) {
@@ -322,16 +260,58 @@ public class ProfileService {
         }
 
         List<ProfileResponseDto> list = allProfilesPaginated.stream()
-                .map(profile -> new ProfileResponseDto(
-                        profile.getId(),
-                        new ProfileDetailsResponseDto(profile.getDetails().stream()
-                                .collect(Collectors.toMap(
-                                        ProfileDetail::getDetailName,
-                                        ProfileDetail::getDetailValue
-                                ))
-                        )
-                )).toList();
+                .map((profile -> profileMapper.mapToProfileDto(profile.getTelegramUserId(), profile.getDetails())))
+                .toList();
 
         return new AllProfilesPaginatedResponseDto(allProfilesCount, totalPageCount, allProfilesPaginated.size(), pageNumber, list);
+    }
+
+    private static Set<ProfileDetail> mergeProfileDetails(
+            Set<ProfileDetail> existingDetails,
+            Map<String, String> newDetailsMap
+    ) {
+        Map<String, String> mergedMap = new HashMap<>();
+
+        existingDetails.forEach(detail ->
+                mergedMap.put(detail.getDetailName(), detail.getDetailValue()));
+
+        mergedMap.putAll(newDetailsMap);
+
+        return mergedMap.entrySet().stream()
+                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
+    }
+
+    private void validateDetails(Map<String, String> details) {
+        if (details == null || details.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Profile details should not be empty");
+        }
+        for (var entry : details.entrySet()) {
+            String detailName = entry.getKey();
+            String detailValue = entry.getValue();
+
+            ProfileDetailType type = ProfileDetailType.fromName(detailName)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Unknown detail name: " + detailName
+                    ));
+
+            baseDetailValidator.validate(detailName, detailValue);
+
+            detailValidatorRegistry.getSpecificValidator(type)
+                    .ifPresent(v -> v.validate(detailValue));
+        }
+    }
+
+    private Map<String, String> getIdentityInfoIfPresent(UserCreatedEvent event) {
+        Map<String, String> details = new HashMap<>();
+
+        if (event.getFirstName() != null && !event.getFirstName().isBlank()) {
+            details.put(ProfileDetailType.FIRST_NAME.getDetailName(), event.getFirstName());
+        }
+        if (event.getLastName() != null && !event.getLastName().isBlank()) {
+            details.put(ProfileDetailType.LAST_NAME.getDetailName(), event.getLastName());
+        }
+        return details;
     }
 }
