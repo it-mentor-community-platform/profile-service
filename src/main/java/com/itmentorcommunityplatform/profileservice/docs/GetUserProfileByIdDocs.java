@@ -1,7 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.docs;
 
 
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,7 +24,23 @@ import java.lang.annotation.Target;
                 description = "Profile received successfully",
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = ProfileResponseDto.class))
+                        schema = @Schema(example = """
+                                {
+                                  "details": {
+                                    "github_profile_url": "https://github.com/zhukov",
+                                    "telegram_url": "https://t.me/zhukov",
+                                    "last_name": "Zhukov",
+                                    "first_name": "Sergey"
+                                  },
+                                  "achievements": [
+                                    {
+                                      "type": "SPRINTER",
+                                      "earned_timestamp": 711213212
+                                    }
+                                  ]
+                                }
+                                """)
+                )
         ),
         @ApiResponse(
                 responseCode = "404",

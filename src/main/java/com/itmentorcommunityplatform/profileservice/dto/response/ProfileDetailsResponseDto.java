@@ -9,13 +9,13 @@ import java.util.Map;
         description = "User Profile Details - an arbitrary set of allowed fields",
         additionalProperties = Schema.AdditionalPropertiesValue.TRUE,
         example = """
-        {
-          "github_profile_url": "https://github.com/johndoe",
-          "telegram_url": "https://t.me/johndoe",
-          "twitter_handle": "@johndoe",
-          "full_name": "John Doe"
-        }
-        """
+                {
+                  "github_profile_url": "https://github.com/johndoe",
+                  "telegram_url": "https://t.me/johndoe",
+                  "first_name": "Sergey",
+                  "last_name": "Zhukov"
+                }
+                """
 )
 public class ProfileDetailsResponseDto {
 
