@@ -52,7 +52,13 @@ public class ProfileService {
         Long telegramUserId = event.getTelegramUserId();
         log.info("Attempting to create profile for telegramUserId: {}", telegramUserId);
 
-        Map<String, String> maybeProfileInfo = getIdentityInfoIfPresent(event);
+        baseDetailValidator.validate(ProfileDetailType.FIRST_NAME.getDetailName(), event.getFirstName());
+        baseDetailValidator.validate(ProfileDetailType.LAST_NAME.getDetailName(), event.getLastName());
+
+        Map<String, String> maybeProfileInfo = Map.of(
+                ProfileDetailType.FIRST_NAME.getDetailName(), event.getFirstName(),
+                ProfileDetailType.LAST_NAME.getDetailName(), event.getLastName()
+        );
 
         Optional<Profile> maybeProfile = profileRepository.findByTelegramUserId(telegramUserId);
 
@@ -81,6 +87,7 @@ public class ProfileService {
             log.info("Successfully created profile with telegramUserId: {}", telegramUserId);
         }
     }
+
 
     public ProfileNoIdResponseDto getCurrentUserProfile(Long telegramUserId) {
         return profileMetrics.getGetProfileTimer().record(() -> {
@@ -301,15 +308,4 @@ public class ProfileService {
 
     }
 
-    private Map<String, String> getIdentityInfoIfPresent(UserCreatedEvent event) {
-        Map<String, String> details = new HashMap<>();
-
-        if (event.getFirstName() != null && !event.getFirstName().isBlank()) {
-            details.put(ProfileDetailType.FIRST_NAME.getDetailName(), event.getFirstName());
-        }
-        if (event.getLastName() != null && !event.getLastName().isBlank()) {
-            details.put(ProfileDetailType.LAST_NAME.getDetailName(), event.getLastName());
-        }
-        return details;
-    }
 }
