@@ -177,8 +177,6 @@ public class ProfileService {
                         "Profile with URL: %s not found".formatted(gitHubUrl)
                 ));
 
-        List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
-
         return profileMapper.mapToProfileNoAchievementsDto(profile.getTelegramUserId(), profile.getDetails());
     }
 
@@ -287,10 +285,8 @@ public class ProfileService {
         if (details == null || details.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Profile details should not be empty");
         }
-        for (var entry : details.entrySet()) {
-            String detailName = entry.getKey();
-            String detailValue = entry.getValue();
 
+        details.forEach((detailName, detailValue) -> {
             ProfileDetailType type = ProfileDetailType.fromName(detailName)
                     .orElseThrow(() -> new ResponseStatusException(
                             HttpStatus.BAD_REQUEST,
@@ -301,7 +297,8 @@ public class ProfileService {
 
             detailValidatorRegistry.getSpecificValidator(type)
                     .ifPresent(v -> v.validate(detailValue));
-        }
+        });
+
     }
 
     private Map<String, String> getIdentityInfoIfPresent(UserCreatedEvent event) {
