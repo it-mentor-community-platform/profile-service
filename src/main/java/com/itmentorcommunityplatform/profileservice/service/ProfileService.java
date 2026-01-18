@@ -9,7 +9,8 @@ import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.AllProfilesPaginatedResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ProfileNoAchievementsResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ProfileNoIdResponseDto;
 import com.itmentorcommunityplatform.profileservice.mapper.ProfileMapper;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
 import com.itmentorcommunityplatform.profileservice.repository.AchievementRepository;
@@ -81,7 +82,7 @@ public class ProfileService {
         }
     }
 
-    public ProfileResponseDto getCurrentUserProfile(Long telegramUserId) {
+    public ProfileNoIdResponseDto getCurrentUserProfile(Long telegramUserId) {
         return profileMetrics.getGetProfileTimer().record(() -> {
             log.info("Fetching profile for telegramUserId: {}", telegramUserId);
             try {
@@ -92,7 +93,7 @@ public class ProfileService {
 
                 profileMetrics.getGetProfileSuccessCounter().increment();
 
-                return profileMapper.mapToProfileDto(profile.getDetails(), achievements);
+                return profileMapper.mapToProfileNoIdDto(profile.getDetails(), achievements);
 
             } catch (Exception e) {
                 profileMetrics.getGetProfileErrorCounter().increment();
@@ -102,7 +103,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public ProfileResponseDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto, String telegramUsername) {
+    public ProfileNoIdResponseDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto, String telegramUsername) {
         return profileMetrics.getGetProfileTimer().record(() -> {
             try {
                 Map<String, String> newDetailsMap = dto.getDetails();
@@ -123,7 +124,7 @@ public class ProfileService {
                 profileRepository.save(profile);
                 profileMetrics.getGetProfileSuccessCounter().increment();
 
-                return profileMapper.mapToProfileDto(profile.getDetails(), achievements);
+                return profileMapper.mapToProfileNoIdDto(profile.getDetails(), achievements);
 
             } catch (Exception e) {
                 profileMetrics.getGetProfileErrorCounter().increment();
@@ -164,7 +165,7 @@ public class ProfileService {
         return isNewProfile;
     }
 
-    public ProfileResponseDto getProfileByGitHubUrl(String gitHubUrl) {
+    public ProfileNoAchievementsResponseDto getProfileByGitHubUrl(String gitHubUrl) {
 
         githubProfileUrlValidator.validate(gitHubUrl);
 
@@ -178,7 +179,7 @@ public class ProfileService {
 
         List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
 
-        return profileMapper.mapToProfileDto(profile.getTelegramUserId(), profile.getDetails(), achievements);
+        return profileMapper.mapToProfileNoAchievementsDto(profile.getTelegramUserId(), profile.getDetails());
     }
 
     @Transactional(readOnly = true)
@@ -200,7 +201,7 @@ public class ProfileService {
         return maybeProfile;
     }
 
-    public ProfileResponseDto getUserProfile(Long profileId) {
+    public ProfileNoIdResponseDto getUserProfile(Long profileId) {
 
         Profile profile = profileRepository.findById(profileId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -210,7 +211,7 @@ public class ProfileService {
 
         List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profileId);
 
-        return profileMapper.mapToProfileDto(profile.getDetails(), achievements);
+        return profileMapper.mapToProfileNoIdDto(profile.getDetails(), achievements);
     }
 
     @Transactional(readOnly = true)
@@ -259,8 +260,8 @@ public class ProfileService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page number is greater than total page count");
         }
 
-        List<ProfileResponseDto> list = allProfilesPaginated.stream()
-                .map((profile -> profileMapper.mapToProfileDto(profile.getTelegramUserId(), profile.getDetails())))
+        List<ProfileNoAchievementsResponseDto> list = allProfilesPaginated.stream()
+                .map((profile -> profileMapper.mapToProfileNoAchievementsDto(profile.getTelegramUserId(), profile.getDetails())))
                 .toList();
 
         return new AllProfilesPaginatedResponseDto(allProfilesCount, totalPageCount, allProfilesPaginated.size(), pageNumber, list);

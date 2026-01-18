@@ -4,7 +4,7 @@ import com.itmentorcommunityplatform.profileservice.docs.GetCurrentProfileDocs;
 import com.itmentorcommunityplatform.profileservice.docs.GetUserProfileByIdDocs;
 import com.itmentorcommunityplatform.profileservice.docs.UpdateCurrentProfileDocs;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ProfileNoIdResponseDto;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,16 +23,16 @@ public class ProfileController {
 
     @GetMapping
     @GetCurrentProfileDocs
-    public ResponseEntity<ProfileResponseDto> getCurrentProfile(
+    public ResponseEntity<ProfileNoIdResponseDto> getCurrentProfile(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId
     ) {
-        ProfileResponseDto profileResponseDto = profileService.getCurrentUserProfile(telegramUserId);
-        return ResponseEntity.ok(profileResponseDto);
+        ProfileNoIdResponseDto profileNoIdResponseDto = profileService.getCurrentUserProfile(telegramUserId);
+        return ResponseEntity.ok(profileNoIdResponseDto);
     }
 
     @PatchMapping
     @UpdateCurrentProfileDocs
-    public ResponseEntity<ProfileResponseDto> updateCurrentProfile(
+    public ResponseEntity<ProfileNoIdResponseDto> updateCurrentProfile(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId,
             @RequestHeader("X-Telegram-Username") Optional<String> telegramUsername,
             @RequestBody ProfileUpdateRequestDto dto) {
@@ -42,14 +42,15 @@ public class ProfileController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid telegram_url field in the body");
         }
 
-        var response = profileService.updateCurrentProfile(telegramUserId, dto, telegramUsername.orElse(null));
+        ProfileNoIdResponseDto response = profileService.updateCurrentProfile(telegramUserId, dto, telegramUsername.orElse(null));
+
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     @GetUserProfileByIdDocs
-    public ResponseEntity<ProfileResponseDto> getUserProfile(@PathVariable("id") Long profileId) {
-        ProfileResponseDto userProfile = profileService.getUserProfile(profileId);
+    public ResponseEntity<ProfileNoIdResponseDto> getUserProfile(@PathVariable("id") Long profileId) {
+        ProfileNoIdResponseDto userProfile = profileService.getUserProfile(profileId);
 
         return ResponseEntity.ok(userProfile);
     }

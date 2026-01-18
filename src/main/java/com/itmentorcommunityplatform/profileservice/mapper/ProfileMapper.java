@@ -4,7 +4,8 @@ import com.itmentorcommunityplatform.profileservice.domain.Achievement;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileAchievementsResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileDetailsResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ProfileNoAchievementsResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ProfileNoIdResponseDto;
 import org.mapstruct.Mapper;
 
 import java.util.HashMap;
@@ -15,11 +16,9 @@ import java.util.Set;
 public interface ProfileMapper {
 
 
-    ProfileResponseDto mapToProfileDto(Long telegramUserId, Set<ProfileDetail> details, List<Achievement> achievements);
+    ProfileNoIdResponseDto mapToProfileNoIdDto(Set<ProfileDetail> details, List<Achievement> achievements);
 
-    ProfileResponseDto mapToProfileDto(Set<ProfileDetail> details, List<Achievement> achievements);
-
-    ProfileResponseDto mapToProfileDto(Long telegramUserId, Set<ProfileDetail> details);
+    ProfileNoAchievementsResponseDto mapToProfileNoAchievementsDto(Long telegramUserId, Set<ProfileDetail> details);
 
     List<ProfileAchievementsResponseDto> mapToProfileAchievementsDtoList(List<Achievement> achievements);
 
