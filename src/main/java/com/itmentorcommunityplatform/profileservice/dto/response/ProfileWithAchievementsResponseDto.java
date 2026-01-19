@@ -1,18 +1,18 @@
 package com.itmentorcommunityplatform.profileservice.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @RequiredArgsConstructor
 @Builder
-public class ProfileNoAchievementsResponseDto {
-
-    @JsonProperty("telegram_user_id")
-    private final Long telegramUserId;
+public class ProfileWithAchievementsResponseDto {
 
     private final ProfileDetailsResponseDto details;
+
+    private final List<ProfileAchievementsResponseDto> achievements;
 
 }
