@@ -1,6 +1,5 @@
 package com.itmentorcommunityplatform.profileservice.docs;
 
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileDetailsResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -34,7 +33,25 @@ import java.lang.annotation.Target;
         @ApiResponse(
                 responseCode = "200",
                 description = "Profile retrieved successfully",
-                content = @Content(schema = @Schema(implementation = ProfileDetailsResponseDto.class))
+                content = @Content(
+                        mediaType = "application/json",
+                        schema = @Schema(example = """
+                                {
+                                  "details": {
+                                    "github_profile_url": "https://github.com/zhukov",
+                                    "telegram_url": "https://t.me/zhukov",
+                                    "last_name": "Zhukov",
+                                    "first_name": "Sergey"
+                                  },
+                                  "achievements": [
+                                    {
+                                      "type": "SPRINTER",
+                                      "earned_timestamp": 711213212
+                                    }
+                                  ]
+                                }
+                                """)
+                )
         ),
         @ApiResponse(
                 responseCode = "400",
