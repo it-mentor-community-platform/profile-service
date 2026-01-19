@@ -17,19 +17,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class BaseProfileDetailValidator {
 
     public void validate(String detailName, String value) {
-        if (value == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Value of '" + detailName + "' cannot be null");
-        } else if (value.trim().isEmpty()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Value of '" + detailName + "' cannot be empty or whitespace only");
-        } else if (value.length() > 255) {
+
+        if (value.length() > 255) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Value of '" + detailName + "' exceeds max length 255");
         }
-
     }
 }
