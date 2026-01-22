@@ -43,7 +43,7 @@ public class ProfileService {
 
     @Autowired
     @Lazy
-    private final ProfileService self;
+    private ProfileService self;
     private final ProfileRepository profileRepository;
     private final AchievementRepository achievementRepository;
     private final ProfileMetrics profileMetrics;
@@ -242,7 +242,6 @@ public class ProfileService {
                 });
     }
 
-    public AllProfilesPaginatedResponseDto getAllProfiles(Integer pageSize, Integer pageNumber, Map<String, String> detailFilters) {
     private Map<String, String> getIdentityInfoIfPresent(UserCreatedEvent event) {
         Map<String, String> details = new HashMap<>();
 
@@ -255,8 +254,8 @@ public class ProfileService {
         return details;
     }
 
-    public AllProfilesPaginatedResponseDto getAllProfiles(Integer pageSize,
-                                                          Integer pageNumber,
+    public AllProfilesPaginatedResponseDto getAllProfiles(int pageSize,
+                                                          int pageNumber,
                                                           Map<String, String> detailFilters) {
 
         List<Profile> allProfilesPaginated;
@@ -293,11 +292,6 @@ public class ProfileService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page number is greater than total page count");
         }
 
-        List<ProfileWithTelegramIdResponseDto> profilesWithTelegramId = allProfilesPaginated.stream()
-                .map((profile -> profileMapper.mapToProfileWithTelegramIdDto(profile.getTelegramUserId(), profile.getDetails())))
-                .toList();
-
-        return new AllProfilesPaginatedResponseDto(allProfilesCount, totalPageCount, allProfilesPaginated.size(), pageNumber, profilesWithTelegramId);
         List<ProfileWithRolesResponseDto> items;
 
         try {
@@ -374,5 +368,4 @@ public class ProfileService {
         });
 
     }
-
 }
