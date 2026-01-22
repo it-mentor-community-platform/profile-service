@@ -1,25 +1,29 @@
 package com.itmentorcommunityplatform.profileservice.service;
 
+import com.itmentorcommunityplatform.profileservice.client.AuthServiceClient;
 import com.itmentorcommunityplatform.profileservice.domain.Achievement;
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
+import com.itmentorcommunityplatform.profileservice.domain.type.Role;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.AllProfilesPaginatedResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileAchievementsResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileDetailsResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.request.UserRolesRequest;
+import com.itmentorcommunityplatform.profileservice.dto.response.*;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
 import com.itmentorcommunityplatform.profileservice.repository.AchievementRepository;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
 import com.itmentorcommunityplatform.profileservice.validator.base.BaseProfileDetailValidator;
 import com.itmentorcommunityplatform.profileservice.validator.impl.GithubProfileUrlValidator;
 import com.itmentorcommunityplatform.profileservice.validator.registry.ProfileDetailValidatorRegistry;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,12 +37,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProfileService {
 
+    @Autowired
+    @Lazy
+    private final ProfileService self;
     private final ProfileRepository profileRepository;
     private final AchievementRepository achievementRepository;
     private final ProfileMetrics profileMetrics;
     private final BaseProfileDetailValidator baseDetailValidator;
     private final ProfileDetailValidatorRegistry detailValidatorRegistry;
     private final GithubProfileUrlValidator githubProfileUrlValidator;
+    private final AuthServiceClient authServiceClient;
 
 
     @Transactional
@@ -285,7 +293,9 @@ public class ProfileService {
         return details;
     }
 
-    public AllProfilesPaginatedResponseDto getAllProfiles(Integer pageSize, Integer pageNumber, Map<String, String> detailFilters) {
+    public AllProfilesPaginatedResponseDto getAllProfiles(Integer pageSize,
+                                                          Integer pageNumber,
+                                                          Map<String, String> detailFilters) {
 
         List<Profile> allProfilesPaginated;
         Long allProfilesCount;
@@ -321,17 +331,44 @@ public class ProfileService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page number is greater than total page count");
         }
 
-        List<ProfileResponseDto> list = allProfilesPaginated.stream()
-                .map(profile -> new ProfileResponseDto(
+        List<ProfileWithRolesResponseDto> items;
+
+        try {
+            items = self.enrichProfilesWithRoles(allProfilesPaginated);
+        } catch (Exception ex) {
+            log.error("All attempts to fetch user roles failed. Reason: {}", ex.getMessage());
+            throw ex;
+        }
+
+        return new AllProfilesPaginatedResponseDto(allProfilesCount, totalPageCount, allProfilesPaginated.size(), pageNumber, items);
+    }
+
+    @CircuitBreaker(name = "auth-service")
+    @Retry(name = "auth-service")
+    List<ProfileWithRolesResponseDto> enrichProfilesWithRoles(List<Profile> profiles) {
+        List<Long> telegramIds = profiles.stream()
+                .map(Profile::getTelegramUserId)
+                .toList();
+
+        List<UserRolesRequest> userRoles = authServiceClient.getAllUsers(telegramIds);
+
+        Map<Long, List<Role>> rolesById = userRoles.stream()
+                .collect(Collectors.toMap(
+                        UserRolesRequest::telegramUserId,
+                        user -> user.roleName().stream()
+                                .map(role -> Role.valueOf(role.toUpperCase()))
+                                .toList()
+                ));
+
+        return profiles.stream()
+                .map(profile -> new ProfileWithRolesResponseDto(
                         profile.getId(),
                         new ProfileDetailsResponseDto(profile.getDetails().stream()
                                 .collect(Collectors.toMap(
                                         ProfileDetail::getDetailName,
                                         ProfileDetail::getDetailValue
-                                ))
-                        )
+                                ))),
+                        rolesById.get(profile.getTelegramUserId())
                 )).toList();
-
-        return new AllProfilesPaginatedResponseDto(allProfilesCount, totalPageCount, allProfilesPaginated.size(), pageNumber, list);
     }
 }

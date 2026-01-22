@@ -28,6 +28,25 @@ management:
           - health
           - prometheus
 
+resilience4j:
+  circuitbreaker:
+    instances:
+      authService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 5
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+
+  retry:
+    instances:
+      authService:
+        maxAttempts: 3
+        waitDuration: 5s
+        retryExceptions:
+          - feign.RetryableException
+          - java.io.IOException
+
 profile-service:
   achievements:
     FIRST_PROJECT: Сдан первый проект!
