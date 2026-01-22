@@ -9,7 +9,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ProfileAchievementsResponseDto {
 
-    private final AchievementType type;
+    @JsonProperty("type")
+    private final AchievementType achievementType;
 
     @JsonProperty("earned_timestamp")
     private final Long earnedTimestamp;

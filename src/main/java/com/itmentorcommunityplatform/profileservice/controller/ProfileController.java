@@ -1,22 +1,17 @@
 package com.itmentorcommunityplatform.profileservice.controller;
 
-import com.itmentorcommunityplatform.profileservice.docs.GetAllProfilesDocs;
 import com.itmentorcommunityplatform.profileservice.docs.GetCurrentProfileDocs;
 import com.itmentorcommunityplatform.profileservice.docs.GetUserProfileByIdDocs;
 import com.itmentorcommunityplatform.profileservice.docs.UpdateCurrentProfileDocs;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.AllProfilesPaginatedResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileDetailsResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithAchievementsResponseDto;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -28,16 +23,16 @@ public class ProfileController {
 
     @GetMapping
     @GetCurrentProfileDocs
-    public ResponseEntity<ProfileDetailsResponseDto> getCurrentProfile(
+    public ResponseEntity<ProfileWithAchievementsResponseDto> getCurrentProfile(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId
     ) {
-        ProfileDetailsResponseDto profileDetailsResponseDto = profileService.getCurrentUserProfile(telegramUserId);
-        return ResponseEntity.ok(profileDetailsResponseDto);
+        ProfileWithAchievementsResponseDto profileWithAchievementsResponseDto = profileService.getCurrentUserProfile(telegramUserId);
+        return ResponseEntity.ok(profileWithAchievementsResponseDto);
     }
 
     @PatchMapping
     @UpdateCurrentProfileDocs
-    public ResponseEntity<ProfileDetailsResponseDto> updateCurrentProfile(
+    public ResponseEntity<ProfileWithAchievementsResponseDto> updateCurrentProfile(
             @RequestHeader("X-Telegram-User-Id") Long telegramUserId,
             @RequestHeader("X-Telegram-Username") Optional<String> telegramUsername,
             @RequestBody ProfileUpdateRequestDto dto) {
@@ -47,35 +42,16 @@ public class ProfileController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid telegram_url field in the body");
         }
 
-        var response = profileService.updateCurrentProfile(telegramUserId, dto, telegramUsername.orElse(null));
+        ProfileWithAchievementsResponseDto response = profileService.updateCurrentProfile(telegramUserId, dto, telegramUsername.orElse(null));
+
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     @GetUserProfileByIdDocs
-    public ResponseEntity<ProfileDetailsResponseDto> getUserProfile(@PathVariable("id") Long profileId) {
-        ProfileDetailsResponseDto userProfile = profileService.getUserProfile(profileId);
+    public ResponseEntity<ProfileWithAchievementsResponseDto> getUserProfile(@PathVariable("id") Long profileId) {
+        ProfileWithAchievementsResponseDto userProfile = profileService.getUserProfile(profileId);
 
         return ResponseEntity.ok(userProfile);
-    }
-
-    @GetMapping("/admin/profiles")
-    @GetAllProfilesDocs
-    public ResponseEntity<AllProfilesPaginatedResponseDto> getAllProfiles(@RequestParam("page_size") @Min(1) int pageSize,
-                                                                          @RequestParam("page_number") @Min(1) int pageNumber,
-                                                                          @RequestParam(required = false) Map<String, String> detailFilters,
-                                                                          @RequestHeader(value = "X-User-Roles", required = false) List<String> roles) {
-
-
-        if (roles == null || roles.stream().noneMatch(r -> r.equalsIgnoreCase("ADMIN"))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied: missing ADMIN role in X-User-Roles header");
-        }
-
-        detailFilters.remove("page_size");
-        detailFilters.remove("page_number");
-
-        AllProfilesPaginatedResponseDto allProfiles = profileService.getAllProfiles(pageSize, pageNumber, detailFilters);
-
-        return ResponseEntity.ok(allProfiles);
     }
 }

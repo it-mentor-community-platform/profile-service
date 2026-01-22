@@ -9,7 +9,7 @@
 # INSERT INTO achievements (profile_id, achievement_type, earned_timestamp, publicly_visible)
 # VALUES (1, 'SPRINTER', 1766606135188, true)
 GET http://localhost:8083/api/profile
-X-Telegram-User-Id: 1919770495
+X-Telegram-User-Id: 12345
 X-User-Roles: STUDENT
 
 ### 2. Ошибка: Профиль не найден (404)
@@ -33,7 +33,7 @@ X-User-Roles: STUDENT
 # (Опционально) Для получения списка ачивок:
 # INSERT INTO achievements (profile_id, achievement_type, earned_timestamp, publicly_visible)
 # VALUES (1, 'SPRINTER', 1766606135188, true)
-GET http://localhost:8083/api/profile/21
+GET http://localhost:8083/api/profile/1
 X-User-Roles: STUDENT
 
 ### 5. Ошибка: Профиль не найден (404)
