@@ -62,12 +62,8 @@ dependencies {
 	// OpenFeign
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
-	// Resilience4j
-	implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'
-
-	// AOP
-	implementation 'org.springframework.boot:spring-boot-starter-aop'
-
+	// AspectJ
+	runtimeOnly 'org.aspectj:aspectjweaver:1.9.25.1'
 }
 dependencyManagement {
 	imports {

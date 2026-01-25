@@ -69,7 +69,7 @@ import java.lang.annotation.Target;
                 content = @Content(
                         examples = {
                                 @ExampleObject(
-                                        name = "Invalid pagination parametr",
+                                        name = "Invalid pagination parameter",
                                         summary = "page_size or page_number is invalid",
                                         description = "Example response when page_size or page_number is less than 1",
                                         value = "{\"message\":\"Validation failure\"}"

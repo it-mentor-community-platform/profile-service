@@ -10,11 +10,8 @@ import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEven
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.request.UserRolesRequest;
+import com.itmentorcommunityplatform.profileservice.dto.external.UserWithRolesResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.*;
-import com.itmentorcommunityplatform.profileservice.dto.response.AllProfilesPaginatedResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithAchievementsResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithTelegramIdResponseDto;
 import com.itmentorcommunityplatform.profileservice.mapper.ProfileMapper;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
 import com.itmentorcommunityplatform.profileservice.repository.AchievementRepository;
@@ -22,12 +19,8 @@ import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository
 import com.itmentorcommunityplatform.profileservice.validator.base.BaseProfileDetailValidator;
 import com.itmentorcommunityplatform.profileservice.validator.impl.GithubProfileUrlValidator;
 import com.itmentorcommunityplatform.profileservice.validator.registry.ProfileDetailValidatorRegistry;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,9 +34,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProfileService {
 
-    @Autowired
-    @Lazy
-    private ProfileService self;
     private final ProfileRepository profileRepository;
     private final AchievementRepository achievementRepository;
     private final ProfileMetrics profileMetrics;
@@ -242,18 +232,6 @@ public class ProfileService {
                 });
     }
 
-    private Map<String, String> getIdentityInfoIfPresent(UserCreatedEvent event) {
-        Map<String, String> details = new HashMap<>();
-
-        if (event.getFirstName() != null && !event.getFirstName().isBlank()) {
-            details.put(ProfileDetailType.FIRST_NAME.getDetailName(), event.getFirstName());
-        }
-        if (event.getLastName() != null && !event.getLastName().isBlank()) {
-            details.put(ProfileDetailType.LAST_NAME.getDetailName(), event.getLastName());
-        }
-        return details;
-    }
-
     public AllProfilesPaginatedResponseDto getAllProfiles(int pageSize,
                                                           int pageNumber,
                                                           Map<String, String> detailFilters) {
@@ -295,7 +273,7 @@ public class ProfileService {
         List<ProfileWithRolesResponseDto> items;
 
         try {
-            items = self.enrichProfilesWithRoles(allProfilesPaginated);
+            items = enrichProfilesWithRoles(allProfilesPaginated);
         } catch (Exception ex) {
             log.error("All attempts to fetch user roles failed. Reason: {}", ex.getMessage());
             throw ex;
@@ -304,18 +282,20 @@ public class ProfileService {
         return new AllProfilesPaginatedResponseDto(allProfilesCount, totalPageCount, allProfilesPaginated.size(), pageNumber, items);
     }
 
-    @CircuitBreaker(name = "auth-service")
-    @Retry(name = "auth-service")
-    List<ProfileWithRolesResponseDto> enrichProfilesWithRoles(List<Profile> profiles) {
+    private List<ProfileWithRolesResponseDto> enrichProfilesWithRoles(List<Profile> profiles) {
+        if (profiles == null || profiles.isEmpty()) {
+            return List.of();
+        }
+
         List<Long> telegramIds = profiles.stream()
                 .map(Profile::getTelegramUserId)
                 .toList();
 
-        List<UserRolesRequest> userRoles = authServiceClient.getAllUsers(telegramIds);
+        List<UserWithRolesResponseDto> userRoles = authServiceClient.getAllUsers(telegramIds);
 
         Map<Long, List<Role>> rolesById = userRoles.stream()
                 .collect(Collectors.toMap(
-                        UserRolesRequest::telegramUserId,
+                        UserWithRolesResponseDto::telegramUserId,
                         user -> user.roleName().stream()
                                 .map(role -> Role.valueOf(role.toUpperCase()))
                                 .toList()
@@ -329,7 +309,7 @@ public class ProfileService {
                                         ProfileDetail::getDetailName,
                                         ProfileDetail::getDetailValue
                                 ))),
-                        rolesById.get(profile.getTelegramUserId())
+                        rolesById.getOrDefault(profile.getTelegramUserId(), List.of())
                 )).toList();
     }
 
