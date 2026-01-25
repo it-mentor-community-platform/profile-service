@@ -14,3 +14,7 @@ spring:
   kafka:
     bootstrap-servers: localhost:29092
 
+feign:
+  client:
+    auth-service:
+      url: http://localhost:8081/api/auth

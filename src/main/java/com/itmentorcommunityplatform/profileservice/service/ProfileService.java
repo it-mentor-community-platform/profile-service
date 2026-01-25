@@ -1,16 +1,17 @@
 package com.itmentorcommunityplatform.profileservice.service;
 
+import com.itmentorcommunityplatform.profileservice.client.AuthServiceClient;
 import com.itmentorcommunityplatform.profileservice.domain.Achievement;
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
+import com.itmentorcommunityplatform.profileservice.domain.type.Role;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.AllProfilesPaginatedResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithAchievementsResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithTelegramIdResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.external.UserWithRolesResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.*;
 import com.itmentorcommunityplatform.profileservice.mapper.ProfileMapper;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
 import com.itmentorcommunityplatform.profileservice.repository.AchievementRepository;
@@ -40,6 +41,7 @@ public class ProfileService {
     private final ProfileDetailValidatorRegistry detailValidatorRegistry;
     private final GithubProfileUrlValidator githubProfileUrlValidator;
     private final ProfileMapper profileMapper;
+    private final AuthServiceClient authServiceClient;
 
 
     @Transactional
@@ -230,7 +232,9 @@ public class ProfileService {
                 });
     }
 
-    public AllProfilesPaginatedResponseDto getAllProfiles(Integer pageSize, Integer pageNumber, Map<String, String> detailFilters) {
+    public AllProfilesPaginatedResponseDto getAllProfiles(int pageSize,
+                                                          int pageNumber,
+                                                          Map<String, String> detailFilters) {
 
         List<Profile> allProfilesPaginated;
         Long allProfilesCount;
@@ -266,11 +270,47 @@ public class ProfileService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page number is greater than total page count");
         }
 
-        List<ProfileWithTelegramIdResponseDto> profilesWithTelegramId = allProfilesPaginated.stream()
-                .map((profile -> profileMapper.mapToProfileWithTelegramIdDto(profile.getTelegramUserId(), profile.getDetails())))
+        List<ProfileWithRolesResponseDto> items;
+
+        try {
+            items = enrichProfilesWithRoles(allProfilesPaginated);
+        } catch (Exception ex) {
+            log.error("All attempts to fetch user roles failed. Reason: {}", ex.getMessage());
+            throw ex;
+        }
+
+        return new AllProfilesPaginatedResponseDto(allProfilesCount, totalPageCount, allProfilesPaginated.size(), pageNumber, items);
+    }
+
+    private List<ProfileWithRolesResponseDto> enrichProfilesWithRoles(List<Profile> profiles) {
+        if (profiles == null || profiles.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> telegramIds = profiles.stream()
+                .map(Profile::getTelegramUserId)
                 .toList();
 
-        return new AllProfilesPaginatedResponseDto(allProfilesCount, totalPageCount, allProfilesPaginated.size(), pageNumber, profilesWithTelegramId);
+        List<UserWithRolesResponseDto> userRoles = authServiceClient.getAllUsers(telegramIds);
+
+        Map<Long, List<Role>> rolesById = userRoles.stream()
+                .collect(Collectors.toMap(
+                        UserWithRolesResponseDto::telegramUserId,
+                        user -> user.roles().stream()
+                                .map(role -> Role.valueOf(role.toUpperCase()))
+                                .toList()
+                ));
+
+        return profiles.stream()
+                .map(profile -> new ProfileWithRolesResponseDto(
+                        profile.getId(),
+                        new ProfileDetailsResponseDto(profile.getDetails().stream()
+                                .collect(Collectors.toMap(
+                                        ProfileDetail::getDetailName,
+                                        ProfileDetail::getDetailValue
+                                ))),
+                        rolesById.getOrDefault(profile.getTelegramUserId(), List.of())
+                )).toList();
     }
 
     private static Set<ProfileDetail> mergeProfileDetails(
@@ -308,5 +348,4 @@ public class ProfileService {
         });
 
     }
-
 }

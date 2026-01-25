@@ -22,5 +22,5 @@ public class AllProfilesPaginatedResponseDto {
     @JsonProperty("page_number")
     private final Integer pageNumber;
 
-    private final List<ProfileWithTelegramIdResponseDto> items;
+    private final List<ProfileWithRolesResponseDto> items;
 }
