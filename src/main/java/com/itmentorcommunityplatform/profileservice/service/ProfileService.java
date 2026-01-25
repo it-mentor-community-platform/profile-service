@@ -296,7 +296,7 @@ public class ProfileService {
         Map<Long, List<Role>> rolesById = userRoles.stream()
                 .collect(Collectors.toMap(
                         UserWithRolesResponseDto::telegramUserId,
-                        user -> user.roleName().stream()
+                        user -> user.roles().stream()
                                 .map(role -> Role.valueOf(role.toUpperCase()))
                                 .toList()
                 ));
