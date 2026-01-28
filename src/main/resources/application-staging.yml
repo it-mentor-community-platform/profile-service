@@ -1,0 +1,18 @@
+spring:
+  config:
+    activate:
+      on-profile: staging
+
+  datasource:
+    url: ${POSTGRES_URL}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  kafka:
+    bootstrap-servers: kafka:9092
+
+feign:
+  client:
+    auth-service:
+      url: ${AUTH_SERVICE_URL:http://auth-service:8080/api/auth}
