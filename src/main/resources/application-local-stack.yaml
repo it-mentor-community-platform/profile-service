@@ -11,4 +11,4 @@ spring:
 feign:
   client:
     auth-service:
-      url: http://localhost:8081/api/auth
+      url: http://auth-service:8080/api/auth
