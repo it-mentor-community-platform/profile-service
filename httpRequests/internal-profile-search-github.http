@@ -3,7 +3,6 @@ GET http://localhost:8083/api/profile/internal/profile/by-github-profile-url
     ?url=https://github.com/anelfer
 
 
-
 ### 2. Поиск профиля по невалидной ссылке(400 Bad request)
 GET http://localhost:8083/api/profile/internal/profile/by-github-profile-url
     ?url=https://invalidUrl.com/test
@@ -12,5 +11,3 @@ GET http://localhost:8083/api/profile/internal/profile/by-github-profile-url
 ### 3. Профиль не найден (404 Not found)
 GET http://localhost:8083/api/profile/internal/profile/by-github-profile-url
     ?url=https://github.com/unknown-github-profile
-
-###

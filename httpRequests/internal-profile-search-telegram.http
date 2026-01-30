@@ -1,0 +1,13 @@
+### 1. Успешный поиск профиля по ссылке на тг (200 OK)
+GET http://localhost:8083/api/profile/internal/profile/by-telegram-url
+    ?url=https://t.me/LeslieFn
+
+
+### 2. Поиск профиля по невалидной ссылке(400 Bad request)
+GET http://localhost:8083/api/profile/internal/profile/by-telegram-url
+    ?url=https://invalidUrl.com/test
+
+
+### 3. Профиль не найден (404 Not found)
+GET http://localhost:8083/api/profile/internal/profile/by-telegram-url
+    ?url=https://t.me/demon

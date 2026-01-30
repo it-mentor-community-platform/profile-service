@@ -18,6 +18,7 @@ import com.itmentorcommunityplatform.profileservice.repository.AchievementReposi
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
 import com.itmentorcommunityplatform.profileservice.validator.base.BaseProfileDetailValidator;
 import com.itmentorcommunityplatform.profileservice.validator.impl.GithubProfileUrlValidator;
+import com.itmentorcommunityplatform.profileservice.validator.impl.TelegramProfileUrlValidator;
 import com.itmentorcommunityplatform.profileservice.validator.registry.ProfileDetailValidatorRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,7 @@ public class ProfileService {
     private final GithubProfileUrlValidator githubProfileUrlValidator;
     private final ProfileMapper profileMapper;
     private final AuthServiceClient authServiceClient;
+    private final TelegramProfileUrlValidator telegramProfileUrlValidator;
 
 
     @Transactional
@@ -280,6 +282,19 @@ public class ProfileService {
         }
 
         return new AllProfilesPaginatedResponseDto(allProfilesCount, totalPageCount, allProfilesPaginated.size(), pageNumber, items);
+    }
+
+    public ProfileWithTelegramIdResponseDto getProfileByTgUrl(String tgUrl) {
+
+        telegramProfileUrlValidator.validate(tgUrl);
+
+        log.info("Searching profile by Telegram URL: {}", tgUrl);
+
+        Profile profile = profileRepository.findProfileByTgUrl(tgUrl).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Profile with given Telegram URL not found"));
+
+        return profileMapper.mapToProfileWithTelegramIdDto(profile.getTelegramUserId(), profile.getDetails());
     }
 
     private List<ProfileWithRolesResponseDto> enrichProfilesWithRoles(List<Profile> profiles) {
