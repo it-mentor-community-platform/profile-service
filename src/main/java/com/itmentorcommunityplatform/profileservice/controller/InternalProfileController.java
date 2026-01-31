@@ -1,6 +1,7 @@
 package com.itmentorcommunityplatform.profileservice.controller;
 
 import com.itmentorcommunityplatform.profileservice.docs.GetProfileByGithubUrlDocs;
+import com.itmentorcommunityplatform.profileservice.docs.GetProfileByTgUrlDocs;
 import com.itmentorcommunityplatform.profileservice.docs.UpsertInternalProfileDocs;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithTelegramIdResponseDto;
@@ -33,6 +34,16 @@ public class InternalProfileController {
             @RequestParam("url") String gitHubUrl) {
 
         ProfileWithTelegramIdResponseDto profile = profileService.getProfileByGitHubUrl(gitHubUrl);
+        return ResponseEntity.ok(profile);
+    }
+
+    @GetMapping("/profile/by-telegram-url")
+    @GetProfileByTgUrlDocs
+    public ResponseEntity<ProfileWithTelegramIdResponseDto> getProfileByTgUrl(
+            @RequestParam("url") String tgUrl) {
+
+        ProfileWithTelegramIdResponseDto profile = profileService.getProfileByTgUrl(tgUrl);
+
         return ResponseEntity.ok(profile);
     }
 }
