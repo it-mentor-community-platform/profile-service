@@ -7,6 +7,7 @@ import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
 import com.itmentorcommunityplatform.profileservice.domain.type.Role;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
+import com.itmentorcommunityplatform.profileservice.dto.event.UserAuthenticatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
@@ -93,6 +94,49 @@ public class ProfileService {
         }
     }
 
+    @Transactional
+    public void upsertProfile(UserAuthenticatedEvent event) {
+        if (event == null || event.getTelegramUserId() == null) {
+            log.warn("Received empty event or null telegramUserId. Skipping.");
+            return;
+        }
+
+        Long telegramUserId = event.getTelegramUserId();
+        log.info("Attempting to update profile for telegramUserId: {}", telegramUserId);
+
+        Optional<Profile> profileOptional = profileRepository.findByTelegramUserId(telegramUserId);
+        if (profileOptional.isEmpty()) {
+            log.warn("Profile for telegramUserId: {} not found. Skipping.", telegramUserId);
+            return;
+        }
+
+        Set<ProfileDetail> oldDetailsSet = profileOptional.get().getDetails();
+        Map<String, String> newDetails = new HashMap<>();
+        if (event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank()) {
+            newDetails.put(ProfileDetailType.TELEGRAM_USERNAME.getDetailName(), event.getTelegramUsername());
+        }
+        if (event.getFirstName() != null && !event.getFirstName().isBlank()) {
+            newDetails.put(ProfileDetailType.FIRST_NAME.getDetailName(), event.getFirstName());
+        }
+        if (event.getLastName() != null && !event.getLastName().isBlank()) {
+            newDetails.put(ProfileDetailType.LAST_NAME.getDetailName(), event.getLastName());
+        }
+        Map<String, String> oldDetails = oldDetailsSet.stream().
+                collect(Collectors.toMap(ProfileDetail::getDetailName, ProfileDetail::getDetailValue));
+
+        Map<String, String> merged = new HashMap<>(oldDetails);
+        merged.putAll(newDetails);
+
+        Set<ProfileDetail> newProfileDetails = merged.entrySet().stream()
+                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
+
+        Profile profile = profileOptional.get();
+        profile.setDetails(newProfileDetails);
+
+        profileRepository.save(profile);
+        log.info("Successfully updated profile with telegramUserId: {}", telegramUserId);
+    }
 
     public ProfileWithAchievementsResponseDto getCurrentUserProfile(Long telegramUserId) {
         return profileMetrics.getGetProfileTimer().record(() -> {
@@ -146,7 +190,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public boolean upsertProfile(ProfileUpsertInternalRequestDto dto) {
+    public boolean upsertProfileInternal(ProfileUpsertInternalRequestDto dto) {
 
         Long telegramUserId = dto.telegramUserId();
         if (telegramUserId == null) {
