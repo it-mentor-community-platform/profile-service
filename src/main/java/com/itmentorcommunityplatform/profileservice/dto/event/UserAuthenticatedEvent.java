@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,5 +27,5 @@ public class UserAuthenticatedEvent {
     private String lastName;
 
     @JsonProperty("roles")
-    private String[] roles;
+    private List<String> roles;
 }

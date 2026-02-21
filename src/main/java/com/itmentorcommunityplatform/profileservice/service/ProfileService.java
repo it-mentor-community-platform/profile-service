@@ -9,9 +9,9 @@ import com.itmentorcommunityplatform.profileservice.domain.type.Role;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserAuthenticatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
+import com.itmentorcommunityplatform.profileservice.dto.external.UserWithRolesResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.external.UserWithRolesResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.*;
 import com.itmentorcommunityplatform.profileservice.mapper.ProfileMapper;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
@@ -45,7 +45,6 @@ public class ProfileService {
     private final ProfileMapper profileMapper;
     private final AuthServiceClient authServiceClient;
     private final TelegramProfileUrlValidator telegramProfileUrlValidator;
-
 
     @Transactional
     public void createOrUpdateProfile(UserCreatedEvent event) {
@@ -110,7 +109,7 @@ public class ProfileService {
             return;
         }
 
-        Set<ProfileDetail> oldDetailsSet = profileOptional.get().getDetails();
+        Set<ProfileDetail> existingDetails = profileOptional.get().getDetails();
         Map<String, String> newDetails = new HashMap<>();
         if (event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank()) {
             newDetails.put(ProfileDetailType.TELEGRAM_USERNAME.getDetailName(), event.getTelegramUsername());
@@ -121,19 +120,15 @@ public class ProfileService {
         if (event.getLastName() != null && !event.getLastName().isBlank()) {
             newDetails.put(ProfileDetailType.LAST_NAME.getDetailName(), event.getLastName());
         }
-        Map<String, String> oldDetails = oldDetailsSet.stream().
-                collect(Collectors.toMap(ProfileDetail::getDetailName, ProfileDetail::getDetailValue));
 
-        Map<String, String> merged = new HashMap<>(oldDetails);
-        merged.putAll(newDetails);
-
-        Set<ProfileDetail> newProfileDetails = merged.entrySet().stream()
-                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
+        Set<ProfileDetail> details = mergeProfileDetails(existingDetails, newDetails);
+        if (existingDetails.equals(details)) {
+            log.info("Same details found. Nothing to update for telegramUserId: {}", telegramUserId);
+            return;
+        }
 
         Profile profile = profileOptional.get();
-        profile.setDetails(newProfileDetails);
-
+        profile.setDetails(details);
         profileRepository.save(profile);
         log.info("Successfully updated profile with telegramUserId: {}", telegramUserId);
     }
