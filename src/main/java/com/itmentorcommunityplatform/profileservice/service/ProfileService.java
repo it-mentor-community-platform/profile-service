@@ -103,16 +103,17 @@ public class ProfileService {
         Long telegramUserId = event.getTelegramUserId();
         log.info("Attempting to update profile for telegramUserId: {}", telegramUserId);
 
-        Optional<Profile> profileOptional = profileRepository.findByTelegramUserId(telegramUserId);
-        if (profileOptional.isEmpty()) {
+        Optional<Profile> existingProfile = profileRepository.findByTelegramUserId(telegramUserId);
+        if (existingProfile.isEmpty()) {
             log.warn("Profile for telegramUserId: {} not found. Skipping.", telegramUserId);
             return;
         }
 
-        Set<ProfileDetail> existingDetails = profileOptional.get().getDetails();
+        Set<ProfileDetail> existingDetails = existingProfile.get().getDetails();
         Map<String, String> newDetails = new HashMap<>();
+
         if (event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank()) {
-            newDetails.put(ProfileDetailType.TELEGRAM_USERNAME.getDetailName(), event.getTelegramUsername());
+            newDetails.put(ProfileDetailType.TELEGRAM_URL.getDetailName(), "https://t.me/" + event.getTelegramUsername());
         }
         if (event.getFirstName() != null && !event.getFirstName().isBlank()) {
             newDetails.put(ProfileDetailType.FIRST_NAME.getDetailName(), event.getFirstName());
@@ -127,7 +128,7 @@ public class ProfileService {
             return;
         }
 
-        Profile profile = profileOptional.get();
+        Profile profile = existingProfile.get();
         profile.setDetails(details);
         profileRepository.save(profile);
         log.info("Successfully updated profile with telegramUserId: {}", telegramUserId);
@@ -161,7 +162,7 @@ public class ProfileService {
                 validateDetails(newDetailsMap);
 
                 if (telegramUsername != null && !telegramUsername.isBlank()) {
-                    newDetailsMap.put("telegram_url", "https://t.me/" + telegramUsername);
+                    newDetailsMap.put(ProfileDetailType.TELEGRAM_URL.getDetailName(), "https://t.me/" + telegramUsername);
                 }
 
                 Profile profile = profileRepository.findByTelegramUserId(telegramUserId)

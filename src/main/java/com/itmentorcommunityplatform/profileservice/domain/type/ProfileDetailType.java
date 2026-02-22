@@ -26,8 +26,6 @@ public enum ProfileDetailType {
 
     TELEGRAM_URL("telegram_url"),
 
-    TELEGRAM_USERNAME("telegram_username"),
-
     FIRST_NAME("first_name"),
 
     LAST_NAME("last_name");
