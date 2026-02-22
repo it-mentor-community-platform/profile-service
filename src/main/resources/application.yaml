@@ -13,6 +13,8 @@ spring:
     consumer:
       group-id: profile-service-group
       auto-offset-reset: earliest
+    listener:
+      missing-topics-fatal: true
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml

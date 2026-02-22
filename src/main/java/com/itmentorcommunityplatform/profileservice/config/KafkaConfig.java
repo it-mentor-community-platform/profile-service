@@ -2,6 +2,7 @@ package com.itmentorcommunityplatform.profileservice.config;
 
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
+import com.itmentorcommunityplatform.profileservice.dto.event.UserAuthenticatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -38,6 +39,7 @@ public class KafkaConfig {
         typeMapper.addTrustedPackages("*");
         Map<String, Class<?>> mappings = new HashMap<>();
         mappings.put("com.itmentorcommunityplatform.authservice.kafka.UserCreatedEvent", UserCreatedEvent.class);
+        mappings.put("com.itmentorcommunityplatform.authservice.kafka.UserAuthenticatedEvent", UserAuthenticatedEvent.class);
         mappings.put("com.itmentorcommunityplatform.projectservice.kafka.ProjectCreatedEvent", ProjectCreatedEvent.class);
         typeMapper.setIdClassMapping(mappings);
         converter.setTypeMapper(typeMapper);

@@ -7,10 +7,11 @@ import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
 import com.itmentorcommunityplatform.profileservice.domain.type.Role;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
+import com.itmentorcommunityplatform.profileservice.dto.event.UserAuthenticatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
+import com.itmentorcommunityplatform.profileservice.dto.external.UserWithRolesResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.external.UserWithRolesResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.*;
 import com.itmentorcommunityplatform.profileservice.mapper.ProfileMapper;
 import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
@@ -44,7 +45,6 @@ public class ProfileService {
     private final ProfileMapper profileMapper;
     private final AuthServiceClient authServiceClient;
     private final TelegramProfileUrlValidator telegramProfileUrlValidator;
-
 
     @Transactional
     public void createOrUpdateProfile(UserCreatedEvent event) {
@@ -93,6 +93,46 @@ public class ProfileService {
         }
     }
 
+    @Transactional
+    public void upsertProfile(UserAuthenticatedEvent event) {
+        if (event == null || event.getTelegramUserId() == null) {
+            log.warn("Received empty event or null telegramUserId. Skipping.");
+            return;
+        }
+
+        Long telegramUserId = event.getTelegramUserId();
+        log.info("Attempting to update profile for telegramUserId: {}", telegramUserId);
+
+        Optional<Profile> existingProfile = profileRepository.findByTelegramUserId(telegramUserId);
+        if (existingProfile.isEmpty()) {
+            log.warn("Profile for telegramUserId: {} not found. Skipping.", telegramUserId);
+            return;
+        }
+
+        Set<ProfileDetail> existingDetails = existingProfile.get().getDetails();
+        Map<String, String> newDetails = new HashMap<>();
+
+        if (event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank()) {
+            newDetails.put(ProfileDetailType.TELEGRAM_URL.getDetailName(), "https://t.me/" + event.getTelegramUsername());
+        }
+        if (event.getFirstName() != null && !event.getFirstName().isBlank()) {
+            newDetails.put(ProfileDetailType.FIRST_NAME.getDetailName(), event.getFirstName());
+        }
+        if (event.getLastName() != null && !event.getLastName().isBlank()) {
+            newDetails.put(ProfileDetailType.LAST_NAME.getDetailName(), event.getLastName());
+        }
+
+        Set<ProfileDetail> details = mergeProfileDetails(existingDetails, newDetails);
+        if (existingDetails.equals(details)) {
+            log.info("Same details found. Nothing to update for telegramUserId: {}", telegramUserId);
+            return;
+        }
+
+        Profile profile = existingProfile.get();
+        profile.setDetails(details);
+        profileRepository.save(profile);
+        log.info("Successfully updated profile with telegramUserId: {}", telegramUserId);
+    }
 
     public ProfileWithAchievementsResponseDto getCurrentUserProfile(Long telegramUserId) {
         return profileMetrics.getGetProfileTimer().record(() -> {
@@ -122,7 +162,7 @@ public class ProfileService {
                 validateDetails(newDetailsMap);
 
                 if (telegramUsername != null && !telegramUsername.isBlank()) {
-                    newDetailsMap.put("telegram_url", "https://t.me/" + telegramUsername);
+                    newDetailsMap.put(ProfileDetailType.TELEGRAM_URL.getDetailName(), "https://t.me/" + telegramUsername);
                 }
 
                 Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
@@ -146,7 +186,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public boolean upsertProfile(ProfileUpsertInternalRequestDto dto) {
+    public boolean upsertProfileInternal(ProfileUpsertInternalRequestDto dto) {
 
         Long telegramUserId = dto.telegramUserId();
         if (telegramUserId == null) {

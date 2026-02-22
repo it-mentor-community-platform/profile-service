@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/changesets/002-create-table.sql
   - include:
       file: db/changelog/changesets/003-create-table-project.sql
+  - include:
+      file: db/changelog/changesets/004-change-profile-details-idx.sql
