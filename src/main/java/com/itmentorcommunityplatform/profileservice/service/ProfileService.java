@@ -6,13 +6,6 @@ import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailTyp
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserAuthenticatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
-import com.itmentorcommunityplatform.profileservice.dto.external.UserWithRolesResponseDto;
-import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.*;
-import com.itmentorcommunityplatform.profileservice.mapper.ProfileMapper;
-import com.itmentorcommunityplatform.profileservice.metrics.ProfileMetrics;
-import com.itmentorcommunityplatform.profileservice.repository.AchievementRepository;
 import com.itmentorcommunityplatform.profileservice.exception.ProfileNotFoundException;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,11 +27,6 @@ import static com.itmentorcommunityplatform.profileservice.service.ProfileHelper
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
-    private final AchievementRepository achievementRepository;
-    private final ProfileMetrics profileMetrics;
-    private final ProfileMapper profileMapper;
-
-
 
     @Transactional
     public void createOrUpdateProfile(UserCreatedEvent event) {
