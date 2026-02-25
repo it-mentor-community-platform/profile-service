@@ -35,7 +35,7 @@ public class InternalProfileService {
     private final TelegramProfileUrlValidator telegramProfileUrlValidator;
 
     @Transactional
-    public boolean upsertProfile(ProfileUpsertInternalRequestDto dto) {
+    public boolean upsertProfileInternal(ProfileUpsertInternalRequestDto dto) {
 
         Long telegramUserId = dto.telegramUserId();
         if (telegramUserId == null) {

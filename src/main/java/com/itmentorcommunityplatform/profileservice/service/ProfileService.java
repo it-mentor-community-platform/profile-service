@@ -36,12 +36,8 @@ public class ProfileService {
     private final ProfileRepository profileRepository;
     private final AchievementRepository achievementRepository;
     private final ProfileMetrics profileMetrics;
-    private final BaseProfileDetailValidator baseDetailValidator;
-    private final ProfileDetailValidatorRegistry detailValidatorRegistry;
-    private final GithubProfileUrlValidator githubProfileUrlValidator;
     private final ProfileMapper profileMapper;
-    private final AuthServiceClient authServiceClient;
-    private final TelegramProfileUrlValidator telegramProfileUrlValidator;
+
 
 
     @Transactional
@@ -130,104 +126,6 @@ public class ProfileService {
         profile.setDetails(details);
         profileRepository.save(profile);
         log.info("Successfully updated profile with telegramUserId: {}", telegramUserId);
-    }
-
-    public ProfileWithAchievementsResponseDto getCurrentUserProfile(Long telegramUserId) {
-        return profileMetrics.getGetProfileTimer().record(() -> {
-            log.info("Fetching profile for telegramUserId: {}", telegramUserId);
-            try {
-                Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
-
-                List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
-
-                profileMetrics.getGetProfileSuccessCounter().increment();
-
-                return profileMapper.mapToProfileWithAchievementsDto(profile.getDetails(), achievements);
-
-            } catch (Exception e) {
-                profileMetrics.getGetProfileErrorCounter().increment();
-                throw e;
-            }
-        });
-    }
-
-    @Transactional
-    public ProfileWithAchievementsResponseDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto, String telegramUsername) {
-        return profileMetrics.getGetProfileTimer().record(() -> {
-            try {
-                Map<String, String> newDetailsMap = dto.getDetails();
-                validateDetails(newDetailsMap);
-
-                if (telegramUsername != null && !telegramUsername.isBlank()) {
-                    newDetailsMap.put(ProfileDetailType.TELEGRAM_URL.getDetailName(), "https://t.me/" + telegramUsername);
-                }
-
-                Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile not found"));
-
-                List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
-
-                Set<ProfileDetail> mergedDetails = mergeProfileDetails(profile.getDetails(), newDetailsMap);
-                profile.setDetails(mergedDetails);
-
-                profileRepository.save(profile);
-                profileMetrics.getGetProfileSuccessCounter().increment();
-
-                return profileMapper.mapToProfileWithAchievementsDto(profile.getDetails(), achievements);
-
-            } catch (Exception e) {
-                profileMetrics.getGetProfileErrorCounter().increment();
-                throw e;
-            }
-        });
-    }
-
-    @Transactional
-    public boolean upsertProfileInternal(ProfileUpsertInternalRequestDto dto) {
-
-        Long telegramUserId = dto.telegramUserId();
-        if (telegramUserId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'telegram_user_id' must be provided");
-        }
-
-        if (dto.details() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'details' must be provided");
-        }
-        Map<String, String> newDetailsMap = dto.details().getMap();
-        validateDetails(newDetailsMap);
-
-        Optional<Profile> foundProfile = profileRepository.findByTelegramUserId(telegramUserId);
-        boolean isNewProfile = foundProfile.isEmpty();
-
-        Set<ProfileDetail> existingDetails = foundProfile.map(Profile::getDetails).orElse(Collections.emptySet());
-
-        Set<ProfileDetail> mergedDetails = mergeProfileDetails(existingDetails, newDetailsMap);
-
-        Profile profile = Profile.builder()
-                .id(foundProfile.map(Profile::getId).orElse(null))
-                .telegramUserId(telegramUserId)
-                .details(mergedDetails)
-                .build();
-
-        profileRepository.save(profile);
-
-        return isNewProfile;
-    }
-
-    public ProfileWithTelegramIdResponseDto getProfileByGitHubUrl(String gitHubUrl) {
-
-        githubProfileUrlValidator.validate(gitHubUrl);
-
-        log.info("Searching profile by GitHub URL: {}", gitHubUrl);
-
-        Profile profile = profileRepository.findProfileByGitHubUrl(gitHubUrl)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Profile with URL: %s not found".formatted(gitHubUrl)
-                ));
-
-        return profileMapper.mapToProfileWithTelegramIdDto(profile.getTelegramUserId(), profile.getDetails());
     }
 
     @Transactional(readOnly = true)

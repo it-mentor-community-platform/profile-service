@@ -22,8 +22,9 @@ public class InternalProfileController {
     @UpsertInternalProfileDocs
     public ResponseEntity<Void> upsertProfile(
             @RequestBody ProfileUpsertInternalRequestDto dto) {
-        boolean isCreated = internalProfileService.upsertProfile(dto);
-        boolean isCreated = profileService.upsertProfileInternal(dto);
+
+        boolean isCreated = internalProfileService.upsertProfileInternal(dto);
+
         return isCreated
                 ? ResponseEntity.status(HttpStatus.CREATED).build()
                 : ResponseEntity.ok().build();
