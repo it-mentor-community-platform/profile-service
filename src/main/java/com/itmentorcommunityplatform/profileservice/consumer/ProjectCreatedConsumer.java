@@ -20,16 +20,8 @@ public class ProjectCreatedConsumer {
 
     @KafkaListener(topics = "${spring.kafka.topic.projects-project-created}", groupId = "profile-service-cg")
     public void consumeProjectCreatedEvent(ProjectCreatedEvent event) {
-        log.info("[ProjectCreated] create project | author_telegram_user_id: {}," +
-                        "author_telegram_profile_url: {}," +
-                        " github_repository_url: {}," +
-                        "programming_language: {}," +
-                        "roadmap_project: {}," +
-                        "added_timestamp: {}," +
-                        "projeсt_source_type: {}", event.getAuthorTelegramUserId(),
-                event.getAuthorTelegramProfileUrl(), event.getGithubRepositoryUrl(),
-                event.getProgrammingLanguage(), event.getRoadmapProject(),
-                event.getAddedTimestamp(), event.getProjectSourceType());
+        log.info("ProjectCreated received: userId={}", event.getAuthorTelegramUserId());
+        log.debug("ProjectCreated payload: userId={}", event);
 
         try {
             profileDetailService.upsertGithubProfileUrl(event.getAuthorTelegramUserId(), event.getGithubRepositoryUrl());
@@ -37,8 +29,8 @@ public class ProjectCreatedConsumer {
             achievementService.recheckAndAwardAchievements(event);
             log.info("Kafka Consumer: Successfully processed event for user {}", event.getAuthorTelegramUserId());
         } catch (Exception e) {
-            log.error("Kafka Consumer: Error processing event for user: {}. Error: {}",
-                    event.getAuthorTelegramUserId(), e.getMessage(), e);
+            log.error("Kafka Consumer: Error processing event for user: {}",
+                    event.getAuthorTelegramUserId(), e);
         }
     }
 }
