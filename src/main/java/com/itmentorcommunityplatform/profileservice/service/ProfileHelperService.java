@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,7 +41,13 @@ public class ProfileHelperService {
     }
 
     public void validateDetails(Map<String, String> details) {
-        if (details == null || details.isEmpty()) {
+        if (details == null) {
+            throw new EmptyProfileDetailsException("Profile details should not be empty");
+        }
+
+        details.entrySet().removeIf(str -> str.getValue() == null);
+
+        if (details.isEmpty()) {
             throw new EmptyProfileDetailsException("Profile details should not be empty");
         }
 
