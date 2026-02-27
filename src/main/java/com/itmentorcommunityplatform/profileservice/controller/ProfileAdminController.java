@@ -2,13 +2,12 @@ package com.itmentorcommunityplatform.profileservice.controller;
 
 import com.itmentorcommunityplatform.profileservice.docs.GetAllProfilesDocs;
 import com.itmentorcommunityplatform.profileservice.dto.response.AllProfilesPaginatedResponseDto;
-import com.itmentorcommunityplatform.profileservice.service.ProfileService;
+import com.itmentorcommunityplatform.profileservice.exception.AccessDeniedException;
+import com.itmentorcommunityplatform.profileservice.service.AdminProfileService;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ProfileAdminController {
 
-    private final ProfileService profileService;
+    private final AdminProfileService  adminProfileService;
 
     @GetMapping("/profiles")
     @GetAllProfilesDocs
@@ -29,13 +28,13 @@ public class ProfileAdminController {
 
 
         if (roles == null || roles.stream().noneMatch(r -> r.equalsIgnoreCase("ADMIN"))) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied: missing ADMIN role in X-User-Roles header");
+            throw new AccessDeniedException("Access denied");
         }
 
         detailFilters.remove("page_size");
         detailFilters.remove("page_number");
 
-        AllProfilesPaginatedResponseDto allProfiles = profileService.getAllProfiles(pageSize, pageNumber, detailFilters);
+        AllProfilesPaginatedResponseDto allProfiles = adminProfileService.getAllProfiles(pageSize, pageNumber, detailFilters);
 
         return ResponseEntity.ok(allProfiles);
     }
