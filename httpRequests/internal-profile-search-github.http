@@ -1,6 +1,6 @@
 ### 1. Успешный поиск профиля по ссылке на гитхаб (200 OK)
 GET http://localhost:8083/api/profile/internal/profile/by-github-profile-url
-    ?url=https://github.com/anelfer
+    ?url=https://github.com/created_by_internal_request
 
 
 ### 2. Поиск профиля по невалидной ссылке(400 Bad request)

@@ -1,6 +1,6 @@
 ### 1. Успешный поиск профиля по ссылке на тг (200 OK)
 GET http://localhost:8083/api/profile/internal/profile/by-telegram-url
-    ?url=https://t.me/LeslieFn
+    ?url=https://t.me/created_by_internal_request
 
 
 ### 2. Поиск профиля по невалидной ссылке(400 Bad request)

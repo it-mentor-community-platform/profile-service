@@ -1,41 +1,41 @@
 ### 1. Успешное обновление достижения профиля по telegram id (200 OK)
-PATCH http://localhost:8083/api/achievement/type/SPRINTER
+PATCH http://localhost:8083/api/profile/achievement/type/SPRINTER
 Content-Type: application/json
-X-Telegram-User-Id: 143304648
+X-Telegram-User-Id: 1201
 
 {
   "publicly_visible": true
 }
 
 ### 2. Ошибки валидации: невалидные поле (400)
-PATCH http://localhost:8083/api/achievement/type/SPRINTER
+PATCH http://localhost:8083/api/profile/achievement/type/SPRINTER
 Content-Type: application/json
-X-Telegram-User-Id: 143304648
+X-Telegram-User-Id: 1201
 
 {
   "visible": true
 }
 
 ### 3. Ошибки валидации: несуществующие достижение (400)
-PATCH http://localhost:8083/api/achievement/type/BETA_TESTER123123
+PATCH http://localhost:8083/api/profile/achievement/type/BETA_TESTER123123
 Content-Type: application/json
-X-Telegram-User-Id: 143304648
+X-Telegram-User-Id: 1201
 
 {
   "publicly_visible": true
 }
 
 ### 4. У юзера нет ачивки, которую он пытается редактировать (403)
-PATCH http://localhost:8083/api/achievement/type/POLYGLOT
+PATCH http://localhost:8083/api/profile/achievement/type/POLYGLOT
 Content-Type: application/json
-X-Telegram-User-Id: 143304648
+X-Telegram-User-Id: 1201
 
 {
   "publicly_visible": true
 }
 
 ### 5. Профиль текущего пользователя не существуете (404)
-PATCH http://localhost:8083/api/achievement/type/SPRINTER
+PATCH http://localhost:8083/api/profile/achievement/type/SPRINTER
 Content-Type: application/json
 X-Telegram-User-Id: 1
 

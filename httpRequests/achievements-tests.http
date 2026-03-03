@@ -1,23 +1,23 @@
 ### Успешный сценарий. Получение ачивок пользователя (200 OK)
-GET http://localhost:8083/api/achievements
+GET http://localhost:8083/api/profile/achievements
 Accept: application/json
-X-Telegram-User-Id: 987654321
+X-Telegram-User-Id: 1201
 
 ### Неуспешный сценарий. Отсутствует обязательный загаловок X-Telegram-User-Id (401 Unauthorized)
-GET http://localhost:8083/api/achievements
+GET http://localhost:8083/api/profile/achievements
 Accept: application/json
 
-### Неуспешный сценарий. Неправильный формат заголовка X-Telegram-User-Id (500 Internal Server Error)
-GET http://localhost:8083/api/achievements
+### Неуспешный сценарий. Неправильный формат заголовка X-Telegram-User-Id (400 Bad Request)
+GET http://localhost:8083/api/profile/achievements
 Accept: application/json
 X-Telegram-User-Id: not-user
 
 ### Неуспешный сценарий. Пользователя не найден (404 Not found)
-GET http://localhost:8083/api/achievements
+GET http://localhost:8083/api/profile/achievements
 Accept: application/json
 X-Telegram-User-Id: 1234567892131
 
 ### Успешный сценарий. Пользователь без ачивок (200 OK)
-GET http://localhost:8083/api/achievements
+GET http://localhost:8083/api/profile/achievements
 Accept: application/json
-X-Telegram-User-Id: 0785467
+X-Telegram-User-Id: 1201
