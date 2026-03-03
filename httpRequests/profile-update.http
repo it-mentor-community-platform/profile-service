@@ -1,8 +1,8 @@
 ///200 Успешное обновление профилей пользователя
 ###
-PATCH http://localhost:8083/api/profile
+PATCH http://localhost:8083/api/profile/profile
 Content-Type: application/json
-X-Telegram-User-Id: 10001
+X-Telegram-User-Id: 1201
 
 {
   "github_profile_url": "https://github.com/JollykaiTEST1",
@@ -13,9 +13,9 @@ X-Telegram-User-Id: 10001
 
 ///400 - No parameters found to update
 ###
-PATCH http://localhost:8083/api/profile
+PATCH http://localhost:8083/api/profile/profile
 Content-Type: application/json
-X-Telegram-User-Id: 10001
+X-Telegram-User-Id: 1201
 
 {
 
@@ -24,9 +24,9 @@ X-Telegram-User-Id: 10001
 
 ///400 -  profile url incorrect
 ###
-PATCH http://localhost:8083/api/profile
+PATCH http://localhost:8083/api/profile/profile
 Content-Type: application/json
-X-Telegram-User-Id: 10001
+X-Telegram-User-Id: 1201
 
 {
   "github_profile_url": "htt://github.com/zhukovaasfssd"
@@ -35,9 +35,9 @@ X-Telegram-User-Id: 10001
 
 ///403 - попытка изменить "telegram_url"
 ###
-PATCH http://localhost:8083/api/profile
+PATCH http://localhost:8083/api/profile/profile
 Content-Type: application/json
-X-Telegram-User-Id: 10001
+X-Telegram-User-Id: 1201
 
 {
   "telegram_url": "https://t.me/zhukovaasfssd"
@@ -46,7 +46,7 @@ X-Telegram-User-Id: 10001
 
 ///404 - профиль текущего пользователя не существует
 ###
-PATCH http://localhost:8083/api/profile
+PATCH http://localhost:8083/api/profile/profile
 Content-Type: application/json
 X-Telegram-User-Id: 1
 
