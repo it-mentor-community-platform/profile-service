@@ -12,13 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/profile/internal")
+@RequestMapping("/api/profile/internal/profile")
 @RequiredArgsConstructor
 public class InternalProfileController {
 
     private final InternalProfileService internalProfileService;
 
-    @PostMapping("/profile")
+    @PostMapping
     @UpsertInternalProfileDocs
     public ResponseEntity<Void> upsertProfile(
             @RequestBody ProfileUpsertInternalRequestDto dto) {
@@ -30,7 +30,7 @@ public class InternalProfileController {
                 : ResponseEntity.ok().build();
     }
 
-    @GetMapping("/profile/by-github-profile-url")
+    @GetMapping("/by-github-profile-url")
     @GetProfileByGithubUrlDocs
     public ResponseEntity<ProfileWithTelegramIdResponseDto> getProfileByGitHubUrl(
             @RequestParam("url") String gitHubUrl) {
@@ -39,7 +39,7 @@ public class InternalProfileController {
         return ResponseEntity.ok(profile);
     }
 
-    @GetMapping("/profile/by-telegram-url")
+    @GetMapping("/by-telegram-url")
     @GetProfileByTgUrlDocs
     public ResponseEntity<ProfileWithTelegramIdResponseDto> getProfileByTgUrl(
             @RequestParam("url") String tgUrl) {
