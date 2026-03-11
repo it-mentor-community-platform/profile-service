@@ -22,5 +22,5 @@ X-User-Roles: ADMIN
 GET http://localhost:8083/api/profile/admin/profiles?page_number=99999&page_size=10
 X-User-Roles: ADMIN
 
-### 7. У пользователя отсутствует роль ADMIN (403 Forbidden)
+### 7. Ошибка доступа: у аутентифицированного пользователя отсутствует роль ADMIN (403 Forbidden)
 GET http://localhost:8083/api/profile/admin/profiles?page_number=10&page_size=1
