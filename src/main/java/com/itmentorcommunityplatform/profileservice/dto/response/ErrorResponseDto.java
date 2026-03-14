@@ -1,4 +1,4 @@
 package com.itmentorcommunityplatform.profileservice.dto.response;
 
-public record ErrorResponseDto(String massage) {
+public record ErrorResponseDto(String message) {
 }
