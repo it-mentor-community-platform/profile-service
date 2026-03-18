@@ -1,5 +1,5 @@
-### 1. Успешное обновление достижения профиля по telegram id (200 OK)
-PATCH http://localhost:8083/api/profile/achievement/type/SPRINTER
+### 1. Успешное обновление существующего достижения в профиле по telegram id (200 OK)
+PATCH http://localhost:8083/api/profile/achievement/type/FIRST_PROJECT
 Content-Type: application/json
 X-Telegram-User-Id: 1201
 
@@ -8,7 +8,7 @@ X-Telegram-User-Id: 1201
 }
 
 ### 2. Ошибки валидации: невалидные поле (400)
-PATCH http://localhost:8083/api/profile/achievement/type/SPRINTER
+PATCH http://localhost:8083/api/profile/achievement/type/FIRST_PROJECT
 Content-Type: application/json
 X-Telegram-User-Id: 1201
 
@@ -34,8 +34,8 @@ X-Telegram-User-Id: 1201
   "publicly_visible": true
 }
 
-### 5. Профиль текущего пользователя не существуете (404)
-PATCH http://localhost:8083/api/profile/achievement/type/SPRINTER
+### 5. Профиль текущего пользователя не существует (требуется аутентифицированный пользователь без профиля) (404)
+PATCH http://localhost:8083/api/profile/achievement/type/FIRST_PROJECT
 Content-Type: application/json
 X-Telegram-User-Id: 1
 

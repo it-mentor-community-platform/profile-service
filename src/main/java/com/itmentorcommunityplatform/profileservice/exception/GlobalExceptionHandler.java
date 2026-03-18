@@ -8,6 +8,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
@@ -65,14 +66,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmptyProfileDetailsException.class)
     public ResponseEntity<ErrorResponseDto> handleEmptyProfileDetailsException(EmptyProfileDetailsException ex) {
-        return  ResponseEntity
+        return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDto(ex.getMessage()));
     }
 
     @ExceptionHandler(InvalidProfileDetailsException.class)
     public ResponseEntity<ErrorResponseDto> handleInvalidProfileDetailsException(InvalidProfileDetailsException ex) {
-        return  ResponseEntity
+        return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDto(ex.getMessage()));
     }
@@ -82,6 +83,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponseDto(ex.getMessage()));
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ErrorResponseDto> handleHandlerMethodValidationException(HandlerMethodValidationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponseDto("Validation failure"));
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)

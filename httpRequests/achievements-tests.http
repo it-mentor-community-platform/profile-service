@@ -12,7 +12,7 @@ GET http://localhost:8083/api/profile/achievements
 Accept: application/json
 X-Telegram-User-Id: not-user
 
-### Неуспешный сценарий. Пользователя не найден (404 Not found)
+### Неуспешный сценарий. Пользователя не найден (при передаче несуществующего X-Telegram-User-Id) (404 Not found)
 GET http://localhost:8083/api/profile/achievements
 Accept: application/json
 X-Telegram-User-Id: 1234567892131
