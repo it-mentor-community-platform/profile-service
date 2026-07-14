@@ -36,6 +36,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponseDto(ex.getMessage()));
     }
 
+    @ExceptionHandler(ProfileAlreadyExistException.class)
+    public ResponseEntity<ErrorResponseDto> handleProfileAlreadyExistException(ProfileAlreadyExistException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ErrorResponseDto(ex.getMessage()));
+    }
+
     @ExceptionHandler(AchievementAccessDeniedException.class)
     public ResponseEntity<ErrorResponseDto> handleAchievementAccessException(AchievementAccessDeniedException ex) {
         return ResponseEntity
