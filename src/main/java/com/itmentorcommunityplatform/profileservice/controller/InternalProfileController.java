@@ -2,8 +2,9 @@ package com.itmentorcommunityplatform.profileservice.controller;
 
 import com.itmentorcommunityplatform.profileservice.docs.GetProfileByGithubUrlDocs;
 import com.itmentorcommunityplatform.profileservice.docs.GetProfileByTgUrlDocs;
-import com.itmentorcommunityplatform.profileservice.docs.UpsertInternalProfileDocs;
+import com.itmentorcommunityplatform.profileservice.docs.InsertInternalProfileDocs;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ProfileUpsertInternalResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithTelegramIdResponseDto;
 import com.itmentorcommunityplatform.profileservice.service.InternalProfileService;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +20,13 @@ public class InternalProfileController {
     private final InternalProfileService internalProfileService;
 
     @PostMapping
-    @UpsertInternalProfileDocs
-    public ResponseEntity<Void> upsertProfile(
+    @InsertInternalProfileDocs
+    public ResponseEntity<ProfileUpsertInternalResponseDto> upsertProfile(
             @RequestBody ProfileUpsertInternalRequestDto dto) {
 
-        boolean isCreated = internalProfileService.upsertProfileInternal(dto);
+        ProfileUpsertInternalResponseDto profile = internalProfileService.insertProfileInternal(dto);
 
-        return isCreated
-                ? ResponseEntity.status(HttpStatus.CREATED).build()
-                : ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(profile);
     }
 
     @GetMapping("/by-github-profile-url")
