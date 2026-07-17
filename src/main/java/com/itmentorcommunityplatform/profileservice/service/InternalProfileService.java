@@ -20,7 +20,8 @@ import org.springframework.data.relational.core.conversion.DbActionExecutionExce
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,23 +30,18 @@ import java.util.stream.Collectors;
 public class InternalProfileService {
 
     private final ProfileRepository profileRepository;
-    private final ProfileHelperService  profileHelperService;
+    private final ProfileHelperService profileHelperService;
     private final GithubProfileUrlValidator githubProfileUrlValidator;
     private final ProfileMapper profileMapper;
     private final TelegramProfileUrlValidator telegramProfileUrlValidator;
 
     @Transactional
     public ProfileInsertInternalResponseDto insertProfileInternal(ProfileInsertInternalRequestDto dto) {
+
         Long telegramUserId = dto.telegramUserId();
-        if (telegramUserId == null) {
-            throw new MissingTelegramUserIdException("'telegram_user_id' must be provided");
-        }
 
         log.info("Starting insert new profile for telegramId: {}", telegramUserId);
 
-        if (dto.details() == null) {
-            throw new MissingProfileDetailsException("'details' must be provided");
-        }
         Map<String, String> detailsMap = dto.details().getMap();
         profileHelperService.validateDetails(detailsMap);
 

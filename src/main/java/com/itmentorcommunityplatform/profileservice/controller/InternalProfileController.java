@@ -7,6 +7,7 @@ import com.itmentorcommunityplatform.profileservice.dto.request.ProfileInsertInt
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileInsertInternalResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithTelegramIdResponseDto;
 import com.itmentorcommunityplatform.profileservice.service.InternalProfileService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class InternalProfileController {
     @PostMapping
     @InsertInternalProfileDocs
     public ResponseEntity<ProfileInsertInternalResponseDto> insertProfile(
-            @RequestBody ProfileInsertInternalRequestDto dto) {
+            @Valid @RequestBody ProfileInsertInternalRequestDto dto) {
 
         ProfileInsertInternalResponseDto profile = internalProfileService.insertProfileInternal(dto);
 
