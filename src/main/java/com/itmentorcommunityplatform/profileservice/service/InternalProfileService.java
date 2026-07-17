@@ -5,8 +5,6 @@ import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileInsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileInsertInternalResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithTelegramIdResponseDto;
-import com.itmentorcommunityplatform.profileservice.exception.MissingProfileDetailsException;
-import com.itmentorcommunityplatform.profileservice.exception.MissingTelegramUserIdException;
 import com.itmentorcommunityplatform.profileservice.exception.ProfileAlreadyExistException;
 import com.itmentorcommunityplatform.profileservice.exception.ProfileNotFoundException;
 import com.itmentorcommunityplatform.profileservice.mapper.ProfileMapper;
@@ -55,7 +53,7 @@ public class InternalProfileService {
                 .build();
 
         try {
-            profile = profileRepository.save(profile);
+            profileRepository.save(profile);
         } catch (DbActionExecutionException e) {
             if (e.getCause() instanceof DuplicateKeyException) {
                 log.warn("Profile with TelegramID: {} already exist", telegramUserId);
