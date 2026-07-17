@@ -2,7 +2,7 @@ package com.itmentorcommunityplatform.profileservice.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record ProfileUpsertInternalResponseDto (
+public record ProfileInsertInternalResponseDto(
     @JsonProperty("id")
     Long id,
 

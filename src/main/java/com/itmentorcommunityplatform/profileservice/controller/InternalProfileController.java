@@ -3,8 +3,8 @@ package com.itmentorcommunityplatform.profileservice.controller;
 import com.itmentorcommunityplatform.profileservice.docs.GetProfileByGithubUrlDocs;
 import com.itmentorcommunityplatform.profileservice.docs.GetProfileByTgUrlDocs;
 import com.itmentorcommunityplatform.profileservice.docs.InsertInternalProfileDocs;
-import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileUpsertInternalResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.request.ProfileInsertInternalRequestDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ProfileInsertInternalResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithTelegramIdResponseDto;
 import com.itmentorcommunityplatform.profileservice.service.InternalProfileService;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +21,10 @@ public class InternalProfileController {
 
     @PostMapping
     @InsertInternalProfileDocs
-    public ResponseEntity<ProfileUpsertInternalResponseDto> upsertProfile(
-            @RequestBody ProfileUpsertInternalRequestDto dto) {
+    public ResponseEntity<ProfileInsertInternalResponseDto> insertProfile(
+            @RequestBody ProfileInsertInternalRequestDto dto) {
 
-        ProfileUpsertInternalResponseDto profile = internalProfileService.insertProfileInternal(dto);
+        ProfileInsertInternalResponseDto profile = internalProfileService.insertProfileInternal(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(profile);
     }

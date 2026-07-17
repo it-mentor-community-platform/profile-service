@@ -1,6 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.docs;
 
-import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
+import com.itmentorcommunityplatform.profileservice.dto.request.ProfileInsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ErrorResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
                 required = true,
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = ProfileUpsertInternalRequestDto.class),
+                        schema = @Schema(implementation = ProfileInsertInternalRequestDto.class),
                         examples = @ExampleObject(
                                 name = "Internal profile upsert example",
                                 value = """

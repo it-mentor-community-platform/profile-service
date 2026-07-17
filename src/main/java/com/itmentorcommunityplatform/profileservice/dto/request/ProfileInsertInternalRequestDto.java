@@ -8,7 +8,7 @@ import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
 
-public record ProfileUpsertInternalRequestDto(
+public record ProfileInsertInternalRequestDto(
 
         @JsonProperty("telegram_user_id")
         Long telegramUserId,

@@ -2,8 +2,8 @@ package com.itmentorcommunityplatform.profileservice.service;
 
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
-import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
-import com.itmentorcommunityplatform.profileservice.dto.response.ProfileUpsertInternalResponseDto;
+import com.itmentorcommunityplatform.profileservice.dto.request.ProfileInsertInternalRequestDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ProfileInsertInternalResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithTelegramIdResponseDto;
 import com.itmentorcommunityplatform.profileservice.exception.MissingProfileDetailsException;
 import com.itmentorcommunityplatform.profileservice.exception.MissingTelegramUserIdException;
@@ -35,7 +35,7 @@ public class InternalProfileService {
     private final TelegramProfileUrlValidator telegramProfileUrlValidator;
 
     @Transactional
-    public ProfileUpsertInternalResponseDto insertProfileInternal(ProfileUpsertInternalRequestDto dto) {
+    public ProfileInsertInternalResponseDto insertProfileInternal(ProfileInsertInternalRequestDto dto) {
         Long telegramUserId = dto.telegramUserId();
         if (telegramUserId == null) {
             throw new MissingTelegramUserIdException("'telegram_user_id' must be provided");
@@ -70,7 +70,7 @@ public class InternalProfileService {
 
         log.info("New profile inserted: {}", profile);
 
-        return new ProfileUpsertInternalResponseDto(
+        return new ProfileInsertInternalResponseDto(
                 profile.getId(),
                 profile.getTelegramUserId(),
                 profileMapper.mapToProfileDetailsDto(profile.getDetails())
