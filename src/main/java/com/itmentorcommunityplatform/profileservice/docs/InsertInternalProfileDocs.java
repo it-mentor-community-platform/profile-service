@@ -1,6 +1,7 @@
 package com.itmentorcommunityplatform.profileservice.docs;
 
-import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpsertInternalRequestDto;
+import com.itmentorcommunityplatform.profileservice.dto.request.ProfileInsertInternalRequestDto;
+import com.itmentorcommunityplatform.profileservice.dto.response.ErrorResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -17,9 +18,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-        summary = "Upsert user profile (internal)",
+        summary = "Insert user profile (internal)",
         description = """
-                Create or update a user's profile details.
+                Create a user's profile details.
                 It is used by internal services.
                 Requires `telegram_user_id` and any set of details.
                 
@@ -40,7 +41,7 @@ import java.lang.annotation.Target;
                 required = true,
                 content = @Content(
                         mediaType = "application/json",
-                        schema = @Schema(implementation = ProfileUpsertInternalRequestDto.class),
+                        schema = @Schema(implementation = ProfileInsertInternalRequestDto.class),
                         examples = @ExampleObject(
                                 name = "Internal profile upsert example",
                                 value = """
@@ -64,8 +65,16 @@ import java.lang.annotation.Target;
                 description = "Profile created successfully"
         ),
         @ApiResponse(
-                responseCode = "200",
-                description = "Profile updated successfully"
+                responseCode = "409",
+                description = "Profile with provided telegram_user_id already exist",
+                content  = @Content(
+                        schema = @Schema(implementation = ErrorResponseDto.class))
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "An unexpected error occurred",
+                content  = @Content(
+                schema = @Schema(implementation = ErrorResponseDto.class))
         ),
         @ApiResponse(
                 responseCode = "400",
@@ -75,5 +84,5 @@ import java.lang.annotation.Target;
                 ))
         )
 })
-public @interface UpsertInternalProfileDocs {
+public @interface InsertInternalProfileDocs {
 }
