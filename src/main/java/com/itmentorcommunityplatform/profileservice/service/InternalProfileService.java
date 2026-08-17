@@ -14,6 +14,7 @@ import com.itmentorcommunityplatform.profileservice.validator.impl.GithubProfile
 import com.itmentorcommunityplatform.profileservice.validator.impl.TelegramProfileUrlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.stereotype.Service;
@@ -42,12 +43,7 @@ public class InternalProfileService {
 
         log.info("Starting insert new profile for telegramId: {}", telegramUserId);
 
-        Map<String, String> detailsMap = dto.details().getMap();
-        profileHelperService.validateDetails(detailsMap);
-
-        Set<ProfileDetail> details = detailsMap.entrySet().stream()
-                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
+        Set<ProfileDetail> details = normalizeProfileDetails(dto.details());
 
         Profile profile = Profile.builder()
                 .telegramUserId(telegramUserId)
@@ -80,16 +76,10 @@ public class InternalProfileService {
 
         log.info("Starting upsert profile for telegramId: {}", telegramUserId);
 
-        Map<String, String> detailsFromDtoRequest = dto.details().getMap();
-        profileHelperService.validateDetails(detailsFromDtoRequest);
-
-        Set<ProfileDetail> details = detailsFromDtoRequest.entrySet().stream()
-                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
-
         Optional<Profile> profileOptional = profileRepository.findByTelegramUserId(telegramUserId);
-
         boolean isExist = profileOptional.isPresent();
+
+        Set<ProfileDetail> details = normalizeProfileDetails(dto.details());
 
         Profile profile = profileOptional
                 .orElseGet(() ->
@@ -97,6 +87,10 @@ public class InternalProfileService {
                                 .telegramUserId(telegramUserId)
                                 .build()
                 );
+
+        if (isExist) {
+            details.addAll(profile.getDetails());
+        }
 
         profile.setDetails(details);
 
@@ -113,6 +107,7 @@ public class InternalProfileService {
                 isExist
         );
     }
+
 
     public ProfileWithTelegramIdResponseDto getProfileByGitHubUrl(String gitHubUrl) {
 
@@ -143,5 +138,14 @@ public class InternalProfileService {
                 });
 
         return profileMapper.mapToProfileWithTelegramIdDto(profile.getTelegramUserId(), profile.getDetails());
+    }
+
+    private @NonNull Set<ProfileDetail> normalizeProfileDetails(ProfileInsertInternalRequestDto.Details detailsFromDto) {
+        Map<String, String> detailsFromDtoRequest = detailsFromDto.getMap();
+        profileHelperService.validateDetails(detailsFromDtoRequest);
+
+        return detailsFromDtoRequest.entrySet().stream()
+                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
     }
 }
