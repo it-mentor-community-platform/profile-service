@@ -39,7 +39,7 @@ public class InternalProfileController {
 
         ProfileUpdateDto profileUpdateDto = internalProfileService.upsertProfileInternal(dto);
 
-        ProfileInsertInternalResponseDto profile = profileUpdateDto.profileInsertInternalResponseDto();
+        ProfileInsertInternalResponseDto profile = profileUpdateDto.profileDto();
 
         HttpStatus httpStatus = profileUpdateDto.isProfileWasExist() ? HttpStatus.OK : HttpStatus.CREATED;
         return ResponseEntity.status(httpStatus).body(profile);
