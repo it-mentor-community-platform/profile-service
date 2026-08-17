@@ -20,6 +20,6 @@ public class PolyglotAchievementStrategy implements AchievementCriteriaChecker {
     public boolean checkCriteria(Long userId) {
         Set<String> usersProjectsLanguages = projectRepository.findUsersProjectsLanguagesByUserId(userId);
 
-        return usersProjectsLanguages.size()>=4;
+        return usersProjectsLanguages.size() >= 4;
     }
 }

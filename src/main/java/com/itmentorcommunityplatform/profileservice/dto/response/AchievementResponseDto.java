@@ -8,8 +8,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class AchievementResponseDto
-{
+public class AchievementResponseDto {
     AchievementType type;
 
     @JsonProperty("earned_timestamp")

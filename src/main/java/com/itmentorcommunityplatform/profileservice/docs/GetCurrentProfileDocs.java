@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
 @Operation(
         summary = "Get current user's profile",
         description = "Retrieve the profile of the current user.\n" +
-                      "Requires header `X-Telegram-User-Id`.",
+                "Requires header `X-Telegram-User-Id`.",
         parameters = {
                 @Parameter(
                         name = "X-Telegram-User-Id",

@@ -26,12 +26,12 @@ public record ProfileInsertInternalRequestDto(
             description = "Custom profile Details",
             additionalProperties = Schema.AdditionalPropertiesValue.TRUE,
             example = """
-        {
-          "github_profile_url": "https://github.com/johndoe",
-          "twitter_handle": "@johndoe",
-          "portfolio": "https://johndoe.dev"
-        }
-        """
+                    {
+                      "github_profile_url": "https://github.com/johndoe",
+                      "twitter_handle": "@johndoe",
+                      "portfolio": "https://johndoe.dev"
+                    }
+                    """
     )
     @Getter
     public static class Details {

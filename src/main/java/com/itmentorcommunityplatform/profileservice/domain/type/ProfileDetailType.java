@@ -10,12 +10,12 @@ import java.util.Optional;
  * которые могут быть сохранены в системе. </p>
  * detailName совпадает с ключом во входящем JSON.
  * <p> Для добавления нового параметра профиля <br>
- *   - добавьте новый элемент enum с уникальным detailName <br>
- *   - при необходимости создайте валидатор имплементирующий
- *      интерфейс ProfileDetailValidator и являющийся @Component
+ * - добавьте новый элемент enum с уникальным detailName <br>
+ * - при необходимости создайте валидатор имплементирующий
+ * интерфейс ProfileDetailValidator и являющийся @Component
  * </p>
  * Пример:
- *   GITHUB_PROFILE_URL("github_profile_url")
+ * GITHUB_PROFILE_URL("github_profile_url")
  * <p> Статический метод fromName() позволяет получить тип по его
  * detailName.</p>
  */
