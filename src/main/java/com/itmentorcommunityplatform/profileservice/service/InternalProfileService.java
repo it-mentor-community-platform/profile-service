@@ -2,6 +2,7 @@ package com.itmentorcommunityplatform.profileservice.service;
 
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
+import com.itmentorcommunityplatform.profileservice.dto.external.ProfileUpdateDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileInsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileInsertInternalResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithTelegramIdResponseDto;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -68,6 +70,45 @@ public class InternalProfileService {
                 profile.getId(),
                 profile.getTelegramUserId(),
                 profileMapper.mapToProfileDetailsDto(profile.getDetails())
+        );
+    }
+
+    @Transactional
+    public ProfileUpdateDto upsertProfileInternal(ProfileInsertInternalRequestDto dto) {
+
+        Long telegramUserId = dto.telegramUserId();
+
+        log.info("Starting upsert profile for telegramId: {}", telegramUserId);
+
+        Map<String, String> detailsFromDtoRequest = dto.details().getMap();
+        profileHelperService.validateDetails(detailsFromDtoRequest);
+
+        Set<ProfileDetail> details = detailsFromDtoRequest.entrySet().stream()
+                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
+
+        Optional<Profile> profileOptional = profileRepository.findByTelegramUserId(telegramUserId);
+
+        boolean isExist = profileOptional.isPresent();
+
+        Profile profile = profileOptional
+                .orElseGet(() ->
+                        Profile.builder()
+                                .telegramUserId(telegramUserId)
+                                .build()
+                );
+
+        profile.setDetails(details);
+
+        profileRepository.save(profile);
+
+        log.info("New profile inserted: {}", profile);
+
+        return new ProfileUpdateDto(new ProfileInsertInternalResponseDto(
+                profile.getId(),
+                profile.getTelegramUserId(),
+                profileMapper.mapToProfileDetailsDto(profile.getDetails())),
+                isExist
         );
     }
 

@@ -3,6 +3,8 @@ package com.itmentorcommunityplatform.profileservice.controller;
 import com.itmentorcommunityplatform.profileservice.docs.GetProfileByGithubUrlDocs;
 import com.itmentorcommunityplatform.profileservice.docs.GetProfileByTgUrlDocs;
 import com.itmentorcommunityplatform.profileservice.docs.InsertInternalProfileDocs;
+import com.itmentorcommunityplatform.profileservice.docs.UpsertInternalProfileDocs;
+import com.itmentorcommunityplatform.profileservice.dto.external.ProfileUpdateDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileInsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileInsertInternalResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithTelegramIdResponseDto;
@@ -28,6 +30,19 @@ public class InternalProfileController {
         ProfileInsertInternalResponseDto profile = internalProfileService.insertProfileInternal(dto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(profile);
+    }
+
+    @PutMapping
+    @UpsertInternalProfileDocs
+    public ResponseEntity<ProfileInsertInternalResponseDto> upsertProfile(
+            @Valid @RequestBody ProfileInsertInternalRequestDto dto) {
+
+        ProfileUpdateDto profileUpdateDto = internalProfileService.upsertProfileInternal(dto);
+
+        ProfileInsertInternalResponseDto profile = profileUpdateDto.profileInsertInternalResponseDto();
+
+        HttpStatus httpStatus = profileUpdateDto.isProfileWasExist() ? HttpStatus.OK : HttpStatus.CREATED;
+        return ResponseEntity.status(httpStatus).body(profile);
     }
 
     @GetMapping("/by-github-profile-url")
