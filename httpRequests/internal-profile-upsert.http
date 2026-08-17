@@ -1,6 +1,6 @@
 ### 1. Успешное создание профиля пользователя (201 Created)
 # profile с telegram_user_id = 1301 не должен существовать в БД
-POST http://localhost:8083/api/profile/internal/profile
+PUT http://localhost:8083/api/profile/internal/profile
 Content-Type: application/json
 
 
@@ -14,7 +14,7 @@ Content-Type: application/json
 
 ### 2. Успешное обновление пользователя (200 Ok)
 # profile с telegram_user_id = 1301 должен существовать в БД
-POST http://localhost:8083/api/profile/internal/profile
+PUT http://localhost:8083/api/profile/internal/profile
 Content-Type: application/json
 
 
@@ -27,7 +27,7 @@ Content-Type: application/json
 }
 
 ### 3. Ошибки валидации: невалидные поля (400)
-POST http://localhost:8083/api/profile/internal/profile
+PUT http://localhost:8083/api/profile/internal/profile
 Content-Type: application/json
 
 {
@@ -39,7 +39,7 @@ Content-Type: application/json
 }
 
 ### 4. Отсутсвует telegram_user_id (400)
-POST http://localhost:8083/api/profile/internal/profile
+PUT http://localhost:8083/api/profile/internal/profile
 Content-Type: application/json
 
 {
@@ -50,7 +50,7 @@ Content-Type: application/json
 }
 
 ### 5. Невалидный telegram_user_id (400)
-POST http://localhost:8083/api/profile/internal/profile
+PUT http://localhost:8083/api/profile/internal/profile
 Content-Type: application/json
 
 {
@@ -62,7 +62,7 @@ Content-Type: application/json
 }
 
 ### 6. Список деталей пустой (400)
-POST http://localhost:8083/api/profile/internal/profile
+PUT http://localhost:8083/api/profile/internal/profile
 Content-Type: application/json
 
 {
@@ -73,7 +73,7 @@ Content-Type: application/json
 }
 
 ### 7. Отсутсвуют детали (400)
-POST http://localhost:8083/api/profile/internal/profile
+PUT http://localhost:8083/api/profile/internal/profile
 Content-Type: application/json
 
 {
@@ -81,7 +81,7 @@ Content-Type: application/json
 }
 
 ### 8. Ошибки валидации: невалидное значение поля (400)
-POST http://localhost:8083/api/profile/internal/profile
+PUT http://localhost:8083/api/profile/internal/profile
 Content-Type: application/json
 
 {
