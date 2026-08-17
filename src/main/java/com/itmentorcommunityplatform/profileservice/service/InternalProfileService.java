@@ -102,7 +102,9 @@ public class InternalProfileService {
 
         profileRepository.save(profile);
 
-        log.info("New profile inserted: {}", profile);
+        String logMessage = isExist ? "Profile was updated: {}" : "New profile inserted: {}";
+
+        log.info(logMessage, profile);
 
         return new ProfileUpdateDto(new ProfileInsertInternalResponseDto(
                 profile.getId(),
