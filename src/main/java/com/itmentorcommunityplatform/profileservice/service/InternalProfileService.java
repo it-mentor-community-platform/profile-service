@@ -79,8 +79,6 @@ public class InternalProfileService {
         Optional<Profile> profileOptional = profileRepository.findByTelegramUserId(telegramUserId);
         boolean isExist = profileOptional.isPresent();
 
-        Set<ProfileDetail> details = normalizeProfileDetails(dto.details());
-
         Profile profile = profileOptional
                 .orElseGet(() ->
                         Profile.builder()
@@ -88,9 +86,12 @@ public class InternalProfileService {
                                 .build()
                 );
 
-        if (isExist) {
-            details.addAll(profile.getDetails());
-        }
+        Set<ProfileDetail> details = isExist ?
+                profileHelperService.addOnlyNewProfileDetails(
+                        profile.getDetails(),
+                        dto.details().getMap())
+                :
+                normalizeProfileDetails(dto.details());
 
         profile.setDetails(details);
 

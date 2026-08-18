@@ -39,6 +39,22 @@ public class ProfileHelperService {
                 .collect(Collectors.toSet());
     }
 
+    public Set<ProfileDetail> addOnlyNewProfileDetails(
+            Set<ProfileDetail> existingDetails,
+            Map<String, String> newDetailsMap
+    ) {
+        Map<String, String> mergedMap = new HashMap<>();
+
+        existingDetails.forEach(detail ->
+                mergedMap.putIfAbsent(detail.getDetailName(), detail.getDetailValue()));
+
+        mergedMap.putAll(newDetailsMap);
+
+        return mergedMap.entrySet().stream()
+                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
+    }
+
     public void validateDetails(Map<String, String> details) {
         if (details == null) {
             throw new EmptyProfileDetailsException("Profile details should not be empty");

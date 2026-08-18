@@ -22,7 +22,7 @@ Content-Type: application/json
   "telegram_user_id": 1301,
   "details": {
     "github_profile_url": "https://github.com/created_by_internal_request",
-    "telegram_url": "https://t.me/created_by_internal_request"
+    "telegram_url": "https://t.me/created_by_internal_request_12345_other_detail"
   }
 }
 
