@@ -41,14 +41,15 @@ public class ProfileHelperService {
 
     public Set<ProfileDetail> addOnlyNewProfileDetails(
             Set<ProfileDetail> existingDetails,
-            Map<String, String> newDetailsMap
+            Set<ProfileDetail> newDetails
     ) {
         Map<String, String> mergedMap = new HashMap<>();
 
         existingDetails.forEach(detail ->
                 mergedMap.putIfAbsent(detail.getDetailName(), detail.getDetailValue()));
 
-        mergedMap.putAll(newDetailsMap);
+        newDetails.forEach(detail ->
+                mergedMap.putIfAbsent(detail.getDetailName(), detail.getDetailValue()));
 
         return mergedMap.entrySet().stream()
                 .map(e -> new ProfileDetail(e.getKey(), e.getValue()))

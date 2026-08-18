@@ -43,7 +43,8 @@ public class InternalProfileService {
 
         log.info("Starting insert new profile for telegramId: {}", telegramUserId);
 
-        Set<ProfileDetail> details = normalizeProfileDetails(dto.details());
+        Set<ProfileDetail> details = mapDetailsFromMapToSet(
+                validateAndTransformDetailsToMapFromDto(dto.details()));
 
         Profile profile = Profile.builder()
                 .telegramUserId(telegramUserId)
@@ -86,12 +87,16 @@ public class InternalProfileService {
                                 .build()
                 );
 
+        Map<String, String> detailsFromDtoRequest = validateAndTransformDetailsToMapFromDto(dto.details());
+
+        Set<ProfileDetail> profileDetails = mapDetailsFromMapToSet(detailsFromDtoRequest);
+
         Set<ProfileDetail> details = isExist ?
                 profileHelperService.addOnlyNewProfileDetails(
                         profile.getDetails(),
-                        dto.details().getMap())
+                        profileDetails)
                 :
-                normalizeProfileDetails(dto.details());
+                mapDetailsFromMapToSet(detailsFromDtoRequest);
 
         profile.setDetails(details);
 
@@ -141,12 +146,16 @@ public class InternalProfileService {
         return profileMapper.mapToProfileWithTelegramIdDto(profile.getTelegramUserId(), profile.getDetails());
     }
 
-    private @NonNull Set<ProfileDetail> normalizeProfileDetails(ProfileInsertInternalRequestDto.Details detailsFromDto) {
-        Map<String, String> detailsFromDtoRequest = detailsFromDto.getMap();
-        profileHelperService.validateDetails(detailsFromDtoRequest);
+    private @NonNull Set<ProfileDetail> mapDetailsFromMapToSet(Map<String, String> details) {
 
-        return detailsFromDtoRequest.entrySet().stream()
+        return details.entrySet().stream()
                 .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
                 .collect(Collectors.toSet());
+    }
+
+    private Map<String, String> validateAndTransformDetailsToMapFromDto(ProfileInsertInternalRequestDto.Details detailsFromDto) {
+        Map<String, String> detailsFromDtoRequest = detailsFromDto.getMap();
+        profileHelperService.validateDetails(detailsFromDtoRequest);
+        return detailsFromDtoRequest;
     }
 }
