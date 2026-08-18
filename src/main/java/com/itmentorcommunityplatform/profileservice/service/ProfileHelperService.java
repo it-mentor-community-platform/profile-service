@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,6 +33,23 @@ public class ProfileHelperService {
                 mergedMap.put(detail.getDetailName(), detail.getDetailValue()));
 
         mergedMap.putAll(newDetailsMap);
+
+        return mergedMap.entrySet().stream()
+                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<ProfileDetail> addOnlyNewProfileDetails(
+            Set<ProfileDetail> existingDetails,
+            Set<ProfileDetail> newDetails
+    ) {
+        Map<String, String> mergedMap = new HashMap<>();
+
+        existingDetails.forEach(detail ->
+                mergedMap.putIfAbsent(detail.getDetailName(), detail.getDetailValue()));
+
+        newDetails.forEach(detail ->
+                mergedMap.putIfAbsent(detail.getDetailName(), detail.getDetailValue()));
 
         return mergedMap.entrySet().stream()
                 .map(e -> new ProfileDetail(e.getKey(), e.getValue()))

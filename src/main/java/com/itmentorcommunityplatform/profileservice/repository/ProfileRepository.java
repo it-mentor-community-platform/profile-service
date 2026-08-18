@@ -21,10 +21,10 @@ public interface ProfileRepository extends CrudRepository<Profile, Long> {
     Optional<Profile> findProfileByGitHubUrl(@Param("gitHubUrl") String gitHubUrl);
 
     @Query("""
-        SELECT p.*
-        FROM profiles p
-        JOIN profiles_details pd ON p.id = pd.profile_id
-        WHERE pd.detail_name = 'telegram_url' AND pd.detail_value = :tgUrl""")
+            SELECT p.*
+            FROM profiles p
+            JOIN profiles_details pd ON p.id = pd.profile_id
+            WHERE pd.detail_name = 'telegram_url' AND pd.detail_value = :tgUrl""")
     Optional<Profile> findProfileByTgUrl(@Param("tgUrl") String tgUrl);
 
 

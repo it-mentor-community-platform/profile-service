@@ -2,6 +2,7 @@ package com.itmentorcommunityplatform.profileservice.service;
 
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
+import com.itmentorcommunityplatform.profileservice.dto.external.ProfileUpdateDto;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileInsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileInsertInternalResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithTelegramIdResponseDto;
@@ -13,12 +14,14 @@ import com.itmentorcommunityplatform.profileservice.validator.impl.GithubProfile
 import com.itmentorcommunityplatform.profileservice.validator.impl.TelegramProfileUrlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,12 +43,8 @@ public class InternalProfileService {
 
         log.info("Starting insert new profile for telegramId: {}", telegramUserId);
 
-        Map<String, String> detailsMap = dto.details().getMap();
-        profileHelperService.validateDetails(detailsMap);
-
-        Set<ProfileDetail> details = detailsMap.entrySet().stream()
-                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
+        Set<ProfileDetail> details = mapDetailsFromMapToSet(
+                validateAndTransformDetailsToMapFromDto(dto.details()));
 
         Profile profile = Profile.builder()
                 .telegramUserId(telegramUserId)
@@ -70,6 +69,51 @@ public class InternalProfileService {
                 profileMapper.mapToProfileDetailsDto(profile.getDetails())
         );
     }
+
+    @Transactional
+    public ProfileUpdateDto upsertProfileInternal(ProfileInsertInternalRequestDto dto) {
+
+        Long telegramUserId = dto.telegramUserId();
+
+        log.info("Starting upsert profile for telegramId: {}", telegramUserId);
+
+        Optional<Profile> profileOptional = profileRepository.findByTelegramUserId(telegramUserId);
+        boolean isExist = profileOptional.isPresent();
+
+        Profile profile = profileOptional
+                .orElseGet(() ->
+                        Profile.builder()
+                                .telegramUserId(telegramUserId)
+                                .build()
+                );
+
+        Map<String, String> detailsFromDtoRequest = validateAndTransformDetailsToMapFromDto(dto.details());
+
+        Set<ProfileDetail> profileDetails = mapDetailsFromMapToSet(detailsFromDtoRequest);
+
+        Set<ProfileDetail> details = isExist ?
+                profileHelperService.addOnlyNewProfileDetails(
+                        profile.getDetails(),
+                        profileDetails)
+                :
+                mapDetailsFromMapToSet(detailsFromDtoRequest);
+
+        profile.setDetails(details);
+
+        profileRepository.save(profile);
+
+        String logMessage = isExist ? "Profile was updated: {}" : "New profile inserted: {}";
+
+        log.info(logMessage, profile);
+
+        return new ProfileUpdateDto(new ProfileInsertInternalResponseDto(
+                profile.getId(),
+                profile.getTelegramUserId(),
+                profileMapper.mapToProfileDetailsDto(profile.getDetails())),
+                isExist
+        );
+    }
+
 
     public ProfileWithTelegramIdResponseDto getProfileByGitHubUrl(String gitHubUrl) {
 
@@ -100,5 +144,18 @@ public class InternalProfileService {
                 });
 
         return profileMapper.mapToProfileWithTelegramIdDto(profile.getTelegramUserId(), profile.getDetails());
+    }
+
+    private @NonNull Set<ProfileDetail> mapDetailsFromMapToSet(Map<String, String> details) {
+
+        return details.entrySet().stream()
+                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
+    }
+
+    private Map<String, String> validateAndTransformDetailsToMapFromDto(ProfileInsertInternalRequestDto.Details detailsFromDto) {
+        Map<String, String> detailsFromDtoRequest = detailsFromDto.getMap();
+        profileHelperService.validateDetails(detailsFromDtoRequest);
+        return detailsFromDtoRequest;
     }
 }

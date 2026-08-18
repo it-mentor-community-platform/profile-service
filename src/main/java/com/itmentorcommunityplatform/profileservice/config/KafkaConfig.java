@@ -1,8 +1,8 @@
 package com.itmentorcommunityplatform.profileservice.config;
 
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
-import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserAuthenticatedEvent;
+import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;

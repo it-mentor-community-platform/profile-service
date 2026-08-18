@@ -1,0 +1,93 @@
+### 1. Успешное создание профиля пользователя (201 Created)
+# profile с telegram_user_id = 1301 не должен существовать в БД
+PUT http://localhost:8083/api/profile/internal/profile
+Content-Type: application/json
+
+
+{
+  "telegram_user_id": 1301,
+  "details": {
+    "github_profile_url": "https://github.com/created_by_internal_request",
+    "telegram_url": "https://t.me/created_by_internal_request"
+  }
+}
+
+### 2. Успешное обновление пользователя (200 Ok)
+# profile с telegram_user_id = 1301 должен существовать в БД
+PUT http://localhost:8083/api/profile/internal/profile
+Content-Type: application/json
+
+
+{
+  "telegram_user_id": 1301,
+  "details": {
+    "github_profile_url": "https://github.com/created_by_internal_request",
+    "telegram_url": "https://t.me/created_by_internal_request_12345_other_detail"
+  }
+}
+
+### 3. Ошибки валидации: невалидные поля (400)
+PUT http://localhost:8083/api/profile/internal/profile
+Content-Type: application/json
+
+{
+  "telegram_user_id": 100,
+  "details": {
+    "not_valid_detail_name": "https://github.com/not_valid_detail_name",
+    "telegram_url": "https://t.me/not_valid_detail_name"
+  }
+}
+
+### 4. Отсутсвует telegram_user_id (400)
+PUT http://localhost:8083/api/profile/internal/profile
+Content-Type: application/json
+
+{
+  "details": {
+    "github_profile_url": "https://github.com/test4",
+    "telegram_url": "https://t.me/test4"
+  }
+}
+
+### 5. Невалидный telegram_user_id (400)
+PUT http://localhost:8083/api/profile/internal/profile
+Content-Type: application/json
+
+{
+  "telegram_user_id": "not valid",
+  "details": {
+    "github_profile_url": "https://github.com/test4",
+    "telegram_url": "https://t.me/test4"
+  }
+}
+
+### 6. Список деталей пустой (400)
+PUT http://localhost:8083/api/profile/internal/profile
+Content-Type: application/json
+
+{
+  "telegram_user_id": 100,
+  "details": {
+
+  }
+}
+
+### 7. Отсутсвуют детали (400)
+PUT http://localhost:8083/api/profile/internal/profile
+Content-Type: application/json
+
+{
+  "telegram_user_id": 100
+}
+
+### 8. Ошибки валидации: невалидное значение поля (400)
+PUT http://localhost:8083/api/profile/internal/profile
+Content-Type: application/json
+
+{
+  "telegram_user_id": 100,
+  "details": {
+    "github_profile_url": "not valid",
+    "telegram_url": "https://t.me/user100"
+  }
+}

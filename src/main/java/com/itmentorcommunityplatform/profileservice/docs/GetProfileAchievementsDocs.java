@@ -53,7 +53,7 @@ import java.lang.annotation.Target;
         ),
         @ApiResponse(
                 responseCode = "404",
-                description ="Profile not found",
+                description = "Profile not found",
                 content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(example = "{\n" +

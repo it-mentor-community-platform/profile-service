@@ -18,9 +18,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-        summary = "Insert user profile (internal)",
+        summary = "Upsert user profile (internal)",
         description = """
-                Create a user's profile details.
+                Upsert a user's profile details.
                 It is used by internal services.
                 Requires `telegram_user_id` and any set of details.
                 
@@ -61,14 +61,12 @@ import java.lang.annotation.Target;
 )
 @ApiResponses({
         @ApiResponse(
-                responseCode = "201",
-                description = "Profile created successfully"
+                responseCode = "200",
+                description = "Profile update successfully"
         ),
         @ApiResponse(
-                responseCode = "409",
-                description = "Profile with provided telegram_user_id already exist",
-                content = @Content(
-                        schema = @Schema(implementation = ErrorResponseDto.class))
+                responseCode = "201",
+                description = "Profile created successfully"
         ),
         @ApiResponse(
                 responseCode = "500",
@@ -84,5 +82,6 @@ import java.lang.annotation.Target;
                 ))
         )
 })
-public @interface InsertInternalProfileDocs {
+public @interface UpsertInternalProfileDocs {
 }
+
