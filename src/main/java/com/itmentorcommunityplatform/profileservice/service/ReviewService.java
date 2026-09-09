@@ -7,13 +7,17 @@ import com.itmentorcommunityplatform.profileservice.dto.event.ReviewCreatedEvent
 import com.itmentorcommunityplatform.profileservice.exception.ValidationException;
 import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import com.itmentorcommunityplatform.profileservice.repository.ReviewRepository;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
 
+@Validated
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -22,7 +26,7 @@ public class ReviewService {
     private final ProjectRepository projectRepository;
 
     @Transactional
-    public void save(ReviewCreatedEvent event) {
+    public void save(@NotNull @Valid ReviewCreatedEvent event) {
 
         ProjectDto eventProject = event.getProject();
 

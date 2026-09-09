@@ -1,9 +1,8 @@
 package com.itmentorcommunityplatform.profileservice.consumer;
 
 import com.itmentorcommunityplatform.profileservice.dto.event.ReviewCreatedEvent;
+import com.itmentorcommunityplatform.profileservice.exception.ValidationException;
 import com.itmentorcommunityplatform.profileservice.service.ReviewService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -21,7 +20,8 @@ public class ReviewCreatedConsumer {
             groupId = "profile-service-cg",
             containerFactory = "multiTypeKafkaListenerContainerFactory"
     )
-    public void consumeReviewCreatedEvent(@NotNull @Valid ReviewCreatedEvent event) {
+    public void consumeReviewCreatedEvent(ReviewCreatedEvent event) {
+        validateForNull(event);
         log.info("ReviewCreated received: url={}", event.getUrl());
 
         try {
@@ -30,6 +30,12 @@ public class ReviewCreatedConsumer {
         } catch (Exception e) {
             log.error("Kafka Consumer: Error processing event for review: {}",
                     event.getUrl(), e);
+        }
+    }
+
+    private void validateForNull(ReviewCreatedEvent event) {
+        if (event == null) {
+            throw new ValidationException("Request is empty!");
         }
     }
 }

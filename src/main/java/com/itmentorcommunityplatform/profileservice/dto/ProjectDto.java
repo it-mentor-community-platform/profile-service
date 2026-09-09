@@ -12,7 +12,7 @@ public record ProjectDto(
         @Positive
         Long id,
 
-        @NotBlank
+        @NotNull
         @JsonProperty("author_telegram_user_id")
         Long authorTelegramUserId,
 
