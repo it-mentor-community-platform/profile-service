@@ -43,8 +43,7 @@ public class ReviewService {
         );
 
         reviewRepository.save(Review.builder()
-                .id(event.getId())
-                .project(project)
+                .projectId(project.getId())
                 .reviewerTelegramUserId(parseTelegramId(event))
                 .url(event.getUrl())
                 .timestamp(event.getAddedTimestamp())
