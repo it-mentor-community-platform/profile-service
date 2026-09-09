@@ -2,6 +2,7 @@ package com.itmentorcommunityplatform.profileservice.mapper;
 
 
 import com.itmentorcommunityplatform.profileservice.domain.Project;
+import com.itmentorcommunityplatform.profileservice.dto.ProjectDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import org.mapstruct.Mapper;
 
@@ -9,4 +10,6 @@ import org.mapstruct.Mapper;
 public interface ProjectMapper {
 
     Project projectCreatedEvent(ProjectCreatedEvent projectCreatedEvent);
+
+    Project projectDto(ProjectDto projectDto);
 }

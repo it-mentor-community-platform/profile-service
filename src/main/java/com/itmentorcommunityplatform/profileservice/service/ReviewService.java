@@ -5,6 +5,7 @@ import com.itmentorcommunityplatform.profileservice.domain.Review;
 import com.itmentorcommunityplatform.profileservice.dto.ProjectDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.ReviewCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.exception.ResourceAlreadyExistException;
+import com.itmentorcommunityplatform.profileservice.mapper.ProjectMapper;
 import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import com.itmentorcommunityplatform.profileservice.repository.ReviewRepository;
 import jakarta.validation.Valid;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectMapper projectMapper;
 
     @Transactional
     public void save(@NotNull @Valid ReviewCreatedEvent event) {
@@ -38,13 +40,7 @@ public class ReviewService {
         Project project = optionalProject.orElseGet(
                 () ->
                 {
-                    Project savedProject = projectRepository.save(Project.builder()
-                            .authorTelegramUserId(eventProject.authorTelegramUserId())
-                            .githubRepositoryUrl(eventProject.githubRepositoryUrl())
-                            .programmingLanguage(eventProject.programmingLanguage())
-                            .roadmapProject(eventProject.roadmapProject())
-                            .addedTimestamp(eventProject.addedTimestamp())
-                            .build());
+                    Project savedProject = projectRepository.save(projectMapper.projectDto(eventProject));
                     log.info("Project with url {} was save to db", eventProject.githubRepositoryUrl());
                     return savedProject;
                 }

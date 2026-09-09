@@ -9,10 +9,6 @@ import jakarta.validation.constraints.Positive;
 public record ProjectDto(
 
         @NotNull
-        @Positive
-        Long id,
-
-        @NotNull
         @JsonProperty("author_telegram_user_id")
         Long authorTelegramUserId,
 
