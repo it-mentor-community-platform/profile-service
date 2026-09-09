@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/changesets/004-change-profile-details-idx.sql
   - include:
       file: db/changelog/changesets/005-add-constraint-profile-table.sql
+  - include:
+      file: db/changelog/changesets/006-create-table-reviews.sql

@@ -18,7 +18,9 @@ public class ProjectCreatedConsumer {
     private final AchievementService achievementService;
     private final ProfileDetailService profileDetailService;
 
-    @KafkaListener(topics = "${spring.kafka.topic.projects-project-created}", groupId = "profile-service-cg")
+    @KafkaListener(topics = "${spring.kafka.topic.projects-project-created}",
+            groupId = "profile-service-cg",
+            containerFactory = "multiTypeKafkaListenerContainerFactory")
     public void consumeProjectCreatedEvent(ProjectCreatedEvent event) {
         log.info("ProjectCreated received: userId={}", event.getAuthorTelegramUserId());
         log.debug("ProjectCreated payload: userId={}", event);
