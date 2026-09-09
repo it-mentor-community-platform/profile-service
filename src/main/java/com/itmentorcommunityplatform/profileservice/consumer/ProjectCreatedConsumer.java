@@ -18,7 +18,7 @@ public class ProjectCreatedConsumer {
     private final AchievementService achievementService;
     private final ProfileDetailService profileDetailService;
 
-    @KafkaListener(topics = "${spring.kafka.topic.projects-project-created}",
+    @KafkaListener(topics = "${spring.kafka.topic.projects-project-created_BAD_COMMIT}",
             groupId = "profile-service-cg",
             containerFactory = "multiTypeKafkaListenerContainerFactory")
     public void consumeProjectCreatedEvent(ProjectCreatedEvent event) {
