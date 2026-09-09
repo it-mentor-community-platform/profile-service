@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             ProfileAlreadyExistException.class,
-            AlreadyExistException.class
+            ResourceAlreadyExistException.class
     })
     public ResponseEntity<ErrorResponseDto> handleProfileAlreadyExistException(RuntimeException ex) {
         return ResponseEntity

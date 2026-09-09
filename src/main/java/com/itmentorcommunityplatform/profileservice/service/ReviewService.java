@@ -4,7 +4,7 @@ import com.itmentorcommunityplatform.profileservice.domain.Project;
 import com.itmentorcommunityplatform.profileservice.domain.Review;
 import com.itmentorcommunityplatform.profileservice.dto.ProjectDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.ReviewCreatedEvent;
-import com.itmentorcommunityplatform.profileservice.exception.AlreadyExistException;
+import com.itmentorcommunityplatform.profileservice.exception.ResourceAlreadyExistException;
 import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import com.itmentorcommunityplatform.profileservice.repository.ReviewRepository;
 import jakarta.validation.Valid;
@@ -29,7 +29,7 @@ public class ReviewService {
     public void save(@NotNull @Valid ReviewCreatedEvent event) {
 
         if (reviewRepository.existsById(event.getId())) {
-            throw new AlreadyExistException("This review already exist!");
+            throw new ResourceAlreadyExistException("This review already exist!");
         }
 
         ProjectDto eventProject = event.getProject();
