@@ -3,8 +3,8 @@ package com.itmentorcommunityplatform.profileservice.domain;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -13,12 +13,10 @@ import org.springframework.data.relational.core.mapping.Table;
 @Builder
 @Getter
 @Table(name = "reviews")
-public class Review {
+public class Review implements Persistable<Long> {
 
     @Id
-    @Setter
     private Long id;
-
 
     @Column("project_id")
     private Long projectId;
@@ -32,4 +30,8 @@ public class Review {
     @Column("added_timestamp")
     private Long timestamp;
 
+    @Override
+    public boolean isNew() {
+        return true;
+    }
 }

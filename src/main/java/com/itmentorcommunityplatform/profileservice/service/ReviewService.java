@@ -4,6 +4,7 @@ import com.itmentorcommunityplatform.profileservice.domain.Project;
 import com.itmentorcommunityplatform.profileservice.domain.Review;
 import com.itmentorcommunityplatform.profileservice.dto.ProjectDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.ReviewCreatedEvent;
+import com.itmentorcommunityplatform.profileservice.exception.AlreadyExistException;
 import com.itmentorcommunityplatform.profileservice.exception.ValidationException;
 import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import com.itmentorcommunityplatform.profileservice.repository.ReviewRepository;
@@ -28,6 +29,10 @@ public class ReviewService {
     @Transactional
     public void save(@NotNull @Valid ReviewCreatedEvent event) {
 
+        if (reviewRepository.existsById(event.getId())) {
+            throw new AlreadyExistException("This review already exist!");
+        }
+
         ProjectDto eventProject = event.getProject();
 
         Optional<Project> optionalProject = projectRepository.findByGithubRepositoryUrl(eventProject.githubRepositoryUrl());
@@ -47,6 +52,7 @@ public class ReviewService {
         );
 
         reviewRepository.save(Review.builder()
+                .id(event.getId())
                 .projectId(project.getId())
                 .reviewerTelegramUserId(parseTelegramId(event))
                 .url(event.getUrl())
