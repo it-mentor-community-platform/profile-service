@@ -5,7 +5,6 @@ import com.itmentorcommunityplatform.profileservice.domain.Review;
 import com.itmentorcommunityplatform.profileservice.dto.ProjectDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.ReviewCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.exception.AlreadyExistException;
-import com.itmentorcommunityplatform.profileservice.exception.ValidationException;
 import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import com.itmentorcommunityplatform.profileservice.repository.ReviewRepository;
 import jakarta.validation.Valid;
@@ -54,17 +53,9 @@ public class ReviewService {
         reviewRepository.save(Review.builder()
                 .id(event.getId())
                 .projectId(project.getId())
-                .reviewerTelegramUserId(parseTelegramId(event))
+                .reviewerTelegramUserId(event.getReviewerTelegramUserId())
                 .url(event.getUrl())
                 .timestamp(event.getAddedTimestamp())
                 .build());
-    }
-
-    private long parseTelegramId(ReviewCreatedEvent event) {
-        try {
-            return Long.parseLong(event.getReviewerTelegramUserId());
-        } catch (NumberFormatException e) {
-            throw new ValidationException("Invalid reviewer telegram id!");
-        }
     }
 }

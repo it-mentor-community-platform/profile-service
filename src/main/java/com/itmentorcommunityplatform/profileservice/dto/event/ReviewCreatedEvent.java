@@ -22,9 +22,10 @@ public class ReviewCreatedEvent {
     @JsonProperty("id")
     Long id;
 
-    @NotBlank
+    @NotNull
+    @Positive
     @JsonProperty("reviewer_telegram_user_id")
-    String reviewerTelegramUserId;
+    Long reviewerTelegramUserId;
 
     @JsonProperty("reviewer_telegram_profile_url")
     String reviewerTelegramProfileUrl;
