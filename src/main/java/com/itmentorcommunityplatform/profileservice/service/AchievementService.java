@@ -5,8 +5,8 @@ import com.itmentorcommunityplatform.profileservice.domain.Achievement;
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementCriteriaChecker;
 import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementStrategyRegistry;
+import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementEvent;
 import com.itmentorcommunityplatform.profileservice.domain.type.AchievementType;
-import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.request.AchievementsVisibleRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.AchievementResponseDto;
 import com.itmentorcommunityplatform.profileservice.exception.AchievementAccessDeniedException;
@@ -37,12 +37,12 @@ public class AchievementService {
     private final ProfileRepository profileRepository;
     private final AchievementConfig achievementConfig;
 
-    public void recheckAndAwardAchievements(ProjectCreatedEvent event) {
+    public void recheckAndAwardAchievements(AchievementEvent event) {
         profileService.getProfileForEvent(event).ifPresent(profile ->
                 transactionTemplate.executeWithoutResult(status -> {
                     for (AchievementType type : AchievementType.values()) {
                         AchievementCriteriaChecker checker = registry.getStrategy(type);
-                        if (checker != null && checker.checkCriteria(event.getAuthorTelegramUserId())) {
+                        if (checker != null && checker.checkCriteria(event.getTelegramUserId())) {
                             awardAchievement(event, type, profile);
                         }
                     }
@@ -99,10 +99,10 @@ public class AchievementService {
         );
     }
 
-    private void awardAchievement(ProjectCreatedEvent event, AchievementType achievementType, Profile profile) {
+    private void awardAchievement(AchievementEvent event, AchievementType achievementType, Profile profile) {
         if (alreadyHasAchievement(profile.getId(), achievementType)) {
             log.info("Achievement issuance skipped: user (profileId: {}({})) already owns achievement of type: {}",
-                    profile.getId(), event.getAuthorTelegramUserId(), achievementType);
+                    profile.getId(), event.getTelegramUserId(), achievementType);
             return;
         }
 
@@ -116,7 +116,7 @@ public class AchievementService {
 
         achievementRepository.save(achievement);
         log.info("User (profileId: {}({})), earned achievement: {}",
-                profile.getId(), event.getAuthorTelegramUserId(), achievementType);
+                profile.getId(), event.getTelegramUserId(), achievementType);
     }
 
     private Achievement getAchievementOrThrow(Long profileId, AchievementType type) {

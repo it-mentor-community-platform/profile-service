@@ -1,6 +1,7 @@
 package com.itmentorcommunityplatform.profileservice.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementEvent;
 import com.itmentorcommunityplatform.profileservice.dto.ProjectDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReviewCreatedEvent {
+public class ReviewCreatedEvent implements AchievementEvent {
 
     @NotNull
     @Positive
@@ -44,4 +45,8 @@ public class ReviewCreatedEvent {
     @JsonProperty("project")
     ProjectDto project;
 
+    @Override
+    public Long getTelegramUserId() {
+        return this.reviewerTelegramUserId;
+    }
 }
