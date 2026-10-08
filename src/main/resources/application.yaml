@@ -37,6 +37,10 @@ profile-service:
     BILINGUAL: Сданы проекты на двух языках!
     POLYGLOT: Сданы проекты на 4+ языках!
     SPRINTER: Сданы с 1 по 6 проект за 6 месяцев!
+    FUTURE_MENTOR: Будущий ментор!
+    UNIVERSAL_REVIEWER: Универсальный ревьюер!
+    EXPERIENCED_REVIEWER: Опытный ревьюер!
+    COMMUNITY_PILAR: Столп сообщества!
 
 
 
