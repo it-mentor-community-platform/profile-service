@@ -2,8 +2,8 @@ package com.itmentorcommunityplatform.profileservice.service;
 
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
 import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
-import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementEvent;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
+import com.itmentorcommunityplatform.profileservice.dto.AchievementDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserAuthenticatedEvent;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.exception.ProfileNotFoundException;
@@ -117,13 +117,13 @@ public class ProfileService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<Profile> getProfileForEvent(AchievementEvent event) {
-        if (event == null || event.getTelegramUserId() == null) {
+    public Optional<Profile> getProfileForEvent(AchievementDto event) {
+        if (event == null || event.telegramUserId() == null) {
             log.warn("Received empty event or null author ID");
             return Optional.empty();
         }
 
-        Long telegramUserId = event.getTelegramUserId();
+        Long telegramUserId = event.telegramUserId();
 
         Optional<Profile> maybeProfile = profileRepository.findByTelegramUserId(telegramUserId);
 

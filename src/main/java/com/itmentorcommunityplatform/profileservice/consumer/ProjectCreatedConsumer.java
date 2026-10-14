@@ -1,6 +1,7 @@
 package com.itmentorcommunityplatform.profileservice.consumer;
 
 import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
+import com.itmentorcommunityplatform.profileservice.mapper.ProjectMapper;
 import com.itmentorcommunityplatform.profileservice.service.AchievementService;
 import com.itmentorcommunityplatform.profileservice.service.ProfileDetailService;
 import com.itmentorcommunityplatform.profileservice.service.ProjectService;
@@ -17,6 +18,7 @@ public class ProjectCreatedConsumer {
     private final ProjectService projectService;
     private final AchievementService achievementService;
     private final ProfileDetailService profileDetailService;
+    private final ProjectMapper projectMapper;
 
     @KafkaListener(topics = "${spring.kafka.topic.projects-project-created}",
             groupId = "profile-service-cg",
@@ -28,7 +30,7 @@ public class ProjectCreatedConsumer {
         try {
             profileDetailService.upsertGithubProfileUrl(event.getAuthorTelegramUserId(), event.getGithubRepositoryUrl());
             projectService.createdProject(event);
-            achievementService.recheckAndAwardAchievements(event);
+            achievementService.recheckAndAwardAchievements(projectMapper.achievementDto(event));
             log.info("Kafka Consumer: Successfully processed event for user {}", event.getAuthorTelegramUserId());
         } catch (Exception e) {
             log.error("Kafka Consumer: Error processing event for user: {}",

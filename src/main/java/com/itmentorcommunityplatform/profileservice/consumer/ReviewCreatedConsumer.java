@@ -2,6 +2,7 @@ package com.itmentorcommunityplatform.profileservice.consumer;
 
 import com.itmentorcommunityplatform.profileservice.dto.event.ReviewCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.exception.ValidationException;
+import com.itmentorcommunityplatform.profileservice.mapper.ReviewMapper;
 import com.itmentorcommunityplatform.profileservice.service.AchievementService;
 import com.itmentorcommunityplatform.profileservice.service.ReviewService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ public class ReviewCreatedConsumer {
 
     private final ReviewService reviewService;
     private final AchievementService achievementService;
+    private final ReviewMapper reviewMapper;
 
     @KafkaListener(
             topics = "${spring.kafka.topic.reviews-review-created}",
@@ -28,7 +30,7 @@ public class ReviewCreatedConsumer {
 
         try {
             reviewService.save(event);
-            achievementService.recheckAndAwardAchievements(event);
+            achievementService.recheckAndAwardAchievements(reviewMapper.achievementDto(event));
             log.info("Kafka Consumer: Successfully save review {}", event.getUrl());
         } catch (Exception e) {
             log.error("Kafka Consumer: Error processing event for review: {}",

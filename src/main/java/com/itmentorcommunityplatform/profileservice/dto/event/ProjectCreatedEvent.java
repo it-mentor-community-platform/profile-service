@@ -1,7 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.itmentorcommunityplatform.profileservice.domain.achievement.AchievementEvent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProjectCreatedEvent implements AchievementEvent {
+public class ProjectCreatedEvent {
     @JsonProperty("author_telegram_user_id")
     Long authorTelegramUserId;
     @JsonProperty("author_telegram_profile_url")
@@ -26,9 +25,4 @@ public class ProjectCreatedEvent implements AchievementEvent {
     Long addedTimestamp;
     @JsonProperty("project_source_type")
     String projectSourceType;
-
-    @Override
-    public Long getTelegramUserId() {
-        return this.authorTelegramUserId;
-    }
 }
