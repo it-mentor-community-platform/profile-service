@@ -1,4 +1,4 @@
-package achievementStrategy;
+package achievement.strategy;
 
 import com.itmentorcommunityplatform.profileservice.domain.achievement.strategy.AllProjectsAchievementStrategy;
 import com.itmentorcommunityplatform.profileservice.domain.type.RoadmapProjectType;
@@ -43,7 +43,6 @@ public class AllProjectsAchievementStrategyTest {
 
 
         boolean result = achievementStrategy.checkCriteria(userId);
-
 
         assertTrue(result);
     }

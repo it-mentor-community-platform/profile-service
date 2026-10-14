@@ -1,6 +1,6 @@
-package achievementStrategy;
+package achievement.strategy;
 
-import com.itmentorcommunityplatform.profileservice.domain.achievement.strategy.PolyglotAchievementStrategy;
+import com.itmentorcommunityplatform.profileservice.domain.achievement.strategy.BilingualAchievementStrategy;
 import com.itmentorcommunityplatform.profileservice.repository.ProjectRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,23 +16,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class PolyglotAchievementStrategyTest {
+public class BilingualAchievementStrategyTest {
 
     @Mock
     private ProjectRepository projectRepository;
 
     @InjectMocks
-    private PolyglotAchievementStrategy achievementStrategy;
+    private BilingualAchievementStrategy achievementStrategy;
 
     @Test
-    @DisplayName("Возвращает true, если у юзера проекты на 4 различных языках")
-    void shouldReturnTrueWhenUserHasFourDifferentLanguages() {
+    @DisplayName("Возвращает true при проектах на 2 разных языках")
+    void checkCriteriaShouldReturnTrueWhenUserHasProjectsOnTwoLanguages() {
+
         Long userId = 228L;
 
-        Set<String> fourLanguages = Set.of("Java", "Python", "JavaScript", "Go");
+        Set<String> twoLanguages = Set.of("Java", "Python");
 
         when(projectRepository.findUsersProjectsLanguagesByUserId(userId))
-                .thenReturn(fourLanguages);
+                .thenReturn(twoLanguages);
 
         boolean result = achievementStrategy.checkCriteria(userId);
 
@@ -40,24 +41,24 @@ public class PolyglotAchievementStrategyTest {
     }
 
     @Test
-    @DisplayName("Возвращает true, если у юзера проекты на 5 различных языках")
-    void shouldReturnTrueWhenUserHasMoreThanFourLanguages() {
+    @DisplayName("Возвращает false при проектах только на 1 языке")
+    void checkCriteriaShouldReturnTrueWhenUserHasProjectsOnOnlyOneLanguage() {
 
         Long userId = 228L;
 
-        Set<String> fiveLanguages = Set.of("Java", "Python", "JavaScript", "Go", "Rust");
+        Set<String> twoLanguages = Set.of("Java");
 
         when(projectRepository.findUsersProjectsLanguagesByUserId(userId))
-                .thenReturn(fiveLanguages);
+                .thenReturn(twoLanguages);
 
         boolean result = achievementStrategy.checkCriteria(userId);
 
-        assertTrue(result);
+        assertFalse(result);
     }
 
     @Test
-    @DisplayName("Возвращает false, если у юзера проекты на 3 различных языках")
-    void shouldReturnFalseWhenUserHasLessThanFourLanguages() {
+    @DisplayName("Возвращает false при проектах на 3 языках")
+    void checkCriteriaShouldReturnFalseWhenUserHasProjectsOnThreeOrMoreLanguages() {
 
         Long userId = 228L;
 
@@ -69,5 +70,6 @@ public class PolyglotAchievementStrategyTest {
         boolean result = achievementStrategy.checkCriteria(userId);
 
         assertFalse(result);
+
     }
 }

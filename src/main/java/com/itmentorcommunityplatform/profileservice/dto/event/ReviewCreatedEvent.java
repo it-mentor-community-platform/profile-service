@@ -43,5 +43,4 @@ public class ReviewCreatedEvent {
     @Valid
     @JsonProperty("project")
     ProjectDto project;
-
 }
