@@ -1,7 +1,7 @@
-package achievementStrategy;
+package achievement.strategy;
 
 import com.itmentorcommunityplatform.profileservice.domain.Review;
-import com.itmentorcommunityplatform.profileservice.domain.achievement.strategy.ExperiencedReviewerAchievementStrategy;
+import com.itmentorcommunityplatform.profileservice.domain.achievement.strategy.CommunityPilarAchievementStrategy;
 import com.itmentorcommunityplatform.profileservice.repository.ReviewRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,18 +18,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ExperiencedReviewerAchievementStrategyTest {
+public class CommunityPilarAchievementStrategyTest {
     @Mock
     private ReviewRepository reviewRepository;
 
     @InjectMocks
-    private ExperiencedReviewerAchievementStrategy achievementStrategy;
+    private CommunityPilarAchievementStrategy achievementStrategy;
 
     @Test
-    @DisplayName("Возвращает true, если ревьюер имеет 25 ревью")
-    void checkCriteriaShouldReturnTrueWhenReviewerHas_25_Reviews() {
+    @DisplayName("Возвращает true, если ревьюер имеет 100 ревью")
+    void checkCriteriaShouldReturnTrueWhenReviewerHas_100_Reviews() {
 
-        int countReviews = 25;
+        int countReviews = 100;
         Long userId = 228L;
 
         when(reviewRepository.findByReviewerTelegramUserId(userId))
@@ -41,10 +41,10 @@ public class ExperiencedReviewerAchievementStrategyTest {
     }
 
     @Test
-    @DisplayName("Возвращает false, если ревьюер имеет менее 25 ревью")
-    void checkCriteriaShouldReturnTrueWhenReviewerHasFewer_25_Reviews() {
+    @DisplayName("Возвращает false, если ревьюер имеет менее 100 ревью")
+    void checkCriteriaShouldReturnTrueWhenReviewerHasFewer_100_Reviews() {
 
-        int countReviews = 24;
+        int countReviews = 99;
         Long userId = 228L;
 
         when(reviewRepository.findByReviewerTelegramUserId(userId))

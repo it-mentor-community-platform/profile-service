@@ -1,4 +1,4 @@
-package achievementStrategy;
+package achievement.strategy;
 
 import com.itmentorcommunityplatform.profileservice.domain.Project;
 import com.itmentorcommunityplatform.profileservice.domain.achievement.strategy.FirstProjectAchievementStrategy;

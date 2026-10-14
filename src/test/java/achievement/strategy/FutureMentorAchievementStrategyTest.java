@@ -1,4 +1,4 @@
-package achievementStrategy;
+package achievement.strategy;
 
 import com.itmentorcommunityplatform.profileservice.domain.Review;
 import com.itmentorcommunityplatform.profileservice.domain.achievement.strategy.FutureMentorAchievementStrategy;
