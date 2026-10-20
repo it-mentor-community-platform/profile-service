@@ -44,17 +44,43 @@ public class ProfileRepositoryCustomImpl implements ProfileRepositoryCustom {
                 SET detail_value = EXCLUDED.detail_value;
                 """;
 
+        String fieldExistence = """
+                        SELECT EXISTS (
+                        SELECT 1
+                        FROM profiles_details
+                        WHERE detail_name = ?
+                        AND detail_value = ?
+                        AND profile_id <> ?
+                        )
+                        """;
+
         for (ProfileDetail detail : profile.getDetails()) {
+            boolean shouldUpdate = true;
+
             if (ProfileDetailType.GITHUB_PROFILE_URL.getDetailName()
                     .equals(detail.getDetailName()) ||
                     ProfileDetailType.TELEGRAM_URL.getDetailName()
                             .equals(detail.getDetailName())
             ) {
-                //ToDo разобраться с селектом ЧУЖИХ Юрлов, если они сопадают с нашим (варианты с инсерт/апдейт)
-                //Todo подумать про конкурентность и есть ли она тут
+
+                boolean doesUrlExist = template.queryForObject(
+                        fieldExistence,
+                        Boolean.class,
+                        detail.getDetailName(),
+                        detail.getDetailValue(),
+                        id
+                );
+
+                shouldUpdate = !doesUrlExist;
+
+                //Todo подумать про конкурентность. (точнее про... рейс кондиишн)
+                // но бизнес-требование «пропустить конфликтующий ЮРЛ и сохранить остальные детали»
+                // при такой гонке может нарушиться из-за ошибки транзакции.
             }
 
-            template.update(updateDetails, id, detail.getDetailName(), detail.getDetailValue());
+            if (shouldUpdate) {
+                template.update(updateDetails, id, detail.getDetailName(), detail.getDetailValue());
+            }
         }
     }
 }
