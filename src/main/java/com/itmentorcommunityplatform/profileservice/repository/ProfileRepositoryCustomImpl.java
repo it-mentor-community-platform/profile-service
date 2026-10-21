@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @RequiredArgsConstructor
 @Repository
 public class ProfileRepositoryCustomImpl implements ProfileRepositoryCustom {
@@ -22,6 +25,7 @@ public class ProfileRepositoryCustomImpl implements ProfileRepositoryCustom {
                 """;
 
         Long id = template.queryForObject(profileCreation, Long.class, profile.getTelegramUserId());
+        profile.setId(id);
 
         String profileDetailsCreation = """
                 INSERT INTO profiles_details (profile_id, detail_name, detail_value)
@@ -29,9 +33,22 @@ public class ProfileRepositoryCustomImpl implements ProfileRepositoryCustom {
                 ON CONFLICT DO NOTHING
                 """;
 
+        Set<ProfileDetail> successfullyChangedDetails = new HashSet<>();
+
         for (ProfileDetail detail : profile.getDetails()) {
-            template.update(profileDetailsCreation, id, detail.getDetailName(), detail.getDetailValue());
+            int updated = template.update(
+                    profileDetailsCreation,
+                    id,
+                    detail.getDetailName(),
+                    detail.getDetailValue()
+            );
+
+            if (updated > 0) {
+                successfullyChangedDetails.add(detail);
+            }
         }
+
+        profile.setDetails(successfullyChangedDetails);
     }
 
     @Override
@@ -54,15 +71,12 @@ public class ProfileRepositoryCustomImpl implements ProfileRepositoryCustom {
                         )
                         """;
 
+        Set<ProfileDetail> successfullyChangedDetails = new HashSet<>();
+
         for (ProfileDetail detail : profile.getDetails()) {
             boolean shouldUpdate = true;
 
-            if (ProfileDetailType.GITHUB_PROFILE_URL.getDetailName()
-                    .equals(detail.getDetailName()) ||
-                    ProfileDetailType.TELEGRAM_URL.getDetailName()
-                            .equals(detail.getDetailName())
-            ) {
-
+            if (doesUrlMatch(detail)) {
                 boolean doesUrlExist = template.queryForObject(
                         fieldExistence,
                         Boolean.class,
@@ -79,8 +93,20 @@ public class ProfileRepositoryCustomImpl implements ProfileRepositoryCustom {
             }
 
             if (shouldUpdate) {
-                template.update(updateDetails, id, detail.getDetailName(), detail.getDetailValue());
+                int updated = template.update(updateDetails, id, detail.getDetailName(), detail.getDetailValue());
+                if (updated > 0) {
+                    successfullyChangedDetails.add(detail);
+                }
             }
         }
+
+        profile.setDetails(successfullyChangedDetails);
+    }
+
+    private boolean doesUrlMatch(ProfileDetail detail) {
+        return ProfileDetailType.GITHUB_PROFILE_URL.getDetailName()
+                .equals(detail.getDetailName()) ||
+                ProfileDetailType.TELEGRAM_URL.getDetailName()
+                        .equals(detail.getDetailName());
     }
 }

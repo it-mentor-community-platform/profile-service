@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,13 +51,10 @@ public class InternalProfileService {
                 .build();
 
         try {
-            profileRepository.save(profile);
-        } catch (DbActionExecutionException e) {
-            if (e.getCause() instanceof DuplicateKeyException) {
-                log.warn("Profile with TelegramID: {} already exist", telegramUserId);
-                throw new ProfileAlreadyExistException("Profile with telegramUserId " + telegramUserId + " already exists");
-            }
-            throw e;
+            profileRepository.createProfile(profile);
+        } catch (DuplicateKeyException e) {
+            log.warn("Profile with TelegramID: {} already exists", telegramUserId);
+            throw new ProfileAlreadyExistException("Profile with telegramUserId " + telegramUserId + " already exists");
         }
 
         log.info("New profile inserted: {}", profile);
@@ -100,9 +96,13 @@ public class InternalProfileService {
 
         profile.setDetails(details);
 
-        profileRepository.save(profile);
+        if (isExist) {
+            profileRepository.updateProfile(profile, profile.getId());
+        } else {
+            profileRepository.createProfile(profile);
+        }
 
-        String logMessage = isExist ? "Profile was updated: {}" : "New profile inserted: {}";
+        String logMessage = isExist ? "Profile was processed: {}" : "New profile inserted: {}";
 
         log.info(logMessage, profile);
 
@@ -113,7 +113,6 @@ public class InternalProfileService {
                 isExist
         );
     }
-
 
     public ProfileWithTelegramIdResponseDto getProfileByGitHubUrl(String gitHubUrl) {
 
