@@ -48,7 +48,7 @@ class ProfileServiceTest {
 
         profileService.createOrUpdateProfile(event);
 
-        verify(profileRepository).save(profileCaptor.capture());
+        verify(profileRepository).createProfile(profileCaptor.capture());
         Profile savedProfile = profileCaptor.getValue();
 
         assertEquals(1, savedProfile.getDetails().size());
@@ -68,7 +68,7 @@ class ProfileServiceTest {
 
         profileService.createOrUpdateProfile(event);
 
-        verify(profileRepository).save(profileCaptor.capture());
+        verify(profileRepository).createProfile(profileCaptor.capture());
         Profile savedProfile = profileCaptor.getValue();
 
         assertEquals(2, savedProfile.getDetails().size());
@@ -77,11 +77,13 @@ class ProfileServiceTest {
     }
 
     @Test
-    @DisplayName("Обновление профиля: актуализация данных и сохранение старых деталей")
-    void shouldUpdateProfile_AddLastName_KeepExistingGithub() {
+    @DisplayName("Обновление профиля: актуализация данных - должны измениться лишь новые данные")
+    void shouldUpdateProfile_WithOnlyIncomingDetails() {
         Set<ProfileDetail> existingDetails = new HashSet<>();
-        existingDetails.add(new ProfileDetail(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(), "https://github.com/ivan"));
-        existingDetails.add(new ProfileDetail(ProfileDetailType.FIRST_NAME.getDetailName(), "OldName"));
+        existingDetails.add(new ProfileDetail(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(),
+                "https://github.com/ivan"));
+        existingDetails.add(new ProfileDetail(ProfileDetailType.FIRST_NAME.getDetailName(),
+                "OldName"));
 
         Profile existingProfile = Profile.builder()
                 .id(1L)
@@ -99,13 +101,13 @@ class ProfileServiceTest {
 
         profileService.createOrUpdateProfile(event);
 
-        verify(profileRepository).save(profileCaptor.capture());
+        verify(profileRepository).findByTelegramUserId(TELEGRAM_USER_ID);
+        verify(profileRepository).updateProfile(profileCaptor.capture(), eq(1L));
         Profile updated = profileCaptor.getValue();
 
-        assertEquals(3, updated.getDetails().size());
+        assertEquals(2, updated.getDetails().size());
         assertTrue(hasDetail(updated, ProfileDetailType.FIRST_NAME, "NewName"));
         assertTrue(hasDetail(updated, ProfileDetailType.LAST_NAME, "NewSurname"));
-        assertTrue(hasDetail(updated, ProfileDetailType.GITHUB_PROFILE_URL, "https://github.com/ivan"));
     }
 
     @Test
@@ -124,7 +126,7 @@ class ProfileServiceTest {
                 .build();
 
         profileService.createOrUpdateProfile(event);
-        verify(profileRepository, never()).save(any());
+        verify(profileRepository, never()).createProfile(any());
     }
 
     @Test
@@ -140,14 +142,14 @@ class ProfileServiceTest {
 
         profileService.createOrUpdateProfile(event);
 
-        verify(profileRepository).save(profileCaptor.capture());
+        verify(profileRepository).createProfile(profileCaptor.capture());
         Profile savedProfile = profileCaptor.getValue();
 
         assertTrue(savedProfile.getDetails().isEmpty(), "Список деталей должен быть пустым для blank значений");
     }
 
     @Test
-    @DisplayName("Обновление: если новые поля null, старые детали не должны затираться")
+    @DisplayName("Обновление: если новые поля null, они и не будут переданы")
     void shouldNotOverwriteDataWithNulls_WhenUpdating() {
         Set<ProfileDetail> existingDetails = new HashSet<>();
         existingDetails.add(new ProfileDetail(ProfileDetailType.FIRST_NAME.getDetailName(), "Ivan"));
@@ -167,10 +169,11 @@ class ProfileServiceTest {
 
         profileService.createOrUpdateProfile(event);
 
-        verify(profileRepository).save(profileCaptor.capture());
+        verify(profileRepository).findByTelegramUserId(TELEGRAM_USER_ID);
+        verify(profileRepository).updateProfile(profileCaptor.capture(), eq(1L));
         Profile updated = profileCaptor.getValue();
 
-        assertTrue(hasDetail(updated, ProfileDetailType.FIRST_NAME, "Ivan"));
+        assertTrue(updated.getDetails().isEmpty());
     }
 
     private boolean hasDetail(Profile profile, ProfileDetailType type, String value) {
