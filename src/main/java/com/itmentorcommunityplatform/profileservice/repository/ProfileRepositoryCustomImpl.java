@@ -6,6 +6,7 @@ import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailTyp
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,6 +17,7 @@ public class ProfileRepositoryCustomImpl implements ProfileRepositoryCustom {
 
     private final JdbcTemplate template;
 
+    @Transactional
     @Override
     public void createProfile(Profile profile) {
         String profileCreation = """
@@ -51,6 +53,7 @@ public class ProfileRepositoryCustomImpl implements ProfileRepositoryCustom {
         profile.setDetails(successfullyChangedDetails);
     }
 
+    @Transactional
     @Override
     public void updateProfile(Profile profile, Long id) {
         String updateDetails = """
@@ -86,10 +89,6 @@ public class ProfileRepositoryCustomImpl implements ProfileRepositoryCustom {
                 );
 
                 shouldUpdate = !doesUrlExist;
-
-                //Todo подумать про конкурентность. (точнее про... рейс кондиишн)
-                // но бизнес-требование «пропустить конфликтующий ЮРЛ и сохранить остальные детали»
-                // при такой гонке может нарушиться из-за ошибки транзакции.
             }
 
             if (shouldUpdate) {

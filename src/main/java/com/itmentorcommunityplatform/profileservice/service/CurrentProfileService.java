@@ -12,14 +12,14 @@ import com.itmentorcommunityplatform.profileservice.repository.AchievementReposi
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static com.itmentorcommunityplatform.profileservice.service.ProfileHelperService.mergeProfileDetails;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -47,12 +47,8 @@ public class CurrentProfileService {
 
                 List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
 
-                Set<ProfileDetail> mergedDetails = mergeProfileDetails(profile.getDetails(), newDetailsMap);
-                profile.setDetails(mergedDetails);
-
-                //TODO: После рефакторинга всех сервисов проверить,
-                // нужен ли ещё mergeProfileDetails().
-                // Если нет - просто передавать newDetailsMap с конвертом мапы в сет
+                Set<ProfileDetail> newDetailsSet = mapDetailsFromMapToSet(newDetailsMap);
+                profile.setDetails(newDetailsSet);
 
                 profileRepository.updateProfile(profile, profile.getId());
 
@@ -104,5 +100,11 @@ public class CurrentProfileService {
     private Profile getProfileOrThrow(Long telegramUserId) {
         return profileRepository.findByTelegramUserId(telegramUserId)
                 .orElseThrow(() -> new ProfileNotFoundException("Profile not found"));
+    }
+
+    private @NonNull Set<ProfileDetail> mapDetailsFromMapToSet(Map<String, String> details) {
+        return details.entrySet().stream()
+                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
     }
 }
