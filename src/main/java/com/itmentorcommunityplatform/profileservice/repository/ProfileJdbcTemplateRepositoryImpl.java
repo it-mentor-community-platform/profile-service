@@ -13,7 +13,7 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 @Repository
-public class ProfileJdbcTemplateRepositoryImpl implements ProfileJdbcTemplateRepository<Profile> {
+public class ProfileJdbcTemplateRepositoryImpl implements ProfileJdbcTemplateRepository {
 
     private final JdbcTemplate template;
 
@@ -24,7 +24,7 @@ public class ProfileJdbcTemplateRepositoryImpl implements ProfileJdbcTemplateRep
 
     @Override
     @Transactional
-    public <S extends Profile> S save(S profile) {
+    public Profile save(Profile profile) {
         if (profile.getId() == null) {
             createProfile(profile);
         } else {
