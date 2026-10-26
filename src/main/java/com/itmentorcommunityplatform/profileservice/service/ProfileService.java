@@ -61,11 +61,7 @@ public class ProfileService {
         } else {
             log.info("Creating new profile for telegramUserId: {}", telegramUserId);
 
-            Profile newProfile = Profile.builder()
-                    .id(null)
-                    .telegramUserId(telegramUserId)
-                    .details(incomingProfileDetails)
-                    .build();
+            Profile newProfile = new Profile(telegramUserId, incomingProfileDetails);
 
             profileRepository.save(newProfile);
             log.info("Successfully created profile with telegramUserId: {}", telegramUserId);

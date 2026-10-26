@@ -22,8 +22,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.itmentorcommunityplatform.profileservice.service.ProfileHelperService.mapDetailsFromMapToSet;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -42,13 +40,10 @@ public class InternalProfileService {
 
         log.info("Starting insert new profile for telegramId: {}", telegramUserId);
 
-        Set<ProfileDetail> details = mapDetailsFromMapToSet(
+        Set<ProfileDetail> details = profileHelperService.mapDetailsFromMapToSet(
                 validateAndTransformDetailsToMapFromDto(dto.details()));
 
-        Profile profile = Profile.builder()
-                .telegramUserId(telegramUserId)
-                .details(details)
-                .build();
+        Profile profile = new Profile(telegramUserId, details);
 
         try {
             profileRepository.save(profile);
@@ -76,23 +71,21 @@ public class InternalProfileService {
         Optional<Profile> profileOptional = profileRepository.findByTelegramUserId(telegramUserId);
         boolean isExist = profileOptional.isPresent();
 
-        Profile profile = profileOptional
-                .orElseGet(() ->
-                        Profile.builder()
-                                .telegramUserId(telegramUserId)
-                                .build()
-                );
-
         Map<String, String> detailsFromDtoRequest = validateAndTransformDetailsToMapFromDto(dto.details());
 
-        Set<ProfileDetail> profileDetails = mapDetailsFromMapToSet(detailsFromDtoRequest);
+        Set<ProfileDetail> profileDetails = profileHelperService.mapDetailsFromMapToSet(detailsFromDtoRequest);
 
-        Set<ProfileDetail> details = isExist
-                ? profileHelperService.addOnlyNewProfileDetails(
-                profile.getDetails(), profileDetails)
-                : profileDetails;
+        Profile profile = profileOptional
+                .orElseGet(() ->
+                        new Profile(telegramUserId, profileDetails)
+                );
 
-        profile.setDetails(details);
+        if (isExist) {
+            profile.setDetails(
+                    profileHelperService.addOnlyNewProfileDetails(
+                            profile.getDetails(), profileDetails)
+            );
+        }
 
         profileRepository.save(profile);
 

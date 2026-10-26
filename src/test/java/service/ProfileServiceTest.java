@@ -85,11 +85,11 @@ class ProfileServiceTest {
         existingDetails.add(new ProfileDetail(ProfileDetailType.FIRST_NAME.getDetailName(),
                 "OldName"));
 
-        Profile existingProfile = Profile.builder()
-                .id(1L)
-                .telegramUserId(TELEGRAM_USER_ID)
-                .details(existingDetails)
-                .build();
+        Profile existingProfile = new Profile(
+                1L,
+                TELEGRAM_USER_ID,
+                existingDetails
+        );
 
         UserCreatedEvent event = UserCreatedEvent.builder()
                 .telegramUserId(TELEGRAM_USER_ID)
@@ -154,11 +154,11 @@ class ProfileServiceTest {
         Set<ProfileDetail> existingDetails = new HashSet<>();
         existingDetails.add(new ProfileDetail(ProfileDetailType.FIRST_NAME.getDetailName(), "Ivan"));
 
-        Profile existingProfile = Profile.builder()
-                .id(1L)
-                .telegramUserId(TELEGRAM_USER_ID)
-                .details(existingDetails)
-                .build();
+        Profile existingProfile = new Profile(
+                1L,
+                TELEGRAM_USER_ID,
+                existingDetails
+        );
 
         UserCreatedEvent event = UserCreatedEvent.builder()
                 .telegramUserId(TELEGRAM_USER_ID)

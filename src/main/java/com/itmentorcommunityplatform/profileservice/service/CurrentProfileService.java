@@ -12,16 +12,12 @@ import com.itmentorcommunityplatform.profileservice.repository.AchievementReposi
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.itmentorcommunityplatform.profileservice.service.ProfileHelperService.mapDetailsFromMapToSet;
 
 @Slf4j
 @Service
@@ -49,7 +45,7 @@ public class CurrentProfileService {
 
                 List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
 
-                Set<ProfileDetail> newDetailsSet = mapDetailsFromMapToSet(newDetailsMap);
+                Set<ProfileDetail> newDetailsSet = profileHelperService.mapDetailsFromMapToSet(newDetailsMap);
                 profile.setDetails(newDetailsSet);
 
                 profileRepository.save(profile);

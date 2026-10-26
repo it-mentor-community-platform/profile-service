@@ -95,7 +95,7 @@ public class ProfileJdbcTemplateRepositoryImpl implements ProfileJdbcTemplateRep
             boolean shouldUpdate = true;
 
             if (UNIQUE_DETAIL_NAMES.contains(detail.getDetailName())) {
-                boolean doesUrlExist = template.queryForObject(
+                boolean valueExists = template.queryForObject(
                         fieldExistence,
                         Boolean.class,
                         detail.getDetailName(),
@@ -103,7 +103,7 @@ public class ProfileJdbcTemplateRepositoryImpl implements ProfileJdbcTemplateRep
                         id
                 );
 
-                shouldUpdate = !doesUrlExist;
+                shouldUpdate = !valueExists;
             }
 
             if (shouldUpdate) {

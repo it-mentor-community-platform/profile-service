@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "profiles")
@@ -26,6 +25,10 @@ public class Profile {
     private Long telegramUserId;
 
     @MappedCollection(idColumn = "profile_id")
-    @Builder.Default
     private Set<ProfileDetail> details = new HashSet<>();
+
+    public Profile(Long telegramUserId, Set<ProfileDetail> details) {
+        this.telegramUserId = telegramUserId;
+        this.details = details;
+    }
 }
