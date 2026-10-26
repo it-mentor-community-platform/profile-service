@@ -57,7 +57,7 @@ public class ProfileService {
 
             existingProfile.setDetails(incomingProfileDetails);
 
-            profileRepository.updateProfile(existingProfile, existingProfile.getId());
+            profileRepository.save(existingProfile);
         } else {
             log.info("Creating new profile for telegramUserId: {}", telegramUserId);
 
@@ -67,7 +67,7 @@ public class ProfileService {
                     .details(incomingProfileDetails)
                     .build();
 
-            profileRepository.createProfile(newProfile);
+            profileRepository.save(newProfile);
             log.info("Successfully created profile with telegramUserId: {}", telegramUserId);
         }
     }
@@ -111,7 +111,7 @@ public class ProfileService {
 
         Profile profile = existingProfile.get();
         profile.setDetails(incomingProfileDetails);
-        profileRepository.updateProfile(profile, profile.getId());
+        profileRepository.save(profile);
         log.info("Profile details processed for telegramUserId: {}", telegramUserId);
     }
 

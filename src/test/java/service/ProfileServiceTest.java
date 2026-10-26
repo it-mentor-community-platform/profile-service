@@ -48,7 +48,7 @@ class ProfileServiceTest {
 
         profileService.createOrUpdateProfile(event);
 
-        verify(profileRepository).createProfile(profileCaptor.capture());
+        verify(profileRepository).save(profileCaptor.capture());
         Profile savedProfile = profileCaptor.getValue();
 
         assertEquals(1, savedProfile.getDetails().size());
@@ -68,7 +68,7 @@ class ProfileServiceTest {
 
         profileService.createOrUpdateProfile(event);
 
-        verify(profileRepository).createProfile(profileCaptor.capture());
+        verify(profileRepository).save(profileCaptor.capture());
         Profile savedProfile = profileCaptor.getValue();
 
         assertEquals(2, savedProfile.getDetails().size());
@@ -102,7 +102,7 @@ class ProfileServiceTest {
         profileService.createOrUpdateProfile(event);
 
         verify(profileRepository).findByTelegramUserId(TELEGRAM_USER_ID);
-        verify(profileRepository).updateProfile(profileCaptor.capture(), eq(1L));
+        verify(profileRepository).save(profileCaptor.capture());
         Profile updated = profileCaptor.getValue();
 
         assertEquals(2, updated.getDetails().size());
@@ -126,7 +126,7 @@ class ProfileServiceTest {
                 .build();
 
         profileService.createOrUpdateProfile(event);
-        verify(profileRepository, never()).createProfile(any());
+        verify(profileRepository, never()).save(any());
     }
 
     @Test
@@ -142,7 +142,7 @@ class ProfileServiceTest {
 
         profileService.createOrUpdateProfile(event);
 
-        verify(profileRepository).createProfile(profileCaptor.capture());
+        verify(profileRepository).save(profileCaptor.capture());
         Profile savedProfile = profileCaptor.getValue();
 
         assertTrue(savedProfile.getDetails().isEmpty(), "Список деталей должен быть пустым для blank значений");
@@ -170,7 +170,7 @@ class ProfileServiceTest {
         profileService.createOrUpdateProfile(event);
 
         verify(profileRepository).findByTelegramUserId(TELEGRAM_USER_ID);
-        verify(profileRepository).updateProfile(profileCaptor.capture(), eq(1L));
+        verify(profileRepository).save(profileCaptor.capture());
         Profile updated = profileCaptor.getValue();
 
         assertTrue(updated.getDetails().isEmpty());

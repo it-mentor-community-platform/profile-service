@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.itmentorcommunityplatform.profileservice.service.ProfileHelperService.mapDetailsFromMapToSet;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -50,7 +52,7 @@ public class CurrentProfileService {
                 Set<ProfileDetail> newDetailsSet = mapDetailsFromMapToSet(newDetailsMap);
                 profile.setDetails(newDetailsSet);
 
-                profileRepository.updateProfile(profile, profile.getId());
+                profileRepository.save(profile);
 
                 profile = getProfileOrThrow(telegramUserId);
 
@@ -100,11 +102,5 @@ public class CurrentProfileService {
     private Profile getProfileOrThrow(Long telegramUserId) {
         return profileRepository.findByTelegramUserId(telegramUserId)
                 .orElseThrow(() -> new ProfileNotFoundException("Profile not found"));
-    }
-
-    private @NonNull Set<ProfileDetail> mapDetailsFromMapToSet(Map<String, String> details) {
-        return details.entrySet().stream()
-                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
     }
 }

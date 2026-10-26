@@ -13,13 +13,28 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 @Repository
-public class ProfileRepositoryCustomImpl implements ProfileRepositoryCustom {
+public class ProfileJdbcTemplateRepositoryImpl implements ProfileJdbcTemplateRepository<Profile> {
 
     private final JdbcTemplate template;
 
-    @Transactional
+    private final static Set<String> UNIQUE_DETAIL_NAMES = Set.of(
+            ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(),
+            ProfileDetailType.TELEGRAM_URL.getDetailName()
+    );
+
     @Override
-    public void createProfile(Profile profile) {
+    @Transactional
+    public <S extends Profile> S save(S profile) {
+        if (profile.getId() == null) {
+            createProfile(profile);
+        } else {
+            updateProfile(profile);
+        }
+
+        return profile;
+    }
+
+    private void createProfile(Profile profile) {
         String profileCreation = """
                 INSERT INTO profiles (telegram_user_id)
                 VALUES (?)
@@ -53,9 +68,9 @@ public class ProfileRepositoryCustomImpl implements ProfileRepositoryCustom {
         profile.setDetails(successfullyChangedDetails);
     }
 
-    @Transactional
-    @Override
-    public void updateProfile(Profile profile, Long id) {
+    private void updateProfile(Profile profile) {
+        Long id = profile.getId();
+
         String updateDetails = """
                 INSERT INTO profiles_details (profile_id, detail_name, detail_value)
                 VALUES (?, ?, ?)
@@ -65,21 +80,21 @@ public class ProfileRepositoryCustomImpl implements ProfileRepositoryCustom {
                 """;
 
         String fieldExistence = """
-                        SELECT EXISTS (
-                        SELECT 1
-                        FROM profiles_details
-                        WHERE detail_name = ?
-                        AND detail_value = ?
-                        AND profile_id <> ?
-                        )
-                        """;
+                SELECT EXISTS (
+                SELECT 1
+                FROM profiles_details
+                WHERE detail_name = ?
+                AND detail_value = ?
+                AND profile_id <> ?
+                )
+                """;
 
         Set<ProfileDetail> successfullyChangedDetails = new HashSet<>();
 
         for (ProfileDetail detail : profile.getDetails()) {
             boolean shouldUpdate = true;
 
-            if (doesUrlMatch(detail)) {
+            if (UNIQUE_DETAIL_NAMES.contains(detail.getDetailName())) {
                 boolean doesUrlExist = template.queryForObject(
                         fieldExistence,
                         Boolean.class,
@@ -100,12 +115,5 @@ public class ProfileRepositoryCustomImpl implements ProfileRepositoryCustom {
         }
 
         profile.setDetails(successfullyChangedDetails);
-    }
-
-    private boolean doesUrlMatch(ProfileDetail detail) {
-        return ProfileDetailType.GITHUB_PROFILE_URL.getDetailName()
-                .equals(detail.getDetailName()) ||
-                ProfileDetailType.TELEGRAM_URL.getDetailName()
-                        .equals(detail.getDetailName());
     }
 }

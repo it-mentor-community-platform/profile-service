@@ -8,6 +8,7 @@ import com.itmentorcommunityplatform.profileservice.validator.base.BaseProfileDe
 import com.itmentorcommunityplatform.profileservice.validator.registry.ProfileDetailValidatorRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -22,6 +23,12 @@ public class ProfileHelperService {
 
     private final BaseProfileDetailValidator baseDetailValidator;
     private final ProfileDetailValidatorRegistry detailValidatorRegistry;
+
+    public static @NonNull Set<ProfileDetail> mapDetailsFromMapToSet(Map<String, String> details) {
+        return details.entrySet().stream()
+                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
+    }
 
     public Set<ProfileDetail> addOnlyNewProfileDetails(
             Set<ProfileDetail> existingDetails,

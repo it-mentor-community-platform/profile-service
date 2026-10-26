@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProfileRepository extends CrudRepository<Profile, Long>, ProfileRepositoryCustom {
+public interface ProfileRepository extends CrudRepository<Profile, Long>, ProfileJdbcTemplateRepository<Profile> {
 
     Optional<Profile> findByTelegramUserId(Long telegramUserId);
 

@@ -37,7 +37,7 @@ public class ProfileDetailService {
                 .replaceFirst("/[^/]+$", "")));
 
         profile.setDetails(profileDetails);
-        profileRepository.updateProfile(profile, profile.getId());
+        profileRepository.save(profile);
         log.info("GitHub URL processed: {}", githubUrl);
     }
 }

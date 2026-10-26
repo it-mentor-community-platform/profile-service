@@ -14,7 +14,6 @@ import com.itmentorcommunityplatform.profileservice.validator.impl.GithubProfile
 import com.itmentorcommunityplatform.profileservice.validator.impl.TelegramProfileUrlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static com.itmentorcommunityplatform.profileservice.service.ProfileHelperService.mapDetailsFromMapToSet;
 
 @Slf4j
 @Service
@@ -51,7 +51,7 @@ public class InternalProfileService {
                 .build();
 
         try {
-            profileRepository.createProfile(profile);
+            profileRepository.save(profile);
         } catch (DuplicateKeyException e) {
             log.warn("Profile with TelegramID: {} already exists", telegramUserId);
             throw new ProfileAlreadyExistException("Profile with telegramUserId " + telegramUserId + " already exists");
@@ -87,20 +87,14 @@ public class InternalProfileService {
 
         Set<ProfileDetail> profileDetails = mapDetailsFromMapToSet(detailsFromDtoRequest);
 
-        Set<ProfileDetail> details = isExist ?
-                profileHelperService.addOnlyNewProfileDetails(
-                        profile.getDetails(),
-                        profileDetails)
-                :
-                mapDetailsFromMapToSet(detailsFromDtoRequest);
+        Set<ProfileDetail> details = isExist
+                ? profileHelperService.addOnlyNewProfileDetails(
+                profile.getDetails(), profileDetails)
+                : profileDetails;
 
         profile.setDetails(details);
 
-        if (isExist) {
-            profileRepository.updateProfile(profile, profile.getId());
-        } else {
-            profileRepository.createProfile(profile);
-        }
+        profileRepository.save(profile);
 
         String logMessage = isExist ? "Profile was processed: {}" : "New profile inserted: {}";
 
@@ -143,13 +137,6 @@ public class InternalProfileService {
                 });
 
         return profileMapper.mapToProfileWithTelegramIdDto(profile.getTelegramUserId(), profile.getDetails());
-    }
-
-    private @NonNull Set<ProfileDetail> mapDetailsFromMapToSet(Map<String, String> details) {
-
-        return details.entrySet().stream()
-                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
     }
 
     private Map<String, String> validateAndTransformDetailsToMapFromDto(ProfileInsertInternalRequestDto.Details detailsFromDto) {
