@@ -23,18 +23,8 @@ public class ProfileHelperService {
     private final BaseProfileDetailValidator baseDetailValidator;
     private final ProfileDetailValidatorRegistry detailValidatorRegistry;
 
-    public static Set<ProfileDetail> mergeProfileDetails(
-            Set<ProfileDetail> existingDetails,
-            Map<String, String> newDetailsMap
-    ) {
-        Map<String, String> mergedMap = new HashMap<>();
-
-        existingDetails.forEach(detail ->
-                mergedMap.put(detail.getDetailName(), detail.getDetailValue()));
-
-        mergedMap.putAll(newDetailsMap);
-
-        return mergedMap.entrySet().stream()
+    public Set<ProfileDetail> mapDetailsFromMapToSet(Map<String, String> details) {
+        return details.entrySet().stream()
                 .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
                 .collect(Collectors.toSet());
     }

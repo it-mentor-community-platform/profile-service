@@ -38,8 +38,6 @@ public class ProfileDetailService {
 
         profile.setDetails(profileDetails);
         profileRepository.save(profile);
-        log.info("Github profile saved");
-
+        log.info("GitHub URL processed: {}", githubUrl);
     }
-
 }

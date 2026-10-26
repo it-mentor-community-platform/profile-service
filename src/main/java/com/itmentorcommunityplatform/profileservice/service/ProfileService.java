@@ -19,8 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.itmentorcommunityplatform.profileservice.service.ProfileHelperService.mergeProfileDetails;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -36,7 +34,7 @@ public class ProfileService {
         }
 
         Long telegramUserId = event.getTelegramUserId();
-        log.info("Attempting to create profile for telegramUserId: {}", telegramUserId);
+        log.info("Attempting to create or update profile for telegramUserId {}", telegramUserId);
 
         Map<String, String> details = new HashMap<>();
 
@@ -49,26 +47,21 @@ public class ProfileService {
 
         Optional<Profile> maybeProfile = profileRepository.findByTelegramUserId(telegramUserId);
 
+        Set<ProfileDetail> incomingProfileDetails = details.entrySet().stream()
+                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
+
         if (maybeProfile.isPresent()) {
             log.info("Profile for telegramUserId: {} exists. Updating details.", telegramUserId);
             Profile existingProfile = maybeProfile.get();
 
-            Set<ProfileDetail> profileDetails = mergeProfileDetails(existingProfile.getDetails(), details);
-            existingProfile.setDetails(profileDetails);
+            existingProfile.setDetails(incomingProfileDetails);
 
             profileRepository.save(existingProfile);
         } else {
             log.info("Creating new profile for telegramUserId: {}", telegramUserId);
 
-            Set<ProfileDetail> newProfileDetails = details.entrySet().stream()
-                    .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
-                    .collect(Collectors.toSet());
-
-            Profile newProfile = Profile.builder()
-                    .id(null)
-                    .telegramUserId(telegramUserId)
-                    .details(newProfileDetails)
-                    .build();
+            Profile newProfile = new Profile(telegramUserId, incomingProfileDetails);
 
             profileRepository.save(newProfile);
             log.info("Successfully created profile with telegramUserId: {}", telegramUserId);
@@ -91,7 +84,6 @@ public class ProfileService {
             return;
         }
 
-        Set<ProfileDetail> existingDetails = existingProfile.get().getDetails();
         Map<String, String> newDetails = new HashMap<>();
 
         if (event.getTelegramUsername() != null && !event.getTelegramUsername().isBlank()) {
@@ -104,16 +96,19 @@ public class ProfileService {
             newDetails.put(ProfileDetailType.LAST_NAME.getDetailName(), event.getLastName());
         }
 
-        Set<ProfileDetail> details = mergeProfileDetails(existingDetails, newDetails);
-        if (existingDetails.equals(details)) {
-            log.info("Same details found. Nothing to update for telegramUserId: {}", telegramUserId);
+        Set<ProfileDetail> incomingProfileDetails = newDetails.entrySet().stream()
+                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
+                .collect(Collectors.toSet());
+
+        if (incomingProfileDetails.isEmpty()) {
+            log.info("No details provided. Nothing to update for telegramUserId: {}", telegramUserId);
             return;
         }
 
         Profile profile = existingProfile.get();
-        profile.setDetails(details);
+        profile.setDetails(incomingProfileDetails);
         profileRepository.save(profile);
-        log.info("Successfully updated profile with telegramUserId: {}", telegramUserId);
+        log.info("Profile details processed for telegramUserId: {}", telegramUserId);
     }
 
     @Transactional(readOnly = true)

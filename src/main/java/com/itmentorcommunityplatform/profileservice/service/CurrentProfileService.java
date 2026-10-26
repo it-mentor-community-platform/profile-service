@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.itmentorcommunityplatform.profileservice.service.ProfileHelperService.mergeProfileDetails;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -43,15 +41,17 @@ public class CurrentProfileService {
                     newDetailsMap.put("telegram_url", "https://t.me/" + telegramUsername);
                 }
 
-                Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
-                        .orElseThrow(() -> new ProfileNotFoundException("Profile not found"));
+                Profile profile = getProfileOrThrow(telegramUserId);
 
                 List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
 
-                Set<ProfileDetail> mergedDetails = mergeProfileDetails(profile.getDetails(), newDetailsMap);
-                profile.setDetails(mergedDetails);
+                Set<ProfileDetail> newDetailsSet = profileHelperService.mapDetailsFromMapToSet(newDetailsMap);
+                profile.setDetails(newDetailsSet);
 
                 profileRepository.save(profile);
+
+                profile = getProfileOrThrow(telegramUserId);
+
                 profileMetrics.getGetProfileSuccessCounter().increment();
 
                 return profileMapper.mapToProfileWithAchievementsDto(profile.getDetails(), achievements);
@@ -67,8 +67,7 @@ public class CurrentProfileService {
         return profileMetrics.getGetProfileTimer().record(() -> {
             log.info("Fetching profile for telegramUserId: {}", telegramUserId);
             try {
-                Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
-                        .orElseThrow(() -> new ProfileNotFoundException("Profile not found"));
+                Profile profile = getProfileOrThrow(telegramUserId);
 
                 List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
 
@@ -94,5 +93,10 @@ public class CurrentProfileService {
         List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profileId);
 
         return profileMapper.mapToProfileWithAchievementsDto(profile.getDetails(), achievements);
+    }
+
+    private Profile getProfileOrThrow(Long telegramUserId) {
+        return profileRepository.findByTelegramUserId(telegramUserId)
+                .orElseThrow(() -> new ProfileNotFoundException("Profile not found"));
     }
 }

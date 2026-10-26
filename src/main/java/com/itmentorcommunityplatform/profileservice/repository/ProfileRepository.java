@@ -10,9 +10,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProfileRepository extends CrudRepository<Profile, Long> {
+public interface ProfileRepository extends CrudRepository<Profile, Long>, ProfileJdbcTemplateRepository {
 
     Optional<Profile> findByTelegramUserId(Long telegramUserId);
+
+    @Override
+    Profile save(Profile profile);
 
     @Query("""
             SELECT p.* FROM profiles p 

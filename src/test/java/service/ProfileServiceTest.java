@@ -77,17 +77,19 @@ class ProfileServiceTest {
     }
 
     @Test
-    @DisplayName("Обновление профиля: актуализация данных и сохранение старых деталей")
-    void shouldUpdateProfile_AddLastName_KeepExistingGithub() {
+    @DisplayName("Обновление профиля: актуализация данных - должны измениться лишь новые данные")
+    void shouldUpdateProfile_WithOnlyIncomingDetails() {
         Set<ProfileDetail> existingDetails = new HashSet<>();
-        existingDetails.add(new ProfileDetail(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(), "https://github.com/ivan"));
-        existingDetails.add(new ProfileDetail(ProfileDetailType.FIRST_NAME.getDetailName(), "OldName"));
+        existingDetails.add(new ProfileDetail(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(),
+                "https://github.com/ivan"));
+        existingDetails.add(new ProfileDetail(ProfileDetailType.FIRST_NAME.getDetailName(),
+                "OldName"));
 
-        Profile existingProfile = Profile.builder()
-                .id(1L)
-                .telegramUserId(TELEGRAM_USER_ID)
-                .details(existingDetails)
-                .build();
+        Profile existingProfile = new Profile(
+                1L,
+                TELEGRAM_USER_ID,
+                existingDetails
+        );
 
         UserCreatedEvent event = UserCreatedEvent.builder()
                 .telegramUserId(TELEGRAM_USER_ID)
@@ -99,13 +101,13 @@ class ProfileServiceTest {
 
         profileService.createOrUpdateProfile(event);
 
+        verify(profileRepository).findByTelegramUserId(TELEGRAM_USER_ID);
         verify(profileRepository).save(profileCaptor.capture());
         Profile updated = profileCaptor.getValue();
 
-        assertEquals(3, updated.getDetails().size());
+        assertEquals(2, updated.getDetails().size());
         assertTrue(hasDetail(updated, ProfileDetailType.FIRST_NAME, "NewName"));
         assertTrue(hasDetail(updated, ProfileDetailType.LAST_NAME, "NewSurname"));
-        assertTrue(hasDetail(updated, ProfileDetailType.GITHUB_PROFILE_URL, "https://github.com/ivan"));
     }
 
     @Test
@@ -147,16 +149,16 @@ class ProfileServiceTest {
     }
 
     @Test
-    @DisplayName("Обновление: если новые поля null, старые детали не должны затираться")
+    @DisplayName("Обновление: если новые поля null, они и не будут переданы")
     void shouldNotOverwriteDataWithNulls_WhenUpdating() {
         Set<ProfileDetail> existingDetails = new HashSet<>();
         existingDetails.add(new ProfileDetail(ProfileDetailType.FIRST_NAME.getDetailName(), "Ivan"));
 
-        Profile existingProfile = Profile.builder()
-                .id(1L)
-                .telegramUserId(TELEGRAM_USER_ID)
-                .details(existingDetails)
-                .build();
+        Profile existingProfile = new Profile(
+                1L,
+                TELEGRAM_USER_ID,
+                existingDetails
+        );
 
         UserCreatedEvent event = UserCreatedEvent.builder()
                 .telegramUserId(TELEGRAM_USER_ID)
@@ -167,10 +169,11 @@ class ProfileServiceTest {
 
         profileService.createOrUpdateProfile(event);
 
+        verify(profileRepository).findByTelegramUserId(TELEGRAM_USER_ID);
         verify(profileRepository).save(profileCaptor.capture());
         Profile updated = profileCaptor.getValue();
 
-        assertTrue(hasDetail(updated, ProfileDetailType.FIRST_NAME, "Ivan"));
+        assertTrue(updated.getDetails().isEmpty());
     }
 
     private boolean hasDetail(Profile profile, ProfileDetailType type, String value) {
