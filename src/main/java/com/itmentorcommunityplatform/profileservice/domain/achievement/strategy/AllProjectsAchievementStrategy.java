@@ -24,7 +24,8 @@ public class AllProjectsAchievementStrategy implements AchievementCriteriaChecke
 
         Set<RoadmapProjectType> requiredRoadmapProjects = EnumSet.allOf(RoadmapProjectType.class)
                 .stream()
-                .filter(project -> project != RoadmapProjectType.OTHER)
+                .filter(project -> project != RoadmapProjectType.OTHER
+                        && project != RoadmapProjectType.WEATHER_VIEWER)
                 .collect(Collectors.toSet());
 
         Set<RoadmapProjectType> usersRoadmapProjects = projectRepository
