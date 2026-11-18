@@ -9,6 +9,7 @@ import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
@@ -20,6 +21,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProfilePersistenceService {
     private static final String UNIQUE_VIOLATION_SQL_STATE = "23505";
+    private static final String GITHUB_URL_INDEX = "idx_profile_details_github_profile_url_unique";
+    private static final String TELEGRAM_URL_INDEX = "idx_profile_details_telegram_url_unique";
+    private static final String TELEGRAM_USER_ID_CONSTRAINT = "uk_telegram_user_id";
 
     private final static Set<String> UNIQUE_DETAIL_NAMES = Set.of(
             ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(),
@@ -29,13 +33,18 @@ public class ProfilePersistenceService {
     private final ProfileRepository profileRepository;
 
     public Profile createProfile(Long telegramUserId, Map<String, String> details) {
+        if (profileRepository.findByTelegramUserId(telegramUserId).isPresent()) {
+            log.warn("Profile with TelegramID: {} already exists", telegramUserId);
+            throw new ProfileAlreadyExistException("Profile with telegramUserId %d already exists"
+                    .formatted(telegramUserId));
+        }
         Set<String> skippedDetails = new HashSet<>();
         while (true) {
             Set<String> conflicts = findConflictingDetails(null, details, skippedDetails);
             logSkippedDetails(telegramUserId, conflicts);
             skippedDetails.addAll(conflicts);
             Profile profile = new Profile(telegramUserId, mapToDetails(details, skippedDetails));
-            Optional<Profile> savedProfile = trySaveProfile(profile, details, skippedDetails);
+            Optional<Profile> savedProfile = trySaveProfile(profile, skippedDetails);
             if (savedProfile.isPresent()) {
                 return savedProfile.get();
             }
@@ -50,7 +59,7 @@ public class ProfilePersistenceService {
             logSkippedDetails(telegramUserId, conflicts);
             skippedDetails.addAll(conflicts);
             mergeDetails(profile, updatedDetails, skippedDetails);
-            Optional<Profile> savedProfile = trySaveProfile(profile, updatedDetails, skippedDetails);
+            Optional<Profile> savedProfile = trySaveProfile(profile, skippedDetails);
             if (savedProfile.isPresent()) {
                 return savedProfile.get();
             }
@@ -58,20 +67,24 @@ public class ProfilePersistenceService {
         }
     }
 
-    private Optional<Profile> trySaveProfile(Profile profile, Map<String, String> details, Set<String> skippedDetails) {
+    private Optional<Profile> trySaveProfile(Profile profile, Set<String> skippedDetails) {
         try {
             return Optional.of(profileRepository.save(profile));
-        } catch (DataIntegrityViolationException exception) {
-            if (!isUniqueConstraintViolation(exception)) {
+        } catch (DbActionExecutionException | DataIntegrityViolationException exception) {
+            if (isUniqueConstraintViolation(exception, TELEGRAM_USER_ID_CONSTRAINT)) {
                 log.warn("Profile with TelegramID: {} already exists", profile.getTelegramUserId());
                 throw new ProfileAlreadyExistException("Profile with telegramUserId %d already exists"
                         .formatted(profile.getTelegramUserId()));
             }
-            Set<String> racedConflicts = findConflictingDetails(profile.getId(), details, skippedDetails);
+            Set<String> racedConflicts = new HashSet<>();
+            if (isUniqueConstraintViolation(exception, GITHUB_URL_INDEX)) {
+                racedConflicts.add(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName());
+            }
+            if (isUniqueConstraintViolation(exception, TELEGRAM_URL_INDEX)) {
+                racedConflicts.add(ProfileDetailType.TELEGRAM_URL.getDetailName());
+            }
             if (racedConflicts.isEmpty()) {
-                log.warn("Profile with TelegramID: {} already exists", profile.getTelegramUserId());
-                throw new ProfileAlreadyExistException("Profile with telegramUserId %d already exists"
-                        .formatted(profile.getTelegramUserId()));
+                throw exception;
             }
             logSkippedDetails(profile.getTelegramUserId(), racedConflicts);
             skippedDetails.addAll(racedConflicts);
@@ -125,11 +138,14 @@ public class ProfilePersistenceService {
         );
     }
 
-    private boolean isUniqueConstraintViolation(DataIntegrityViolationException exception) {
+    private boolean isUniqueConstraintViolation(Throwable exception, String constraintName) {
         Throwable cause = exception;
         while (cause != null) {
-            if (cause instanceof SQLException sqlException) {
-                return UNIQUE_VIOLATION_SQL_STATE.equals(sqlException.getSQLState());
+            if (cause instanceof SQLException sqlException
+                    && UNIQUE_VIOLATION_SQL_STATE.equals(sqlException.getSQLState())
+                    && sqlException.getMessage() != null
+                    && sqlException.getMessage().contains(constraintName)) {
+                return true;
             }
             cause = cause.getCause();
         }
