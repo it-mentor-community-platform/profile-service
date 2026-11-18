@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -18,13 +18,13 @@ import java.util.Set;
 public class ProfileDetailService {
 
     private final ProfileRepository profileRepository;
+    private final ProfilePersistenceService profilePersistenceService;
 
     public void upsertGithubProfileUrl(Long telegramUserId, String githubUrl) {
         Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
                 .orElseThrow(() -> new ProfileNotFoundException("Profile not found"));
-        Set<ProfileDetail> profileDetails = profile.getDetails();
 
-        boolean githubAlreadyUpToDate = profileDetails.stream()
+        boolean githubAlreadyUpToDate = profile.getDetails().stream()
                 .map(ProfileDetail::getDetailName)
                 .anyMatch(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName()::equals);
 
@@ -33,11 +33,10 @@ public class ProfileDetailService {
             return;
         }
 
-        profileDetails.add(new ProfileDetail(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(), githubUrl.replaceFirst("/+$", "")
-                .replaceFirst("/[^/]+$", "")));
+        String normalizedGithubUrl = githubUrl.replaceFirst("/+$", "").replaceFirst("/[^/]+$", "");
 
-        profile.setDetails(profileDetails);
-        profileRepository.save(profile);
+        Map<String, String> details = Map.of(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(), normalizedGithubUrl);
+        profilePersistenceService.updateProfile(telegramUserId, details);
         log.info("GitHub URL processed: {}", githubUrl);
     }
 }

@@ -1,7 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.service;
 
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
-import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
 import com.itmentorcommunityplatform.profileservice.dto.AchievementDto;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserAuthenticatedEvent;
@@ -16,8 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,8 +22,8 @@ import java.util.stream.Collectors;
 public class ProfileService {
 
     private final ProfileRepository profileRepository;
+    private final ProfilePersistenceService profilePersistenceService;
 
-    @Transactional
     public void createOrUpdateProfile(UserCreatedEvent event) {
         if (event == null || event.getTelegramUserId() == null) {
             log.warn("Received empty event or null telegramUserId. Skipping.");
@@ -47,28 +44,19 @@ public class ProfileService {
 
         Optional<Profile> maybeProfile = profileRepository.findByTelegramUserId(telegramUserId);
 
-        Set<ProfileDetail> incomingProfileDetails = details.entrySet().stream()
-                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
-
         if (maybeProfile.isPresent()) {
             log.info("Profile for telegramUserId: {} exists. Updating details.", telegramUserId);
-            Profile existingProfile = maybeProfile.get();
 
-            existingProfile.setDetails(incomingProfileDetails);
-
-            profileRepository.save(existingProfile);
+            profilePersistenceService.updateProfile(telegramUserId, details);
         } else {
             log.info("Creating new profile for telegramUserId: {}", telegramUserId);
 
-            Profile newProfile = new Profile(telegramUserId, incomingProfileDetails);
+            Profile profile = profilePersistenceService.createProfile(telegramUserId, details);
 
-            profileRepository.save(newProfile);
-            log.info("Successfully created profile with telegramUserId: {}", telegramUserId);
+            log.info("Successfully created profile with telegramUserId: {}", profile.getTelegramUserId());
         }
     }
 
-    @Transactional
     public void upsertProfile(UserAuthenticatedEvent event) {
         if (event == null || event.getTelegramUserId() == null) {
             log.warn("Received empty event or null telegramUserId. Skipping.");
@@ -96,18 +84,13 @@ public class ProfileService {
             newDetails.put(ProfileDetailType.LAST_NAME.getDetailName(), event.getLastName());
         }
 
-        Set<ProfileDetail> incomingProfileDetails = newDetails.entrySet().stream()
-                .map(e -> new ProfileDetail(e.getKey(), e.getValue()))
-                .collect(Collectors.toSet());
-
-        if (incomingProfileDetails.isEmpty()) {
+        if (newDetails.isEmpty()) {
             log.info("No details provided. Nothing to update for telegramUserId: {}", telegramUserId);
             return;
         }
 
-        Profile profile = existingProfile.get();
-        profile.setDetails(incomingProfileDetails);
-        profileRepository.save(profile);
+        profilePersistenceService.updateProfile(telegramUserId, newDetails);
+
         log.info("Profile details processed for telegramUserId: {}", telegramUserId);
     }
 
