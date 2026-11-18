@@ -11,8 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -24,9 +27,11 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ActiveProfiles("ide")
-@SpringBootTest(classes = ProfileServiceApplication.class)
+@DataJdbcTest
+@Import(ProfilePersistenceService.class)
+@ContextConfiguration(classes = ProfileServiceApplication.class)
 @Testcontainers
+@ActiveProfiles("ide")
 class ProfilePersistenceServiceTest {
 
     private static final Long TEST_TELEGRAM_USER_ID = 111L;
