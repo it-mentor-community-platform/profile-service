@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
@@ -24,6 +25,7 @@ public class Profile {
     private Long telegramUserId;
 
     @MappedCollection(idColumn = "profile_id")
+    @ReadOnlyProperty
     private Set<ProfileDetail> details = new HashSet<>();
 
     public Profile(Long telegramUserId, Set<ProfileDetail> details) {
