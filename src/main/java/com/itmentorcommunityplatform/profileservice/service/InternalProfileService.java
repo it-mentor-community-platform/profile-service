@@ -5,6 +5,7 @@ import com.itmentorcommunityplatform.profileservice.dto.external.ProfileUpdateDt
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileInsertInternalRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileInsertInternalResponseDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithTelegramIdResponseDto;
+import com.itmentorcommunityplatform.profileservice.exception.ProfileAlreadyExistException;
 import com.itmentorcommunityplatform.profileservice.exception.ProfileNotFoundException;
 import com.itmentorcommunityplatform.profileservice.mapper.ProfileMapper;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
@@ -12,7 +13,10 @@ import com.itmentorcommunityplatform.profileservice.validator.impl.GithubProfile
 import com.itmentorcommunityplatform.profileservice.validator.impl.TelegramProfileUrlValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.relational.core.conversion.DbActionExecutionException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +42,14 @@ public class InternalProfileService {
 
         Map<String, String> details = validateAndTransformDetailsToMapFromDto(dto.details());
 
-        Profile profile = profilePersistenceService.createProfile(telegramUserId, details);
+        Profile profile;
+
+        try {
+            profile = profilePersistenceService.createProfile(telegramUserId, details);
+        } catch (DbActionExecutionException | DataIntegrityViolationException e) {
+            log.warn("Profile with TelegramID: {} already exists", telegramUserId);
+            throw new ProfileAlreadyExistException("Profile with telegramUserId " + telegramUserId + " already exists");
+        }
 
         log.info("New profile inserted: {}", profile);
 
@@ -49,6 +60,7 @@ public class InternalProfileService {
         );
     }
 
+    @Transactional
     public ProfileUpdateDto upsertProfileInternal(ProfileInsertInternalRequestDto dto) {
         Long telegramUserId = dto.telegramUserId();
 
@@ -67,7 +79,7 @@ public class InternalProfileService {
             if (newDetails.isEmpty()) {
                 profile = profileOptional.get();
             } else {
-                profile = profilePersistenceService.updateProfile(telegramUserId, newDetails);
+                profile = profilePersistenceService.updateProfile(profileOptional.get(), newDetails);
             }
         } else {
             profile = profilePersistenceService.createProfile(telegramUserId, detailsFromDtoRequest);

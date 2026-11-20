@@ -13,6 +13,7 @@ import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class CurrentProfileService {
     private final ProfileHelperService profileHelperService;
     private final ProfilePersistenceService profilePersistenceService;
 
+    @Transactional
     public ProfileWithAchievementsResponseDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto, String telegramUsername) {
         return profileMetrics.getGetProfileTimer().record(() -> {
             try {
@@ -39,7 +41,9 @@ public class CurrentProfileService {
                     newDetailsMap.put(ProfileDetailType.TELEGRAM_URL.getDetailName(), "https://t.me/" + telegramUsername);
                 }
 
-                Profile profile = profilePersistenceService.updateProfile(telegramUserId, newDetailsMap);
+                Profile profile = getProfileOrThrow(telegramUserId);
+
+                profile = profilePersistenceService.updateProfile(profile, newDetailsMap);
 
                 List<Achievement> achievements = achievementRepository
                         .findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());

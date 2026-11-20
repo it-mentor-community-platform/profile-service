@@ -24,6 +24,7 @@ public class ProfileService {
     private final ProfileRepository profileRepository;
     private final ProfilePersistenceService profilePersistenceService;
 
+    @Transactional
     public void createOrUpdateProfile(UserCreatedEvent event) {
         if (event == null || event.getTelegramUserId() == null) {
             log.warn("Received empty event or null telegramUserId. Skipping.");
@@ -47,7 +48,7 @@ public class ProfileService {
         if (maybeProfile.isPresent()) {
             log.info("Profile for telegramUserId: {} exists. Updating details.", telegramUserId);
 
-            profilePersistenceService.updateProfile(telegramUserId, details);
+            profilePersistenceService.updateProfile(maybeProfile.get(), details);
         } else {
             log.info("Creating new profile for telegramUserId: {}", telegramUserId);
 
@@ -57,6 +58,7 @@ public class ProfileService {
         }
     }
 
+    @Transactional
     public void upsertProfile(UserAuthenticatedEvent event) {
         if (event == null || event.getTelegramUserId() == null) {
             log.warn("Received empty event or null telegramUserId. Skipping.");
@@ -89,7 +91,7 @@ public class ProfileService {
             return;
         }
 
-        profilePersistenceService.updateProfile(telegramUserId, newDetails);
+        profilePersistenceService.updateProfile(existingProfile.get(), newDetails);
 
         log.info("Profile details processed for telegramUserId: {}", telegramUserId);
     }
