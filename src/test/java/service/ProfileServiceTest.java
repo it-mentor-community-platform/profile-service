@@ -103,7 +103,7 @@ class ProfileServiceTest {
 
         verify(profileRepository).findByTelegramUserId(TELEGRAM_USER_ID);
 
-        verify(profilePersistenceService).updateProfile(eq(TELEGRAM_USER_ID), detailsCaptor.capture());
+        verify(profilePersistenceService).updateProfile(eq(existingProfile), detailsCaptor.capture());
 
         assertEquals(Map.of(ProfileDetailType.FIRST_NAME.getDetailName(), "NewName",
                         ProfileDetailType.LAST_NAME.getDetailName(), "NewSurname"
@@ -166,7 +166,7 @@ class ProfileServiceTest {
 
         profileService.createOrUpdateProfile(event);
 
-        verify(profilePersistenceService).updateProfile(eq(TELEGRAM_USER_ID), detailsCaptor.capture());
+        verify(profilePersistenceService).updateProfile(eq(existingProfile), detailsCaptor.capture());
 
         assertTrue(detailsCaptor.getValue().isEmpty(), "Null-значения не должны попадать в карту деталей");
     }
