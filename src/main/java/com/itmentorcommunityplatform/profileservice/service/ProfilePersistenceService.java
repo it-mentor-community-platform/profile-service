@@ -28,8 +28,7 @@ public class ProfilePersistenceService {
                 details.get(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName()), profile.getId());
         Map<String, String> filteredDetails = filterAndLogConflictingDetails(profile.getId(), conflicts, details);
         profileDetailRepository.saveAll(mapToDetails(profile.getId(), filteredDetails));
-        profile.setDetails(profileDetailRepository.findAllByProfileId(profile.getId()));
-        return profile;
+        return profileRepository.findById(profile.getId()).orElseThrow();
     }
 
     @Transactional
@@ -41,8 +40,7 @@ public class ProfilePersistenceService {
         Set<ProfileDetail> existingDetails = profileDetailRepository.findAllByProfileId(profile.getId());
         List<ProfileDetail> mergedDetails = mergeDetails(profile.getId(), existingDetails, filteredDetails);
         profileDetailRepository.saveAll(mergedDetails);
-        profile.setDetails(profileDetailRepository.findAllByProfileId(profile.getId()));
-        return profile;
+        return profileRepository.findById(profile.getId()).orElseThrow();
     }
 
     private List<ProfileDetail> mergeDetails(Long profileId, Set<ProfileDetail> existingDetails,
