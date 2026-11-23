@@ -80,14 +80,12 @@ public class InternalProfileService {
                 profile = profileOptional.get();
             } else {
                 profile = profilePersistenceService.updateProfile(profileOptional.get(), newDetails);
+                log.info("Profile was processed: {}", profile);
             }
         } else {
             profile = profilePersistenceService.createProfile(telegramUserId, detailsFromDtoRequest);
+            log.info("New profile inserted: {}", profile);
         }
-
-        String logMessage = isExist ? "Profile was processed: {}" : "New profile inserted: {}";
-
-        log.info(logMessage, profile);
 
         return new ProfileUpdateDto(new ProfileInsertInternalResponseDto(
                 profile.getId(),

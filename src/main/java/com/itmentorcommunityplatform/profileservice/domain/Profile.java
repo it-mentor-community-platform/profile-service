@@ -28,6 +28,10 @@ public class Profile {
     @ReadOnlyProperty
     private Set<ProfileDetail> details = new HashSet<>();
 
+    public Profile(Long telegramUserId) {
+        this.telegramUserId = telegramUserId;
+    }
+
     public Profile(Long telegramUserId, Set<ProfileDetail> details) {
         this.telegramUserId = telegramUserId;
         this.details = details;

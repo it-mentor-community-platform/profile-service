@@ -13,11 +13,9 @@ public interface ProfileDetailRepository extends CrudRepository<ProfileDetail, L
     @Query("""
             SELECT * from profiles_details
             WHERE (detail_name = 'telegram_url' AND detail_value = :telegramUrl)
-            OR (detail_name = 'github_profile_url' AND detail_value = :gitHubUrl)
-            AND (:profileId IS NULL OR profile_id <> :profileId)""")
+            OR (detail_name = 'github_profile_url' AND detail_value = :gitHubUrl)""")
     List<ProfileDetail> findConflictingDetails(@Param("telegramUrl") String telegramUrl,
-                                                         @Param("gitHubUrl") String gitHubUrl,
-                                                         @Param("profileId") Long profileId);
+                                                         @Param("gitHubUrl") String gitHubUrl);
 
     Set<ProfileDetail> findAllByProfileId(Long profileId);
 }

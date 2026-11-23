@@ -22,12 +22,15 @@ public class ProfilePersistenceService {
 
     @Transactional
     public Profile createProfile(Long telegramUserId, Map<String, String> details) {
-        Profile profile = profileRepository.save(new Profile(telegramUserId, null));
+        Profile profile = profileRepository.save(new Profile(telegramUserId));
+
         List<ProfileDetail> conflicts = profileDetailRepository.findConflictingDetails(
                 details.get(ProfileDetailType.TELEGRAM_URL.getDetailName()),
-                details.get(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName()), profile.getId());
+                details.get(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName()));
         Map<String, String> filteredDetails = filterAndLogConflictingDetails(profile.getId(), conflicts, details);
+
         profileDetailRepository.saveAll(mapToDetails(profile.getId(), filteredDetails));
+
         return profileRepository.findById(profile.getId()).orElseThrow();
     }
 
@@ -35,11 +38,14 @@ public class ProfilePersistenceService {
     public Profile updateProfile(Profile profile, Map<String, String> updatedDetails) {
         List<ProfileDetail> conflicts = profileDetailRepository.findConflictingDetails(
                 updatedDetails.get(ProfileDetailType.TELEGRAM_URL.getDetailName()),
-                updatedDetails.get(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName()), profile.getId());
+                updatedDetails.get(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName()));
         Map<String, String> filteredDetails = filterAndLogConflictingDetails(profile.getId(), conflicts, updatedDetails);
+
         Set<ProfileDetail> existingDetails = profileDetailRepository.findAllByProfileId(profile.getId());
         List<ProfileDetail> mergedDetails = mergeDetails(profile.getId(), existingDetails, filteredDetails);
+
         profileDetailRepository.saveAll(mergedDetails);
+
         return profileRepository.findById(profile.getId()).orElseThrow();
     }
 
@@ -47,6 +53,7 @@ public class ProfilePersistenceService {
                                              Map<String, String> updatedDetails) {
         Map<String, ProfileDetail> mergedDetails = new LinkedHashMap<>();
         existingDetails.forEach(detail -> mergedDetails.put(detail.getDetailName(), detail));
+
         updatedDetails.forEach((name, value) -> {
             ProfileDetail existingDetail = mergedDetails.get(name);
             if (existingDetail != null) {
@@ -55,6 +62,7 @@ public class ProfilePersistenceService {
                 mergedDetails.put(name, new ProfileDetail(profileId, name, value));
             }
         });
+
         return new ArrayList<>(mergedDetails.values());
     }
 
@@ -67,11 +75,13 @@ public class ProfilePersistenceService {
     private Map<String, String> filterAndLogConflictingDetails(Long profileId, List<ProfileDetail> conflicts,
                                                                Map<String, String> details) {
         Map<String, String> filteredDetails = new HashMap<>(details);
+
         for (ProfileDetail conflict : conflicts) {
             log.info("Skipping profile detail '{}' for profile ID {}: value is already used by another profile",
                     conflict.getDetailName(), profileId);
             filteredDetails.remove(conflict.getDetailName());
         }
+
         return filteredDetails;
     }
 }
