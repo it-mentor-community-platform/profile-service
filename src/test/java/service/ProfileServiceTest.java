@@ -1,10 +1,10 @@
 package service;
 
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
-import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
 import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
+import com.itmentorcommunityplatform.profileservice.service.ProfilePersistenceService;
 import com.itmentorcommunityplatform.profileservice.service.ProfileService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -26,13 +27,16 @@ import static org.mockito.Mockito.*;
 class ProfileServiceTest {
 
     @Mock
+    private ProfilePersistenceService profilePersistenceService;
+
+    @Mock
     private ProfileRepository profileRepository;
 
     @InjectMocks
     private ProfileService profileService;
 
     @Captor
-    private ArgumentCaptor<Profile> profileCaptor;
+    private ArgumentCaptor<Map<String, String>> detailsCaptor;
 
     private final Long TELEGRAM_USER_ID = 111L;
 
@@ -46,13 +50,16 @@ class ProfileServiceTest {
 
         when(profileRepository.findByTelegramUserId(TELEGRAM_USER_ID)).thenReturn(Optional.empty());
 
+        when(profilePersistenceService.createProfile(eq(TELEGRAM_USER_ID), anyMap()))
+                .thenReturn(new Profile(TELEGRAM_USER_ID, Set.of()));
+
         profileService.createOrUpdateProfile(event);
 
-        verify(profileRepository).save(profileCaptor.capture());
-        Profile savedProfile = profileCaptor.getValue();
+        verify(profilePersistenceService).createProfile(eq(TELEGRAM_USER_ID), detailsCaptor.capture());
 
-        assertEquals(1, savedProfile.getDetails().size());
-        assertTrue(hasDetail(savedProfile, ProfileDetailType.FIRST_NAME, "Ivan"));
+        assertEquals(Map.of(ProfileDetailType.FIRST_NAME.getDetailName(), "Ivan"), detailsCaptor.getValue());
+
+        verify(profilePersistenceService, never()).updateProfile(any(), any());
     }
 
     @Test
@@ -66,30 +73,23 @@ class ProfileServiceTest {
 
         when(profileRepository.findByTelegramUserId(TELEGRAM_USER_ID)).thenReturn(Optional.empty());
 
+        when(profilePersistenceService.createProfile(eq(TELEGRAM_USER_ID), anyMap()))
+                .thenReturn(new Profile(TELEGRAM_USER_ID, Set.of()));
+
         profileService.createOrUpdateProfile(event);
 
-        verify(profileRepository).save(profileCaptor.capture());
-        Profile savedProfile = profileCaptor.getValue();
+        verify(profilePersistenceService).createProfile(eq(TELEGRAM_USER_ID), detailsCaptor.capture());
 
-        assertEquals(2, savedProfile.getDetails().size());
-        assertTrue(hasDetail(savedProfile, ProfileDetailType.FIRST_NAME, "Ivan"));
-        assertTrue(hasDetail(savedProfile, ProfileDetailType.LAST_NAME, "Ivanov"));
+        assertEquals(
+                Map.of(ProfileDetailType.FIRST_NAME.getDetailName(), "Ivan",
+                        ProfileDetailType.LAST_NAME.getDetailName(), "Ivanov"),
+                detailsCaptor.getValue());
     }
 
     @Test
     @DisplayName("Обновление профиля: актуализация данных - должны измениться лишь новые данные")
     void shouldUpdateProfile_WithOnlyIncomingDetails() {
-        Set<ProfileDetail> existingDetails = new HashSet<>();
-        existingDetails.add(new ProfileDetail(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(),
-                "https://github.com/ivan"));
-        existingDetails.add(new ProfileDetail(ProfileDetailType.FIRST_NAME.getDetailName(),
-                "OldName"));
-
-        Profile existingProfile = new Profile(
-                1L,
-                TELEGRAM_USER_ID,
-                existingDetails
-        );
+        Profile existingProfile = new Profile(1L, TELEGRAM_USER_ID, new HashSet<>());
 
         UserCreatedEvent event = UserCreatedEvent.builder()
                 .telegramUserId(TELEGRAM_USER_ID)
@@ -102,19 +102,21 @@ class ProfileServiceTest {
         profileService.createOrUpdateProfile(event);
 
         verify(profileRepository).findByTelegramUserId(TELEGRAM_USER_ID);
-        verify(profileRepository).save(profileCaptor.capture());
-        Profile updated = profileCaptor.getValue();
 
-        assertEquals(2, updated.getDetails().size());
-        assertTrue(hasDetail(updated, ProfileDetailType.FIRST_NAME, "NewName"));
-        assertTrue(hasDetail(updated, ProfileDetailType.LAST_NAME, "NewSurname"));
+        verify(profilePersistenceService).updateProfile(eq(existingProfile), detailsCaptor.capture());
+
+        assertEquals(Map.of(ProfileDetailType.FIRST_NAME.getDetailName(), "NewName",
+                        ProfileDetailType.LAST_NAME.getDetailName(), "NewSurname"
+                ), detailsCaptor.getValue());
+
+        verify(profilePersistenceService, never()).createProfile(any(), any());
     }
 
     @Test
     @DisplayName("Пропуск: событие равно null")
     void shouldDoNothing_WhenEventIsNull() {
         profileService.createOrUpdateProfile(null);
-        verifyNoInteractions(profileRepository);
+        verifyNoInteractions(profileRepository, profilePersistenceService);
     }
 
     @Test
@@ -126,7 +128,7 @@ class ProfileServiceTest {
                 .build();
 
         profileService.createOrUpdateProfile(event);
-        verify(profileRepository, never()).save(any());
+        verifyNoInteractions(profileRepository, profilePersistenceService);
     }
 
     @Test
@@ -140,25 +142,20 @@ class ProfileServiceTest {
 
         when(profileRepository.findByTelegramUserId(TELEGRAM_USER_ID)).thenReturn(Optional.empty());
 
+        when(profilePersistenceService.createProfile(eq(TELEGRAM_USER_ID), anyMap()))
+                .thenReturn(new Profile(TELEGRAM_USER_ID, Set.of()));
+
         profileService.createOrUpdateProfile(event);
 
-        verify(profileRepository).save(profileCaptor.capture());
-        Profile savedProfile = profileCaptor.getValue();
+        verify(profilePersistenceService).createProfile(eq(TELEGRAM_USER_ID), detailsCaptor.capture());
 
-        assertTrue(savedProfile.getDetails().isEmpty(), "Список деталей должен быть пустым для blank значений");
+        assertTrue(detailsCaptor.getValue().isEmpty(), "Карта деталей должна быть пустой для blank значений");
     }
 
     @Test
     @DisplayName("Обновление: если новые поля null, они и не будут переданы")
     void shouldNotOverwriteDataWithNulls_WhenUpdating() {
-        Set<ProfileDetail> existingDetails = new HashSet<>();
-        existingDetails.add(new ProfileDetail(ProfileDetailType.FIRST_NAME.getDetailName(), "Ivan"));
-
-        Profile existingProfile = new Profile(
-                1L,
-                TELEGRAM_USER_ID,
-                existingDetails
-        );
+        Profile existingProfile = new Profile(1L, TELEGRAM_USER_ID, new HashSet<>());
 
         UserCreatedEvent event = UserCreatedEvent.builder()
                 .telegramUserId(TELEGRAM_USER_ID)
@@ -169,16 +166,8 @@ class ProfileServiceTest {
 
         profileService.createOrUpdateProfile(event);
 
-        verify(profileRepository).findByTelegramUserId(TELEGRAM_USER_ID);
-        verify(profileRepository).save(profileCaptor.capture());
-        Profile updated = profileCaptor.getValue();
+        verify(profilePersistenceService).updateProfile(eq(existingProfile), detailsCaptor.capture());
 
-        assertTrue(updated.getDetails().isEmpty());
-    }
-
-    private boolean hasDetail(Profile profile, ProfileDetailType type, String value) {
-        if (profile.getDetails() == null) return false;
-        return profile.getDetails().stream()
-                .anyMatch(d -> d.getDetailName().equals(type.getDetailName()) && d.getDetailValue().equals(value));
+        assertTrue(detailsCaptor.getValue().isEmpty(), "Null-значения не должны попадать в карту деталей");
     }
 }

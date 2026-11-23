@@ -2,7 +2,6 @@ package com.itmentorcommunityplatform.profileservice.service;
 
 
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
-import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
 import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
 import com.itmentorcommunityplatform.profileservice.exception.ProfileNotFoundException;
 import com.itmentorcommunityplatform.profileservice.repository.ProfileRepository;
@@ -10,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -18,26 +17,14 @@ import java.util.Set;
 public class ProfileDetailService {
 
     private final ProfileRepository profileRepository;
+    private final ProfilePersistenceService profilePersistenceService;
 
     public void upsertGithubProfileUrl(Long telegramUserId, String githubUrl) {
         Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
                 .orElseThrow(() -> new ProfileNotFoundException("Profile not found"));
-        Set<ProfileDetail> profileDetails = profile.getDetails();
-
-        boolean githubAlreadyUpToDate = profileDetails.stream()
-                .map(ProfileDetail::getDetailName)
-                .anyMatch(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName()::equals);
-
-        if (githubAlreadyUpToDate) {
-            log.info("Github profile for profile with telegramId #{}, already exists", telegramUserId);
-            return;
-        }
-
-        profileDetails.add(new ProfileDetail(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(), githubUrl.replaceFirst("/+$", "")
-                .replaceFirst("/[^/]+$", "")));
-
-        profile.setDetails(profileDetails);
-        profileRepository.save(profile);
+        String normalizedGithubUrl = githubUrl.replaceFirst("/+$", "").replaceFirst("/[^/]+$", "");
+        Map<String, String> details = Map.of(ProfileDetailType.GITHUB_PROFILE_URL.getDetailName(), normalizedGithubUrl);
+        profilePersistenceService.updateProfile(profile, details);
         log.info("GitHub URL processed: {}", githubUrl);
     }
 }

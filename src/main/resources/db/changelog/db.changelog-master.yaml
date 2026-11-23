@@ -13,3 +13,5 @@ databaseChangeLog:
       file: db/changelog/changesets/006-create-table-reviews.sql
   - include:
       file: db/changelog/changesets/007-add-unique-indexes-on-profile-details.sql
+  - include:
+      file: db/changelog/changesets/008-add-pk-for-details-profiles-table.sql
