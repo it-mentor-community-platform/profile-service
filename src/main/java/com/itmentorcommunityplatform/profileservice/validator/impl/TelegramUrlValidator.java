@@ -12,7 +12,7 @@ import static com.itmentorcommunityplatform.profileservice.domain.type.ProfileDe
 @Component
 public class TelegramUrlValidator implements ProfileDetailValidator {
 
-    private static final Pattern TELEGRAM_PATTERN = Pattern.compile("^https://t\\.me/[^\\s/]+$");
+    private static final Pattern TELEGRAM_PATTERN = Pattern.compile("^https://t\\.me/[^\\s/@]+$");
 
     @Override
     public ProfileDetailType getSupportedProfileDetailType() {

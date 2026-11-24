@@ -70,7 +70,7 @@ public class AdminProfileService {
                     allProfilesPaginated.size(),
                     pageNumber,
                     enrichProfilesWithRoles(allProfilesPaginated)
-                    );
+            );
         } catch (Exception ex) {
             log.error("All attempts to fetch user roles failed. Reason: {}", ex.getMessage());
             throw ex;

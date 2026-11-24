@@ -2,7 +2,7 @@ package com.itmentorcommunityplatform.profileservice.service;
 
 import com.itmentorcommunityplatform.profileservice.domain.Achievement;
 import com.itmentorcommunityplatform.profileservice.domain.Profile;
-import com.itmentorcommunityplatform.profileservice.domain.ProfileDetail;
+import com.itmentorcommunityplatform.profileservice.domain.type.ProfileDetailType;
 import com.itmentorcommunityplatform.profileservice.dto.request.ProfileUpdateRequestDto;
 import com.itmentorcommunityplatform.profileservice.dto.response.ProfileWithAchievementsResponseDto;
 import com.itmentorcommunityplatform.profileservice.exception.ProfileNotFoundException;
@@ -17,9 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import static com.itmentorcommunityplatform.profileservice.service.ProfileHelperService.mergeProfileDetails;
 
 @Slf4j
 @Service
@@ -31,6 +28,7 @@ public class CurrentProfileService {
     private final AchievementRepository achievementRepository;
     private final ProfileMapper profileMapper;
     private final ProfileHelperService profileHelperService;
+    private final ProfilePersistenceService profilePersistenceService;
 
     @Transactional
     public ProfileWithAchievementsResponseDto updateCurrentProfile(Long telegramUserId, ProfileUpdateRequestDto dto, String telegramUsername) {
@@ -40,18 +38,16 @@ public class CurrentProfileService {
                 profileHelperService.validateDetails(newDetailsMap);
 
                 if (telegramUsername != null && !telegramUsername.isBlank()) {
-                    newDetailsMap.put("telegram_url", "https://t.me/" + telegramUsername);
+                    newDetailsMap.put(ProfileDetailType.TELEGRAM_URL.getDetailName(), "https://t.me/" + telegramUsername);
                 }
 
-                Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
-                        .orElseThrow(() -> new ProfileNotFoundException("Profile not found"));
+                Profile profile = getProfileOrThrow(telegramUserId);
 
-                List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
+                profile = profilePersistenceService.updateProfile(profile, newDetailsMap);
 
-                Set<ProfileDetail> mergedDetails = mergeProfileDetails(profile.getDetails(), newDetailsMap);
-                profile.setDetails(mergedDetails);
+                List<Achievement> achievements = achievementRepository
+                        .findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
 
-                profileRepository.save(profile);
                 profileMetrics.getGetProfileSuccessCounter().increment();
 
                 return profileMapper.mapToProfileWithAchievementsDto(profile.getDetails(), achievements);
@@ -67,8 +63,7 @@ public class CurrentProfileService {
         return profileMetrics.getGetProfileTimer().record(() -> {
             log.info("Fetching profile for telegramUserId: {}", telegramUserId);
             try {
-                Profile profile = profileRepository.findByTelegramUserId(telegramUserId)
-                        .orElseThrow(() -> new ProfileNotFoundException("Profile not found"));
+                Profile profile = getProfileOrThrow(telegramUserId);
 
                 List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profile.getId());
 
@@ -94,5 +89,10 @@ public class CurrentProfileService {
         List<Achievement> achievements = achievementRepository.findAllByProfileIdAndPubliclyVisibleTrue(profileId);
 
         return profileMapper.mapToProfileWithAchievementsDto(profile.getDetails(), achievements);
+    }
+
+    private Profile getProfileOrThrow(Long telegramUserId) {
+        return profileRepository.findByTelegramUserId(telegramUserId)
+                .orElseThrow(() -> new ProfileNotFoundException("Profile not found"));
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface ProjectRepository extends CrudRepository<Project, Long> {
@@ -14,16 +15,17 @@ public interface ProjectRepository extends CrudRepository<Project, Long> {
     List<Project> findByAuthorTelegramUserId(Long authorTelegramUserId);
 
     @Query("""
-           SELECT DISTINCT p.roadmap_project 
-           FROM Project p  
-           WHERE p.author_telegram_user_id = :userId
-           """)
+            SELECT DISTINCT p.roadmap_project 
+            FROM Project p  
+            WHERE p.author_telegram_user_id = :userId
+            """)
     Set<RoadmapProjectType> findProjectsNamesByUserId(@Param("userId") Long userId);
 
     @Query("""
-           SELECT DISTINCT p.programming_language FROM Project p 
-           WHERE p.author_telegram_user_id = :userId
-           """)
+            SELECT DISTINCT p.programming_language FROM Project p 
+            WHERE p.author_telegram_user_id = :userId
+            """)
     Set<String> findUsersProjectsLanguagesByUserId(@Param("userId") Long userId);
 
+    Optional<Project> findByGithubRepositoryUrl(String githubRepositoryUrl);
 }

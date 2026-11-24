@@ -11,12 +11,12 @@ import java.util.Map;
         description = "Profile Update Request - any set of allowed fields",
         additionalProperties = Schema.AdditionalPropertiesValue.TRUE,
         example = """
-        {
-          "github_profile_url": "https://github.com/johndoe",
-          "first_name": "Dmitry",
-          "last_name": "OxErr"
-        }
-        """
+                {
+                  "github_profile_url": "https://github.com/johndoe",
+                  "first_name": "Dmitry",
+                  "last_name": "OxErr"
+                }
+                """
 )
 @Getter
 public class ProfileUpdateRequestDto {

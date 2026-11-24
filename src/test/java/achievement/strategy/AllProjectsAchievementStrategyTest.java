@@ -1,4 +1,4 @@
-package achievementStrategy;
+package achievement.strategy;
 
 import com.itmentorcommunityplatform.profileservice.domain.achievement.strategy.AllProjectsAchievementStrategy;
 import com.itmentorcommunityplatform.profileservice.domain.type.RoadmapProjectType;
@@ -28,14 +28,15 @@ public class AllProjectsAchievementStrategyTest {
     private AllProjectsAchievementStrategy achievementStrategy;
 
     @Test
-    @DisplayName("Возвращает true, если юзер выполнил 7 проектов")
+    @DisplayName("Возвращает true, если выполнены все обязательные проекты без Погоды")
     void checkCriteriaShouldReturnTrueWhenUserHasAllRequiredProjects() {
 
         Long userId = 228L;
 
         Set<RoadmapProjectType> userRoadmapProjects =  EnumSet.allOf(RoadmapProjectType.class)
                 .stream()
-                .filter(project -> project != RoadmapProjectType.OTHER)
+                .filter(project -> project != RoadmapProjectType.OTHER
+                        && project != RoadmapProjectType.WEATHER_VIEWER)
                 .collect(Collectors.toSet());
 
         when(projectRepository.findProjectsNamesByUserId(userId))
@@ -44,12 +45,12 @@ public class AllProjectsAchievementStrategyTest {
 
         boolean result = achievementStrategy.checkCriteria(userId);
 
-
         assertTrue(result);
     }
 
     @Test
-    @DisplayName("Возвращает false, если юзер выполнил 7 проектов и проект не из роадмапа")
+    @DisplayName("Возвращает true, если пользователь выполнил все обязательные проекты, " +
+            "а также необязательный проект и проект не из роадмапа")
     void checkCriteriaShouldReturnTrueWhenUserHasAllRequiredProjectsAndOther() {
 
         Long userId = 228L;
@@ -66,7 +67,7 @@ public class AllProjectsAchievementStrategyTest {
     }
 
     @Test
-    @DisplayName("Возвращает false, если юзер не выполнил 7 проектов")
+    @DisplayName("Возвращает false, если отсутствует обязательный проект TASK_TRACKER")
     void checkCriteriaShouldReturnFalseWhenUserMissingOneRequiredProjects(){
         Long userId = 228L;
 

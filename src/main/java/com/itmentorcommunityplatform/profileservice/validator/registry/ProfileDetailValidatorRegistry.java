@@ -17,14 +17,14 @@ import java.util.Optional;
  * и сопоставляет их с конкретным ProfileDetailType.</p>
  *
  * <p>Основное назначение: <br>
- *  - быстро определить, существует ли специфичный валидатор для конкретного ProfileDetailType; <br>
- *  - предоставить валидатор сервисам, которые выполняют валидацию details.</p>
+ * - быстро определить, существует ли специфичный валидатор для конкретного ProfileDetailType; <br>
+ * - предоставить валидатор сервисам, которые выполняют валидацию details.</p>
  *
  * <p>Добавление нового валидатора: <br>
- *  1. Создать класс, реализующий ProfileDetailValidator. <br>
- *  2. Вернуть корректный ProfileDetailType в getSupportedProfileDetailType(). <br>
- *  3. Отметить класс @Component. <br>
- *  4. Registry автоматически подхватит его.</p>
+ * 1. Создать класс, реализующий ProfileDetailValidator. <br>
+ * 2. Вернуть корректный ProfileDetailType в getSupportedProfileDetailType(). <br>
+ * 3. Отметить класс @Component. <br>
+ * 4. Registry автоматически подхватит его.</p>
  */
 @Component
 public class ProfileDetailValidatorRegistry {

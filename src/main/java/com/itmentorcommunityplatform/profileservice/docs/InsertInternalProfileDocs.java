@@ -67,14 +67,14 @@ import java.lang.annotation.Target;
         @ApiResponse(
                 responseCode = "409",
                 description = "Profile with provided telegram_user_id already exist",
-                content  = @Content(
+                content = @Content(
                         schema = @Schema(implementation = ErrorResponseDto.class))
         ),
         @ApiResponse(
                 responseCode = "500",
                 description = "An unexpected error occurred",
-                content  = @Content(
-                schema = @Schema(implementation = ErrorResponseDto.class))
+                content = @Content(
+                        schema = @Schema(implementation = ErrorResponseDto.class))
         ),
         @ApiResponse(
                 responseCode = "400",

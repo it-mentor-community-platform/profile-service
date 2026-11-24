@@ -14,7 +14,9 @@ public class UserAuthenticatedConsumer {
 
     private final ProfileService profileService;
 
-    @KafkaListener(topics = "${spring.kafka.topic.auth-user-authenticated}", groupId = "profile-service-cg")
+    @KafkaListener(topics = "${spring.kafka.topic.auth-user-authenticated}",
+            groupId = "profile-service-cg",
+            containerFactory = "multiTypeKafkaListenerContainerFactory")
     public void consumeUserAuthenticatedEvent(UserAuthenticatedEvent event) {
         log.info("Kafka Consumer: Received user authenticated event: {}", event);
         try {

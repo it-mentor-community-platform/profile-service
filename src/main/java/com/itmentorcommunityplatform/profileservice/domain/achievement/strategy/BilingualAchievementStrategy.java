@@ -21,6 +21,6 @@ public class BilingualAchievementStrategy implements AchievementCriteriaChecker 
 
         Set<String> usersProjectsLanguages = projectRepository.findUsersProjectsLanguagesByUserId(userId);
 
-        return usersProjectsLanguages.size()==2;
+        return usersProjectsLanguages.size() == 2;
     }
 }

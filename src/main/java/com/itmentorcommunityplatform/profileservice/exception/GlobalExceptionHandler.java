@@ -39,8 +39,11 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponseDto(ex.getMessage()));
     }
 
-    @ExceptionHandler(ProfileAlreadyExistException.class)
-    public ResponseEntity<ErrorResponseDto> handleProfileAlreadyExistException(ProfileAlreadyExistException ex) {
+    @ExceptionHandler({
+            ProfileAlreadyExistException.class,
+            ResourceAlreadyExistException.class
+    })
+    public ResponseEntity<ErrorResponseDto> handleProfileAlreadyExistException(RuntimeException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(new ErrorResponseDto(ex.getMessage()));

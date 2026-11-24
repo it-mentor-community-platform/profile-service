@@ -17,11 +17,10 @@ import java.util.stream.Collectors;
 @AchievementStrategy(type = AchievementType.SPRINTER)
 public class SprinterAchievementStrategy implements AchievementCriteriaChecker {
 
+    private static final long SIX_MONTHS_IN_MILLIS = 6L * 30 * 24 * 60 * 60 * 1000;
     private final ProjectRepository projectRepository;
     private final List<RoadmapProjectType> nonRequiredProjectsTypeForSprinter = List.of(RoadmapProjectType.OTHER,
-                                                                                        RoadmapProjectType.TASK_TRACKER);
-
-    private static final long SIX_MONTHS_IN_MILLIS = 6L * 30 * 24 * 60 * 60 * 1000;
+            RoadmapProjectType.TASK_TRACKER);
 
     @Override
     public boolean checkCriteria(Long userId) {
@@ -35,7 +34,7 @@ public class SprinterAchievementStrategy implements AchievementCriteriaChecker {
 
         List<Project> requiredUserProjects = new ArrayList<>();
 
-        for (Project project :allUserProjects) {
+        for (Project project : allUserProjects) {
 
             Optional<Project> projectWithSameType = requiredUserProjects.stream()
                     .filter(p -> p.getRoadmapProject() == project.getRoadmapProject())
@@ -51,7 +50,7 @@ public class SprinterAchievementStrategy implements AchievementCriteriaChecker {
                 .map(Project::getRoadmapProject)
                 .collect(Collectors.toSet());
 
-        if (!userProjectTypes.containsAll(requiredProjectsTypeForSprinter)){
+        if (!userProjectTypes.containsAll(requiredProjectsTypeForSprinter)) {
             return false;
         }
 

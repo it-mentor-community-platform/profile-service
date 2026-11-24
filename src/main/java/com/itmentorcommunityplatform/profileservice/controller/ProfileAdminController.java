@@ -17,7 +17,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ProfileAdminController {
 
-    private final AdminProfileService  adminProfileService;
+    private final AdminProfileService adminProfileService;
 
     @GetMapping("/profiles")
     @GetAllProfilesDocs

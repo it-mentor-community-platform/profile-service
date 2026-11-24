@@ -15,6 +15,6 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "profile-service")
 public class AchievementConfig {
 
-    private  Map<AchievementType, String> achievements;
+    private Map<AchievementType, String> achievements;
 
 }
