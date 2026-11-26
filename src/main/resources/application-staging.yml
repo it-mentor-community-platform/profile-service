@@ -15,6 +15,7 @@ spring:
       auth-user-created: staging.auth.user.created
       auth-user-authenticated: staging.auth.user.authenticated
       projects-project-created: staging.projects.project.created
+      projects-project-updated: staging.projects.project.updated
       reviews-review-created: staging.reviews.review.created
     properties:
       security.protocol: ${KAFKA_SECURITY_PROTOCOL}
