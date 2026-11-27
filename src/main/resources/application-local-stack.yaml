@@ -11,6 +11,7 @@ spring:
       auth-user-created: auth.user.created
       auth-user-authenticated: auth.user.authenticated
       projects-project-created: projects.project.created
+      projects-project-updated: projects.project.updated
       reviews-review-created: reviews.review.created
 
 feign:

@@ -1,9 +1,6 @@
 package com.itmentorcommunityplatform.profileservice.config;
 
-import com.itmentorcommunityplatform.profileservice.dto.event.ProjectCreatedEvent;
-import com.itmentorcommunityplatform.profileservice.dto.event.ReviewCreatedEvent;
-import com.itmentorcommunityplatform.profileservice.dto.event.UserAuthenticatedEvent;
-import com.itmentorcommunityplatform.profileservice.dto.event.UserCreatedEvent;
+import com.itmentorcommunityplatform.profileservice.dto.event.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -40,6 +37,7 @@ public class KafkaConfig {
         mappings.put("com.itmentorcommunityplatform.authservice.kafka.UserCreatedEvent", UserCreatedEvent.class);
         mappings.put("com.itmentorcommunityplatform.authservice.kafka.UserAuthenticatedEvent", UserAuthenticatedEvent.class);
         mappings.put("com.itmentorcommunityplatform.projectservice.kafka.ProjectCreatedEvent", ProjectCreatedEvent.class);
+        mappings.put("com.itmentorcommunityplatform.projectservice.kafka.ProjectUpdatedEvent", ProjectUpdatedEvent.class);
         mappings.put("com.itmentorcommunityplatform.projectservice.kafka.ReviewCreatedEvent", ReviewCreatedEvent.class);
 
         typeMapper.setIdClassMapping(mappings);
